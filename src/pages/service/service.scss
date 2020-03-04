@@ -1,0 +1,53 @@
+.column_3{
+  display: flex;
+  flex-wrap: wrap;
+  li{
+    flex: 33.3% 0 0;
+  }
+}
+.form-input{
+  width: 300px;
+}
+.area-setting{
+  .area-lists{
+    display: flex;
+    flex-wrap: wrap;
+    max-height:485px;
+    overflow-y:auto;
+    li{
+      flex: 30% 0 0;
+      //padding: 6px 15px;
+      height: 34px;
+      line-height: 34px;
+      overflow: hidden;
+      text-align: center;
+      border-radius: 4px;
+      margin: 5px 0;
+      border:1px solid #dcdee2;
+      user-select: none;
+      border-bottom: 1px solid #ddd;
+
+      white-space: nowrap;
+      text-overflow:ellipsis;
+      &:nth-child(3n+2){
+        margin: 5px 15px;
+      }
+      &.active{
+        border: 1px solid #2d8cf0;
+        color: #2d8cf0;
+      }
+    }
+
+  }
+  .btn-wrap{
+    width:250px;
+    margin: 0 auto;
+    margin-top: 70px;
+  }
+
+}
+.area-box{
+  max-height: 165px;
+  overflow-y:auto;
+}
+
