@@ -1,4 +1,3 @@
-# wy-pc
 
 > A Vue.js project
 
