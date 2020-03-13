@@ -69,8 +69,9 @@
         goback(){
           this.$router.back();
         },
+        // 待查看接口返回数据
         getRoleInfo(id){
-          this.$http.get(`/role/info?id=${id}`)
+          this.$http.get(`/sys/v1/role/info?id=${id}`)
             .then(res=>{
               if(res.data.code===0){
                 this.roleInfo=res.data.data;
@@ -87,7 +88,7 @@
           let url='';
           let params=this.roleInfo;
           if(type===1){
-            url='/role/add'
+            url='/sys/v1/role/defend'
           }else{
             url='/role/edit'
           }
@@ -116,7 +117,7 @@
         },
         //获取所有资源列表
         getAuth(){
-          this.$http.get(`/resource/list`)
+          this.$http.get(`/sys/v1/role/findAllMenu`)
             .then(res=>{
               if(res.data.code===0){
                 let data = res.data.data;
@@ -182,7 +183,6 @@
             this.getAuth();
           }
 
-          // this.$store.app.
       },
       watch:{
         viewInfo(val){

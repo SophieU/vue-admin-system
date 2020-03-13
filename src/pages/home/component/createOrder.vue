@@ -379,10 +379,10 @@
 
       },
       mounted(){
-          this.getRegionLists();
-          util.getRepairTypeDropdown(data=>{
-            this.repairFirst = data;
-          })
+          // this.getRegionLists();
+          // util.getRepairTypeDropdown(data=>{
+          //   this.repairFirst = data;
+          // })
           // util.getRepairType(data=>{
           //   this.repairLists=data;
           // });

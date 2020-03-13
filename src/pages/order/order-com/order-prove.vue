@@ -1,6 +1,6 @@
 
 <style scoped lang="scss">
-  @import "../order.scss";
+  @import "../order";
 </style>
 <template>
 <div>

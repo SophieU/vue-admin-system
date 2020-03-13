@@ -126,7 +126,7 @@
           },
       },
       mounted(){
-          this.getCount();
+          // this.getCount();
       }
 
     }

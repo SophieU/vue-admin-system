@@ -1,5 +1,5 @@
 <style scoped lang="scss">
-  @import "./staff.scss";
+  @import "staff";
 </style>
 <template>
   <div style="padding-bottom: 30px;">

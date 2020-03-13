@@ -71,21 +71,23 @@ const app = {
     setStaffAccount(state,account){
       state.staffAccount=account;
     },
-    // setTagsList (state, list) {
-    //   state.tagsList.push(...list);
-    // },
+    setTagsList (state, list) {
+      state.tagsList.push(...list);
+    },
     //更新菜单，以及权限设定
     updateMenulist(state){
       let menuList = [];
-      axios.get(`/user/basicInfo`).then(res=>{
+      state.menuList=appRouter;
+      return;
+      axios.get(`/sys/v1/user/basicInfo`).then(res=>{
         if(res.data.code===0){
           Cookies.set('username',res.data.data.loginName);
           //权限菜单名数组
-          let menu= res.data.data.resourceList.map(item=>{
+          let menu= res.data.data.menuList.map(item=>{
             return item.path;
           });
 
-//筛选
+          //筛选
           let menuHasAdd = []; //用于存放已添加的菜单项name（外层）
           let appRouterTemp=JSON.stringify(appRouter);
           let appRouterArr = JSON.parse(appRouterTemp);
@@ -200,6 +202,7 @@ const app = {
       localStorage.setItem('village',name);
       state.curVillage=name;
     },
+    // 已打开窗口
     pageOpenedList(state,get){
       let openedPage = state.pageOpenedList[get.index];
       if(get.argu){

@@ -163,13 +163,13 @@
             roleLists:[],
             accountForm:{
               loginName:'',
+              nickName:'',
               password:'',
               mobile:'',
               type:'',
               isOpen:'Y',
               roleId:'',
-              callCenterId:'',
-              id:'',
+              // id:'',
             },
             accountRule:{
               loginName:[{required:true,message:'请输入账号名',trigger:'blur'}],
@@ -195,8 +195,7 @@
             mobile:'',
             isOpen:'Y',
             roleId:'',
-            id:'',
-            callCenterId:'',
+            // id:'',
             type:''
           };
           this.activeModal=true;
@@ -212,7 +211,7 @@
         },
         getLists(){
           let params = `pageNo=${this.pageNo}&pageSize=${this.pageSize}`;
-          this.$http.get(`/user/list?${params}`)
+          this.$http.get(`/sys/v1/user/pageList?${params}`)
             .then(res=>{
               if(res.data.code===0){
                 let data = res.data.data;
@@ -225,7 +224,7 @@
         },
         //获取账号信息
         getAccountInfo(id){
-          this.$http.get(`/user/info?id=${id}`)
+          this.$http.get(`/sys/v1/user/info?id=${id}`)
             .then(res=>{
               if(res.data.code===0){
                 this.accountForm=res.data.data;
@@ -239,7 +238,7 @@
         },
         //获取角色列表
         getRoleLists(){
-          this.$http.get(`/role/list`)
+          this.$http.get(`/sys/v1/role/getAllRoleList`)
             .then(res=>{
               if(res.data.code===0){
                 let data = res.data.data;
@@ -250,19 +249,14 @@
         //保存账号
         saveAccount(){
           let account = this.accountForm;
-          let url = '';
-          if(account.id.length>0){
-            url='/user/edit'
-          }else{
-            url='/user/add'
-          }
+
           this.loadingSend=true;
           this.$refs['accountForm'].validate(valid=>{
             if(valid){
               if(account.password==='111111'){
                 delete account.password;
               }
-              this.$http.post(url,{...account}).then(res=>{
+              this.$http.post(`/sys/v1/user/addOrUpdate`,{...account}).then(res=>{
                 if(res.data.code===0){
                   this.$Message.success('保存成功');
                   this.activeModal=false;

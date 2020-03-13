@@ -226,6 +226,7 @@ util.setCurrentPath=function(vm,name){
 util.openNewPage = function (vm, name, argu, query) {
   let pageOpenedList = vm.$store.state.app.pageOpenedList;
   let openedPageLen = pageOpenedList.length;
+
   let i = 0;
   let tagHasOpened = false;
   while (i < openedPageLen) {
@@ -256,14 +257,24 @@ util.openNewPage = function (vm, name, argu, query) {
         item.children.forEach(child=>{
           if(child.name===name){
             tag = child;
+          }else if(child.children){
+            child.children.forEach(subChild=>{
+              if(subChild.name===name){
+                tag=subChild
+              }
+            })
           }
+
         })
+
+
       }else{
         if(item.name===name){
           tag=item;
         }
       }
     });
+
 
 
     if (tag) {

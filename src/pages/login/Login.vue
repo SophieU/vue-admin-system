@@ -8,7 +8,7 @@
           <div class="left-img"></div>
           <div class="right-form">
             <div class="login-title">
-              <h3>呼叫中心管理系统 <span class="text-grey">V1.0.0</span></h3>
+              <h3>速达优服管理系统 <span class="text-grey">V1.0.0</span></h3>
               <p class="text-grey welcome">欢迎您，请登录</p>
             </div>
             <div class="login-form">
@@ -26,7 +26,7 @@
               </Form>
             </div>
             <div class="copyright">
-              Copyright©2018 天富一生约 All Rights Reserved.
+              Copyright©2020 速达优服 All Rights Reserved.
             </div>
           </div>
       </div>
@@ -52,8 +52,8 @@
           return {
             focus:'',
             formLogin:{
-              username:'',
-              password:'',
+              username:'system',
+              password:'123456z',
             },
             ruleLogin:{
               username:[
@@ -77,8 +77,13 @@
               let password = this.formLogin.password;
               iview.LoadingBar.start();
               this.$http.defaults.withCredentials=true;
+              // 待删除
+              this.$router.push({name:'home'});
+              return;
+              // 待删除
+
               // this.$http.headers['Content-Type']='application/x-www-form-urlencoded';
-              this.$http.post(`/user/login?loginName=${userName}&password=${password}`)
+              this.$http.post(`/sys/v1/user/login?username=${userName}&password=${password}`)
                 .then(res=>{
                   let data = res.data;
                   if(data.code===0){
@@ -91,7 +96,7 @@
                     //设置菜单权限
                     this.$store.commit('updateMenulist');
                     // this.getBaseInfo();
-                    this.getQiNiuToken();
+                    // this.getQiNiuToken();
                     setTimeout(()=>{
                      this.$router.push({name:'home'});
                    },1000)
@@ -104,7 +109,7 @@
             }
           })
         },
-        getQiNiuToken(){
+       /* getQiNiuToken(){
           this.$http.get(`/base/qiniu/token`).then(res=>{
             if(res.data.code===0){
               let token = res.data.data.token;
@@ -113,7 +118,7 @@
               localStorage.setItem('qnPrefix',qnPrefix)
             }
           })
-        },
+        },*/
         /*getBaseInfo(){
 
           this.$http.get(`/user/basicInfo`).then(res=>{
@@ -175,9 +180,7 @@
         }
 
       },
-      beforeDestroy(){
-          this.loading();
-      }
+
     }
 </script>
 

@@ -152,9 +152,9 @@
         }
       },
       mounted(){
-        util.getRepairType(data=>{
-          this.repairLists=data;
-        })
+        // util.getRepairType(data=>{
+        //   this.repairLists=data;
+        // })
       }
     }
 </script>

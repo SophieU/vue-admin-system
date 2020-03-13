@@ -1,5 +1,5 @@
 <style scoped lang="scss">
-  @import "../staff.scss";
+  @import "../staff";
 </style>
 <template>
   <div v-if="info">

@@ -1,32 +1,33 @@
-# wy-pc
+## 功能模块
+- [x]登录（登入，登出）
+- 系统管理
+  - 分类管理
+    - [ ] 服务项目
+  - 系统管理
+    - [ ] 角色管理 -
+    - [ ] 申述原因配置
+    - [ ] 账号管理 -
+    - [ ] 温馨提示
+- 网点管理
+  - [ ] 服务网点管理
+  - [ ] 服务区域管理
+    - [x]列表
+    - 删除
+    - 添加或修改
+- 用户管理
+  - [ ] 普通用户
+  - [ ] 服务师傅
+- 工单管理
+  - [ ] 报修工单管理
+- [ ] 回访管理
+- [ ] 提现管理
+- [ ]平台服务管理
+    - [ ] 服务栏目管理
+    - [ ] 全部服务管理
+    - [ ] 首页服务管理
+- [ ] 广告管理
+    - [ ] banner广告管理
+    - [ ] 推荐位管理
 
-> A Vue.js project
 
-## Build Setup
-
-``` bash
-# install dependencies
-npm install
-
-# serve with hot reload at localhost:8080
-npm run dev
-
-# build for production with minification
-npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
-
-# run unit tests
-npm run unit
-
-# run e2e tests
-npm run e2e
-
-# run all tests
-npm test
-```
-
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
-
-
+- UI 地址： PM\按时间轴迭代原型+UI\2020.01.20\天富一生约e服务UI-1230

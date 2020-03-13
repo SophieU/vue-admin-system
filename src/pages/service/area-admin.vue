@@ -67,12 +67,13 @@
             return false;
           }
         },
+        // 待添加分页
           getAreaLists(){
-            this.$http.get('/repair/region/list')
+            this.$http.get('/yyht/v1/repair/region/pageList')
               .then(res=>{
                 let data = res.data;
                 if(data.code===0){
-                  this.areaLists=data.data;
+                  this.areaLists=data.data.list;
                 }
                 //首次设置默认
                 if(this.editInd===''&&this.areaLists.length>0){
@@ -82,14 +83,11 @@
           },
           editThis(ind){
             this.editInd=ind;
-            // this.editId=this.areaLists[ind].id;
-            // this.areaName=this.areaLists[ind].name;
           },
         //保存设置
           saveThis(){
               let name = this.areaName;
               let id = this.editId;
-              let apiUrl='';
               let paramStr='';
               let control='edit';
               if(!name){
@@ -98,16 +96,14 @@
               }
               //修改
               if(name.length>0&&id.length>0){
-                apiUrl='/repair/region/edit';
                 paramStr=`name=${name}&id=${id}`;
               }else if(name.length>0&&!id.length){
                 //新增
-                apiUrl='/repair/region/add';
                 paramStr=`name=${name}`;
                 control='add';
               }
               this.loadingSave=true;
-              this.$http.post(`${apiUrl}?${paramStr}`)
+              this.$http.post(`/yyht/v1/repair/region/addOrUpdate?${paramStr}`)
                 .then(res=>{
                   let data = res.data;
                   if(data.code===0){
@@ -139,7 +135,7 @@
             if(!id){
               this.areaLists.splice(len-1,1);
             }else{
-              this.$http.delete(`/repair/region/delete?id=${id}`)
+              this.$http.delete(`/yyht/v1/repair/region/delete?id=${id}`)
                 .then(res=>{
                   let data = res.data;
                   if(data.code===0){
@@ -157,7 +153,7 @@
 
         },
         getAreaStations(areaId){
-          this.$http.get(`/repair/region/support/station/list?regionId=${areaId}`)
+          this.$http.get(`/yyht/v1/repair/region/support/station/list?regionId=${areaId}`)
             .then(res=>{
               if(res.data.code===0){
                 this.stationLists=res.data.data;
@@ -175,7 +171,6 @@
             this.areaName = this.areaLists[newVal].name;
             this.editId = this.areaLists[newVal].id;
             this.getAreaStations(this.editId);
-            console.log(newVal)
           }
       }
     }

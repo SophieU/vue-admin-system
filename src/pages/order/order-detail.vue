@@ -1,5 +1,5 @@
 <style scoped lang="scss">
-  @import "./order";
+  @import "order";
 </style>
 <template>
     <div class="order-detail">

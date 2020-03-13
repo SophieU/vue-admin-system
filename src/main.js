@@ -36,6 +36,7 @@ new Vue({
     this.$store.commit('initCachepage');
     // 权限菜单过滤相关
     // this.$store.commit('updateMenulist');
+    loadGaoDe()
 
   },
   created(){
@@ -50,3 +51,9 @@ new Vue({
     // this.$store.commit('setTagsList',tagsList);
   }
 })
+
+function loadGaoDe(){
+  var script = document.createElement('script')
+  script.src='https://webapi.amap.com/maps?v=1.4.15&key=8a1c307c3702ccf7303aae5617321199&plugin=AMap.MouseTool&plugin=AMap.Geocoder'
+  document.body.append(script)
+}

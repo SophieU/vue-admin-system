@@ -166,9 +166,9 @@
         }
       },
       mounted(){
-        util.getRepairTypeDropdown(data=>{
-          this.repairLists = data;
-        })
+        // util.getRepairTypeDropdown(data=>{
+        //   this.repairLists = data;
+        // })
       }
     }
 </script>

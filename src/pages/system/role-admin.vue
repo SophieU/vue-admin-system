@@ -76,7 +76,7 @@
             this.$router.push({name:'editRole',query:{type:type,id:id}});
           },
         getRoleLists(){
-          this.$http.get(`/role/list`)
+          this.$http.get(`/sys/v1/role/getAllRoleList`)
             .then(res=>{
               if(res.data.code===0){
                 let data = res.data.data;
@@ -84,16 +84,6 @@
               }
             })
         },
-       /* getRoleInfo(id){
-            this.$http.get(`/role/info?id=${id}`)
-              .then(res=>{
-                if(res.data.code===0){
-                  this.roleInfo={
-
-                  }
-                }
-              })
-        }*/
       },
       mounted(){
         this.getRoleLists();

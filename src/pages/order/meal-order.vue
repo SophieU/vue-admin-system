@@ -409,7 +409,7 @@
 </script>
 
 <style scoped lang="scss">
-@import "./order";
+@import "order";
   .headerForm{
     .ivu-form-item{
       margin-bottom: 10px;

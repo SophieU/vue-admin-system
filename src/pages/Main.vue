@@ -138,15 +138,13 @@
           this.userName=Cookies.get('user');
 
         },
-        handleSubmenuChange(val){
-        },
 
         //退出
         handleUserDropdown(name){
             if (name === 'logOut') {
             // 退出登录
             this.$store.commit('logout', this);
-            this.$http.post('/user/login/out').then(res=>{
+            this.$http.post('/sys/v1/user/login/out').then(res=>{
 
               if(res.data.code!==0){
                 console.log(res.data.msg);
@@ -173,6 +171,9 @@
             util.openNewPage(this, name, this.$route.params || {}, this.$route.query || {});
           }
         },
+        handleSubmenuChange(){
+
+        }
       },
       mounted(){
           this.init();
@@ -187,6 +188,8 @@
           '$route'(to){
             this.$store.commit('setCurrentPageName',to.name);
 
+            // this.$store.commit('increateTag',to);
+
             let pathArr = util.setCurrentPath(this,this.$route.name);
             if(pathArr.length>=3){
               let arr = [pathArr[0].name,pathArr[1].name];
@@ -194,8 +197,10 @@
             }else if(pathArr.length>=2){
               this.$store.commit('addOpenSubmenu',pathArr[0].name); //展开子菜单
             }
+
             this.checkTag(to.name);
             localStorage.currentPageName = to.name;
+
           },
         uploadProgressVisible(val){
           if(val){
