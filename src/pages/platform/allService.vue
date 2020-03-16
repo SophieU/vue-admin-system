@@ -15,6 +15,7 @@
         <Page :current.sync="pageConfig.current" :page-size="pageConfig.size" :total="pageConfig.totalCount" @on-change="changeCurrent" @on-page-size-change="changeSize" show-elevator show-sizer></Page>
       </div>
    </Card>
+
      <Modal
       :title="title"
       v-model="addAllServe"
@@ -65,6 +66,7 @@
         <Button type="primary" @click="saveAddAll('addAllServeRefs')">确认</Button>
        </div>
      </Modal>
+<!--   二级弹窗-->
       <Modal
         v-model="modalShow"
         :title="showType"
@@ -215,14 +217,7 @@ export default {
   },
   methods:{
     secondOnServe(data){  //第二个模态框内容改变的方法
-    //  if(this.secondList.length > 0){
-    //     this.secondList.forEach(ele=>{
-    //     if(ele.id == data){
-    //       this.btnFlag = true;
-    //       this.btnTitle = ele.name
-    //     }
-    //   })
-    //  }
+
     },
     openChange(flag){ //下拉框展开收起时的方法
       if(flag == true){
@@ -247,7 +242,6 @@ export default {
     dragRow(a,b){       //拖拽行序列
       let data = util.sortTableRow(a,b,this.lists)
       this.lists = data
-      // allSort(this.lists)
     },
     getServerItem(code){           //获取弹窗第二条数据
      let formData = new FormData();
@@ -280,7 +274,7 @@ export default {
       })
     },
     idEditor(id){    //编辑按钮
-     this.$http.get(`/service/getServiceInfoById?id=${id}`).then(res=>{
+     this.$http.get(`/yyht/v1/service/getServiceInfoById?id=${id}`).then(res=>{
        if(res.data.code == 0){
          let data = res.data.data
          this.addAllForm.belong = data.idServiceType;
@@ -348,9 +342,9 @@ export default {
     },
     serveListRemote(query){
       let name = query;
-      this.$http.get(`service/getServiceByCategoryByCode?code=${this.poseObj.code}&name=${name}`).then(res=>{
+      this.$http.get(`/yyht/v1/service/getServiceByCategoryByCode?code=${this.poseObj.code}&name=${name}`).then(res=>{
         if(res.data.code == 0){
-          this.serverOptionList = res.data.data;
+          this.serverOptionList = res.data.data.records;
         }else{
           this.$Message.warning(res.data.msg)
         }
@@ -358,10 +352,10 @@ export default {
     },
     getOptionType(){        //根据code查询不同类型
       let query = '';
-      this.$http.get(`service/getServiceByCategoryByCode?code=${this.poseObj.code}&name=${query}`).then(res=>{
+      this.$http.get(`/yyht/v1/service/getServiceByCategoryByCode?code=${this.poseObj.code}&name=${query}`).then(res=>{
         if(res.data.code == 0){
-          this.serverOptionList = res.data.data;
-          this.poseObj.code == 'E_PROJECT'?this.label = '请选择服务项目类型:': this.label = `请选择${this.poseObj.name}:`;
+          this.serverOptionList = res.data.data.records;
+          this.label = this.poseObj.code == 'E_PROJECT'?'请选择服务项目类型:': `请选择${this.poseObj.name}:`;
           this.modalShow = true;
         }else{
           this.$Message.warning(res.data.msg)
@@ -400,7 +394,7 @@ export default {
       }
     },
     addCategory(){        //点击新增按钮获取树形结构
-      this.$http.get('/service/category/getAllServiceCategory').then(res=>{
+      this.$http.get('/yyht/v1/service/category/getAllServiceCategory').then(res=>{
         if(res.data.code == 0){
           res.data.data.forEach((item,index)=>{
             item.color = 'white'
@@ -455,31 +449,27 @@ export default {
      this.getCol()
     },
     getCol(data,item){  //查询所有服务
-    this.loading = true;
-    if(!data){data = ''}
-    if(!item){item = ''}
-      this.$http.get(`/service/getAllServiceByServiceTyId?PageSize=${this.pageConfig.size}&pageNo=${this.pageConfig.current}&id=${this.defaultServeId}&flag=${data}&type=${item}`).then(res=>{
-        if(res.data.code == 0){
-          this.lists = res.data.data.list;
-          this.loading = false;
-          this.pageConfig.totalCount = res.data.data.totalCount;
-        }else{
-          this.$Message.warning(res.data.msg)
-        }
-      })
+      this.loading = true;
+      if(!data){data = ''}
+      if(!item){item = ''}
+        this.$http.get(`/yyht/v1/service/getAllServiceByServiceTyId?PageSize=${this.pageConfig.size}&pageNo=${this.pageConfig.current}&id=${this.defaultServeId}&flag=${data}&type=${item}`).then(res=>{
+          if(res.data.code == 0){
+            this.lists = res.data.data.list;
+            this.loading = false;
+            this.pageConfig.totalCount = res.data.data.totalCount;
+          }else{
+            this.$Message.warning(res.data.msg)
+          }
+        })
     },
     getServeCol(){  //获取服务栏目列表
-      this.$http.get(`/service/type/getAllServiceType?flag=up&pageNo=${this.pageConfig.current}&pageSize=${this.pageConfig.bigSize}`).then(res=>{
+      this.$http.get(`/yyht/v1/service/type/getAllServiceType`).then(res=>{
         if(res.data.code == 0){
-          this.belongList = res.data.data.list
-          this.defaultServeId = res.data.data.list[0].id
-          this.defaultName = res.data.data.list[0].typeName
+          this.belongList = res.data.data
+          this.defaultServeId = res.data.data[0].id
+          this.defaultName = res.data.data[0].typeName
           this.getCol()
-          res.data.data.list.forEach((ele,index)=>{
-              ele.ind = index
-          })
-          this.AdTypeList = res.data.data.list
-          this.pageConfig.totalCount = res.data.data.totalCount
+          this.AdTypeList = res.data.data
         }else{
           this.$Message.warning(res.data.msg)
         }
@@ -549,12 +539,8 @@ export default {
       this.addAllServe = false
     },
     tabChange(e){  //tab改变按钮
-      this.pageConfig = {
-        current:1,
-        size:10
-      }
-      this.AdTypeList.forEach(ele=>{
-        if(e == ele.ind){
+      this.AdTypeList.forEach((ele,index)=>{
+        if(e == index){
           this.defaultServeId = ele.id
           this.defaultName = ele.typeName
           this.getCol()
@@ -564,7 +550,7 @@ export default {
   },
   mounted(){
    this.getServeCol();
-   this.getToken();
+   // this.getToken();
    this.addCategory();
   }
 }

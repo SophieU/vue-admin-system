@@ -3,78 +3,59 @@
     <Card>
       <div class="clearfix mb-15">
         <div class="pull-right">
-          <Button icon="md-add" type="primary" @click="homeAdd">首页新增服务</Button>
+          <Button icon="md-add" type="primary" @click="showModalHandle('add')">新增栏目</Button>
         </div>
       </div>
-      <Table :columns="columns" :data="lists" draggable @on-drag-drop="dragRow" :loading="loading"></Table>
-      <div class="pagination mt-15">
-        <Page :current.sync="pageConfig.current" :page-size="pageConfig.size" :total="pageConfig.totalCount" @on-change="changeCurrent" @on-page-size-change="changeSize" show-elevator show-sizer></Page>
-      </div>
+      <Table :columns="columns" :data="lists" :draggable="true" @on-drag-drop="dragSort"></Table>
+
     </Card>
-     <Model :addService="addService"
-             :current="pageConfig.current"
-             :size="pageConfig.bigSize"
-             :addTitle="addTitle"
-             :singleId="singleId"
-             @updateCol="updateList"
-             @getStatus="modelStatus"
-             @deleteId="deleteSingleId"
-    ></Model>
+    <Modal v-model="showModal" title="新增栏目">
+      <Form :label-width="100">
+        <FormItem class="must" label="栏目名称">
+          <Input v-model="modalForm.typeName"/>
+          <p class="tips">（最多5个字）</p>
+        </FormItem>
+        <FormItem label="栏目描述">
+          <Input type="textarea" v-model="modalForm.typeDes" />
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button @click="cancelModal">取消</Button>
+        <Button type="primary" @click="saveModalForm">保存</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 
 <script>
 import util from '../../libs/util'
-// import {homeSort} from '../../assets/request/apis/activities'
-import Model from './components/model.vue'
+import _ from 'lodash'
   export default {
     name: "functionSet",
     data(){
       return{
         loading:true,
-        singleId:'',//要传给子组件的(点击编辑时存下的ID)ID
-        addService:false,
-        serverId:'',//传数据时需要使用的服务ID
-        pageConfig:{ //分页
-         current:1,
-         size:10,
-         bigSize:100,
-         totalCount:0
-        },
-        addTitle:'新增服务',
+        showModal:false,
+        modalTitle:'新增栏目',
         columns:[
-          {title:'编号',key:'',render:(h,params)=>{
-            return h('span',params.index+1)
-            }},
-          {title:'图标',key:'imageName',render:(h,params)=>{
-            let src = params.row.imageName
-            return h('img',{
-              attrs:{
-                src:src
-              },
-              style:{
-                width:'50px',
-                height:'40px'
-              }
-            })
-          }},
-          {title:'服务名称',key:'serviceName'},
-          {title:'类型',key:'categoryName'},
-          {title:'是否长期有效',key:'isLongValid'},
-          {title:'开始时间',key:'startTime'},
-          {title:'结束时间',key:'endTime'},
+          {title:'栏目名称',key:'typeName'},
+          {title:'服务数量',key:'serviceNum'},
+          {title:'服务说明',key:'typeDes'},
+          {title:'发布日期',key:'createTime'},
           {title:'操作',key:'',render:(h,params)=>{
+              let _this = this;
               return h('div',[
                 h('Button',{
                   props:{
                     type:'primary',
                     size:'small'
                   },
+                  style:{
+                    marginRight:'10px'
+                  },
                   on:{
                     click:()=>{
-                      this.singleId = params.row.id;
-                      this.addService = true;
-                      this.addTitle = '编辑服务';
+                      _this.showModalHandle('edit',params.row.id)
                     }
                   }
                 },'编辑'),
@@ -85,7 +66,6 @@ import Model from './components/model.vue'
                   },
                   on:{
                     click:()=>{
-                      let _this = this;
                        _this.$store.commit('setDeleteModal',{model:true,callback:()=>{
                           _this.deleteSingle(params.row.id);
                         }})
@@ -95,69 +75,91 @@ import Model from './components/model.vue'
               ])
             }},
         ],
-        lists:[]
+        lists:[ ],
+        modalForm:{
+          typeName:'',
+          typeDes:'',
+        }
       }
     },
-    components:{
-         Model
-    },
     methods:{
-      dragRow(a,b){       //拖拽行序列
-        let data = util.sortTableRow(a,b,this.lists)
-        this.lists = data
-        // homeSort(this.lists)
+      // 拖拽排序
+      dragSort(index1,index2){
+        let param = [{id:this.lists[index1].id},{id:this.lists[index2].id}]
+        this.$http.post(`/yyht/v1/service/type/updateServiceTypeSort`,param).then(res=>{
+          if(res.data.code===0){
+            this.$Message.success('排序成功')
+            let lists = _.cloneDeep(this.lists)
+            let temp = _.cloneDeep(lists[index1])
+            lists[index1] = lists[index2]
+            lists[index2] = temp
+            this.lists = lists;
+          }else{
+            this.$Message.warning('排序失败')
+          }
+        })
       },
-      changeSize(e){    //分页size的改变
-        this.pageConfig.size = e
-        this.getCol()
-      },
-      changeCurrent(e){ //分页页码的改变
-        this.pageConfig.current = e
-        this.getCol()
-      },
-      deleteSingleId(data){ //删除singleID
-        if(data == true){
-          this.singleId = ''
+      showModalHandle(type,id){
+        if(type==='add'){
+          this.showModal=true;
+          this.modalTitle='新增栏目'
+        }else{
+          this.searchById(id)
         }
       },
-      modelStatus(data){  //通过父组件控制模态框关闭
-        if(data == false){
-          this.addService = false;
-          this.singleId = '';
-          this.addTitle = '新增服务';
+      searchById(id){
+        this.$http.get(`/yyht/v1/service/type/getServiceTypeById?id=${id}`)
+        .then(res=>{
+          if(res.data.code===0){
+            this.modalTitle='编辑栏目'
+            this.modalForm=res.data.data
+            this.showModal=true
+          }
+        })
+      },
+      cancelModal(){
+        this.showModal=false;
+        this.modalForm={
+          typeName:'',
+          typeDes: '',
         }
       },
-      deleteSingle(data){ //根据ID删除单条信息
-        this.$http.delete(`/service/default/deleteServiceDefaultById?id=${data}`).then(res=>{
+      deleteSingle(id){ //根据ID删除单条信息
+        this.$http.post(`/yyht/v1/service/type/delete?id=${id}`).then(res=>{
           if(res.data.code == 0){
              this.$Message.success('删除成功');
-             this.$store.commit('setDeleteModal',{model:false})
              this.getCol();
           }else{
             this.$Message.warning(res.data.msg)
           }
+          this.$store.commit('setDeleteModal',{model:false})
         })
-      },
-      updateList(data){ //子组件传递上来的方法  用于给定一个flag判断是否刷新列表
-         if(data == true){
-           this.getCol()
-           this.addService = false
-         }
       },
       getCol(){ //获取首页服务一进页面的数据
-      this.loading = true;
-        this.$http.get(`/service/default/getAllServiceDefault?PageSize=${this.pageConfig.size}&pageNo=${this.pageConfig.current}`).then(res=>{
-          if(res.data.code == 0){
-            this.lists = res.data.data.list;
-            this.loading = false;
-            this.pageConfig.totalCount = res.data.data.totalCount;
+          this.loading = true;
+          this.$http.get(`/yyht/v1/service/type/getAllServiceType`).then(res=>{
+            if(res.data.code == 0){
+              this.lists = res.data.data;
+              this.loading = false;
+            }else{
+              this.$Message.warning(res.data.msg)
+            }
+          })
+      },
+      saveModalForm(){
+        let params = this.modalForm;
+        if(!params.typeName){
+          this.$Message.warning('请输入栏目名称')
+          return;
+        }
+        this.$http.post(`/yyht/v1/service/type/saveOrUpdate`,params).then(res=>{
+          this.showModal=false;
+          if(res.data.code===0){
+            this.$Message.success('保存成功')
           }else{
-            this.$Message.warning(res.data.msg)
+            this.$Message.warning('保存失败')
           }
         })
-      },
-      homeAdd(){ //新增按钮
-        this.addService = true
       }
     },
     mounted(){

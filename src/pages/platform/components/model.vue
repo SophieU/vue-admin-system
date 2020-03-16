@@ -97,7 +97,7 @@
               }
       },
         props:{
-            addService:{ 
+            addService:{
                 type:Boolean
             },
             current:{
@@ -171,7 +171,7 @@
         }
         let data ={
         	"endTime":this.addHomeInfo.model.endTime,
-        	"id": this.singleId, 
+        	"id": this.singleId,
         	"idService":this.serverId,
         	"isLongValid":this.addHomeInfo.model.limitTime,
         	"startTime":this.addHomeInfo.model.startTime
@@ -277,7 +277,7 @@
       this.getServerCol();
       this.getNotAdd()
     }
-      
+
   }
 </script>
 

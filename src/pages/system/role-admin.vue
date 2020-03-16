@@ -23,11 +23,13 @@
                 title:'角色名',
                 key:'name',
                 align:'center'
-              },{
+              },
+              {
               title:'角色描述',
                 key:'description',
                 align:'center'
-              },{
+              },
+              {
               title:'操作',
                 align:'center',
                 render:(h,params)=>{

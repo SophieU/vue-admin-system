@@ -77,7 +77,7 @@
         this.phoneViewNow = item;
       },
       getTemplate(){
-        this.$http.get(`/server/recommend/config/template`).then(res=>{
+        this.$http.get(`/yyht/v1/recommend/config/template`).then(res=>{
           if (res.data.code === 0){
             this.pageTemplate = res.data.data;
           }else {
@@ -86,7 +86,7 @@
         })
       },
       getViewList(){
-        this.$http.get(`/server/recommend/config/list`).then(res=>{  //获取推荐位列表
+        this.$http.get(`/yyht/v1/recommend/config/config/list`).then(res=>{  //获取推荐位列表
           if (res.data.code === 0){
             this.phoneViewList = res.data.data;
             let data = res.data.data;
@@ -176,7 +176,7 @@
       },
       commitSave(data){
         this.disabledBtn = true;
-        this.$http.post(`/server/recommend/config/save`,data).then(res=>{
+        this.$http.post(`/yyht/v1/recommend/config/saveOrUpdate`,data).then(res=>{
           this.disabledBtn = false;
           if (res.data.code === 0){
             this.$Message.success("保存成功");
@@ -193,7 +193,7 @@
           return;
         }
         let id = this.phoneViewList[index].id;
-        this.$http.delete(`/server/recommend/config/delete?id=${id}`).then(res=>{
+        this.$http.post(`/yyht/v1/recommend/config/delete?id=${id}`).then(res=>{
           if (res.data.code === 0){
             this.$Message.success('删除成功');
             this.phoneViewList.splice(index,1)
@@ -211,7 +211,7 @@
         });
       },
       getTargetType(){
-        this.$http.get(`/server/recommend/config/target/categories`).then(res=>{
+        this.$http.get(`/yyht/v1/recommend/config/target/categories`).then(res=>{
           if (res.data.code === 0){
             this.categoriList = res.data.data;
           } else {
@@ -247,7 +247,7 @@
       this.getTemplate();
       this.getViewList();
       this.getTargetType();
-      this.getToken();
+      // this.getToken();
     }
   }
 </script>

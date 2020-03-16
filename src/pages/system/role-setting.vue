@@ -48,7 +48,7 @@
           roleInfo:{
             name:'',
             description:'',
-            resourceList:'',
+            menuIds:'',
             id:'',
             callCenterId:'',
           },
@@ -75,7 +75,7 @@
             .then(res=>{
               if(res.data.code===0){
                 this.roleInfo=res.data.data;
-                this.authListsCheck=res.data.data.resourceList;
+                this.authListsCheck=res.data.data.menuIds;
                 this.getAuth();
               }else{
                 console.log(res.data.msg)
@@ -84,20 +84,15 @@
         },
         saveThis(){
             this.loadingSend=true;
-          let type = this.type;
           let url='';
           let params=this.roleInfo;
-          if(type===1){
-            url='/sys/v1/role/defend'
-          }else{
-            url='/role/edit'
-          }
+          url='/sys/v1/role/defend'
           this.$refs['roleInfo'].validate(valid=>{
             if(valid){
               this.$http.post(url,{
                 name:params.name,
                 description:params.description,
-                resourceList:this.authListsCheck,
+                menuIds:this.authListsCheck,
                 id:params.id
               }).then(res=>{
                 if(res.data.code===0){
@@ -126,7 +121,7 @@
                 let _this = this;
                if(checkedLists.length>0){
                  transformRes = this.iteratorTree(data,function(item){
-                   item.title=item.name;
+                   item.title=item.title;
                    item.expand=true;
                      item.disabled=_this.viewInfo;
                    checkedLists.forEach(check=>{
@@ -137,13 +132,12 @@
                  })
                }else{
                  transformRes = this.iteratorTree(data,function(item){
-                   item.title=item.name;
+                   item.title=item.title;
                    item.expand=true;
                    item.disabled=_this.viewInfo;
                    // item.selected=true;
                  });
                }
-
                   this.authLists=transformRes;
               }else{
                 console.log(res.data.msg);
@@ -165,7 +159,6 @@
               })
             }
           return result;
-
         }
       },
       mounted(){

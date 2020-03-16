@@ -1,16 +1,16 @@
 <template>
     <div>
       <Form :label-width="120">
-        <FormItem label="区域名称">
+        <FormItem class="must" label="区域名称">
             <Input v-model="form.name" placeholder="请填写区域名称" style="width: 250px;"/>
         </FormItem>
-        <FormItem label="服务说明">
+        <FormItem class="must" label="服务说明">
           <div id="fullDescribe"></div>
         </FormItem>
-         <FormItem label="备注">
+         <FormItem  class="must" label="备注">
             <Input v-model="form.remark" type="textarea" placeholder="请填写备注信息" style="width: 250px;"/>
         </FormItem>
-        <FormItem label="区域选点">
+        <FormItem  class="must" label="区域选点">
             <p class="tips">Tips：绘制完成后，点击鼠标右击自动完成绘制</p>
             <div id="map">
               <div class="control">
@@ -51,7 +51,9 @@
               geoDistrict:[],
               areaInfo:'',
               rangeGd:[],
-            }
+            },
+            mouseTool:null,
+            candraw:true,
           }
       },
       mounted(){
@@ -113,15 +115,22 @@
             })
           })
 
+          this.map.on('click',()=>{
+            var overlays = this.map.getAllOverlays('polygon')
+            console.log(overlays)
+            if(!this.candraw){
+              this.map.remove(this.overlay)
+            }
+          })
         },
         drawPolygon(){
             var _this = this
-           this.$Message.info({
-             content:'点击地图开始绘制，右键结束绘制',
-             duration:3
-           })
-          var mouseTool = new AMap.MouseTool(this.map)
-          mouseTool.polygon({
+            this.$Message.info({
+              content:'点击地图开始绘制，右键结束绘制',
+              duration:3
+            })
+           this.mouseTool = new AMap.MouseTool(this.map)
+          this.mouseTool.polygon({
             strokeColor: "#FF33FF",
             strokeOpacity: 1,
             strokeWeight: 6,
@@ -130,18 +139,21 @@
             fillOpacity: 0.4,
             strokeStyle: "solid",
           })
-          mouseTool.on('draw', function(event) {
+          this.mouseTool.on('draw', function(event) {
             _this.$Message.success({
               content:'覆盖物对象绘制完成',
               top:300
             })
+            _this.candraw = false
             _this.overlay = event.obj
+            _this.searchDistrict(_this.overlay.getPath())
             // event.obj 为绘制出来的覆盖物对象
           })
+
         },
         clearPolygon(){
             this.map.remove(this.overlay)
-          this.overlay = null
+           this.overlay = null
         },
        async searchDistrict(path){
           var geocoder;
@@ -164,11 +176,13 @@
                 if(!_this.form.areaInfo) _this.form.areaInfo = data.district
                 _this.form.geoDistrict.push(data.adcode)
                 _this.form.rangeGd.push(`${lng},${lat}`)
+
               }
             });
           })
         },
         async saveForm(){
+            let param = _.cloneDeep(this.form)
             if(!this.form.name) {
               this.$Message.info('请填写区域名称')
               return
@@ -182,17 +196,18 @@
               this.$Message.info('请填写区域名称')
               return
             }
-            params.fullDescribe = fullDescribe
+            param.fullDescribe = fullDescribe
             if(!this.overlay){
               this.$Message.info('请绘制服务区域')
               return
             }
             var paths = this.overlay.getPath()
-            await this.searchDistrict(paths)
-            let param = _.cloneDeep(this.form)
+           await this.searchDistrict(paths)
+
             param.geoDistrict = param.geoDistrict.join(',')
             param.rangeGd = param.rangeGd.join(';')
-            this.$http.post(`/yyht/v1/repair/region/addOrUpdate`,{params:param}).then(res=>{
+
+            this.$http.post(`/yyht/v1/repair/region/addOrUpdate`,param).then(res=>{
               if(res.data.code===0){
                 this.$Message.success('保存成功')
               }else{

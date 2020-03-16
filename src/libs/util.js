@@ -2,6 +2,19 @@ import axios from 'axios';
 import packjson from '../../package.json';
 import {appRouter} from '../router/router';
 let util={};
+util.sortTableRow=function(a,b,datas){  //列表排序方法
+  let arr=[];
+  let obj = datas[a];
+  datas.forEach((ele,index)=>{
+    if(index != a){
+      arr.push(ele)
+    }
+  })
+  arr.splice(b,0,obj)
+  datas = arr
+  return datas
+}
+
 util.title=function(title){
   let Title='天富呼叫中心';
   if(title){

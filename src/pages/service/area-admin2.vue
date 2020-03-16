@@ -10,7 +10,7 @@
           <Table :data="areaLists" :columns="areaColumns"></Table>
           <div class="pagination">
             <Page :page-size="10" :current="pageNo"
-              @on-change="getAreaLists"
+              @on-change="(page)=>getAreaLists(page)"
             ></Page>
           </div>
         </div>
@@ -41,7 +41,7 @@
         //   {title:'联系电话',key:'phone',align:'center'},
         // ],
         pageNo:1,
-        pageType:'add', // 页面类型： list-列表（默认），detail-详情编辑, add-新增
+        pageType:'list', // 页面类型： list-列表（默认），detail-详情编辑, add-新增
         areaLists:[],
         areaColumns:[
           {
@@ -102,20 +102,31 @@
       }
     },
     methods:{
-      // noSpace(event){
-      //   let code = event.code;
-      //   if(code==="Space"){
-      //     event.preventDefault();
-      //     return false;
-      //   }
-      // },
+      goControl(typeInd){
+        let type = '';
+        switch(typeInd){
+          case 1:
+            type='add';
+            break;
+          case 2:
+            type='detail';
+            break;
+          default:
+            type='list';
+        }
+        this.pageType = type
+      },
       // 待添加分页
-      getAreaLists(){
+      getAreaLists(page){
+        if(page){
+          this.pageNo = page
+        }
         this.$http.get(`/yyht/v1/repair/region/pageList?pageSize=10&pageNo=${this.pageNo}`)
           .then(res=>{
             let data = res.data;
             if(data.code===0){
               this.areaLists=data.data.list;
+
             }
             //首次设置默认
             if(this.editInd===''&&this.areaLists.length>0){

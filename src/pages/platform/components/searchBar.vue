@@ -1,7 +1,8 @@
 <template>
-    <div class=" clearfix mb-15">
-        <div class="pull-left">
-          <Form class="pull-left" inline :label-width="100">
+    <div class="clearfix mb-15">
+        <Button class="pull-right mb-15" type="primary" icon="md-add" @click="showAdd" >新增广告</Button>
+        <div style="clear:both;">
+          <Form inline :label-width="100">
             <FormItem label="广告主：">
             <Select :transfer="true" v-model="searchForm.adOwnerId" placeholder="请选择" style="width:190px">
               <Option
@@ -79,12 +80,10 @@
           </FormItem>
             <FormItem class="no-label-form-item">
               <Button type="primary" @click="onSearch"  >查询</Button>
-              <Button type="primary" @click="onReset"  >重置</Button>
+              <Button class="mr-15"  @click="onReset"  >重置</Button>
+
             </FormItem>
           </Form>
-        </div>
-        <div class="pull-right">
-          <Button type="primary" icon="md-add" @click="showAdd" class="pull-right">新增广告</Button>
         </div>
 
     </div>
@@ -125,7 +124,7 @@
             this.$emit('dateChange',data)
           },
             getAllOwner(){
-              this.$http.get(`/ad/owner/getOwnerName`).then(res=>{
+              this.$http.get(`/yyht/v1/ad/owner/getOwnerList`).then(res=>{
                   if (res.data.code === 0){
                       this.advertiserList = res.data.data
                   } else {

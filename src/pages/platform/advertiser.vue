@@ -10,7 +10,7 @@
                 <Input v-model="searchForm.phone" placeholder="请输入广告主电话"></Input>
               </FormItem>
               <FormItem class="no-label-form-item">
-                <Button type="primary" icon="el-icon-search" @click="onSearch">查询</Button>
+                <Button type="primary" @click="onSearch">查询</Button>
                 <Button @click="onReset('searchFormRef')">清空</Button>
               </FormItem>
             </Form>
@@ -133,6 +133,9 @@
                           type:'primary',
                           size:'small'
                         },
+                        style:{
+                          marginRight:'10px'
+                        },
                         on:{
                           click:()=>{
                             _this.goDetail(params.row)
@@ -143,6 +146,9 @@
                         props:{
                           type:'primary',
                           size:'small'
+                        },
+                        style:{
+                          marginRight:'10px'
                         },
                         on:{
                           click:()=>{
@@ -172,12 +178,12 @@
             onSearch() {
               this.loading = true;
                 let parms = {
-                    "ownerName": this.searchForm.name,
+                    "ownerName": this.searchForm.ownerName,
                     "ownerPhone": this.searchForm.phone,
                     "pageNo": this.pageConfig.current,
                     "pageSize": this.pageConfig.size
                 };
-                this.$http.post(`/ad/owner/get/adOwner/show/list`,parms).then(res=>{
+                this.$http.post(`/yyht/v1/ad/owner/get/adOwner/show/pageList`,parms).then(res=>{
                     if (res.data.code === 0){
                         this.advertiserLists = res.data.data.list;
                         this.pageConfig.current = res.data.data.pageNo;
@@ -224,7 +230,7 @@
                         if (this.addModal.type === 'edit'){
                             params.adOwnerId= this.addModal.form.id;
                         }
-                        this.$http.post(`/ad/owner/add/adOwner`,params).then(res=>{
+                        this.$http.post(`/yyht/v1/ad/owner/addOrUpdate`,params).then(res=>{
                           this.disabledBtn = false;
                             if (res.data.code === 0){
                                 if (this.addModal.type === 'add'){
@@ -252,7 +258,7 @@
             submitDelete(){
               this.disabledBtn = true;
               let id = this.deleteModal.adOwnerId;
-              this.$http.delete(`/ad/owner/del/adOwner?adOwnerId=${id}`,{headers:{'Content-Type':'application/json'
+              this.$http.post(`/yyht/v1/ad/owner/delete?adOwnerId=${id}`,{headers:{'Content-Type':'application/json'
                   }}).then(res=>{
                 this.disabledBtn = false;
                   if (res.data.code === 0){

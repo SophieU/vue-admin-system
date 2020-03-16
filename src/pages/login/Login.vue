@@ -78,8 +78,8 @@
               iview.LoadingBar.start();
               this.$http.defaults.withCredentials=true;
               // 待删除
-              this.$router.push({name:'home'});
-              return;
+              // this.$router.push({name:'home'});
+              // return;
               // 待删除
 
               // this.$http.headers['Content-Type']='application/x-www-form-urlencoded';

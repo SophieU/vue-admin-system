@@ -48,7 +48,7 @@
               <Row>
                 <Col span="4">账号状态</Col>
                 <Col span="12">
-                  <i-switch  :disabled="view" size="large" :true-value="'Y'" :false-value="'N'" v-model="accountForm.isOpen">
+                  <i-switch  :disabled="view" size="large" :true-value="'OPEN'" :false-value="'CLOSE'" v-model="accountForm.isOpen">
                     <span slot="open">开启</span>
                     <span slot="close">关闭</span>
                   </i-switch>
@@ -107,13 +107,17 @@
                 key:'mobile',
                 align:'center'
               },{
-                title:'角色',
-                key:'roleName',
+                title:'昵称',
+                key:'nickName',
                 align:'center'
               },{
                 title:'状态',
-                key:'state',
-                align:'center'
+                key:'isOpen',
+                align:'center',
+                render:(h,params)=>{
+                  let text = params.row.isOpen == 'CLOSE' ? '停用': '启用'
+                  return h('span',{},text)
+                }
               },{
                 title:'操作',
                 align:'center',
@@ -121,23 +125,6 @@
                   let _this = this;
 
                   return h('div',[
-                    h('Button',{
-                      props:{
-                        type:'primary',
-                        size:'small'
-                      },
-                      style:{marginRight:'8px'},
-                      on:{
-                        click(){
-                          let id =params.row.id;
-                          _this.activeModal=true;
-                          _this.editPwdInput=false;
-                          _this.view=true;
-                          _this.modalTitle='查看账号';
-                          _this.getAccountInfo(id);
-                        }
-                      }
-                    },'查看'),
                     h('Button',{
                       props:{
                         type:'success',
@@ -150,7 +137,8 @@
                           _this.editPwdInput=false;
                           _this.view=false;
                           _this.modalTitle='编辑账号';
-                          _this.getAccountInfo(id);
+                          _this.accountForm=params.row;
+
                         }
                       }
                     },'编辑')
@@ -223,19 +211,19 @@
             })
         },
         //获取账号信息
-        getAccountInfo(id){
-          this.$http.get(`/sys/v1/user/info?id=${id}`)
-            .then(res=>{
-              if(res.data.code===0){
-                this.accountForm=res.data.data;
-                this.accountForm.password='111111'; //默认待清除密码
-
-                // this.accountForm.isOpen=this.accountForm.isOpen==='Y'?true:false;
-              }else{
-                this.$Message.error(res.data.msg);
-              }
-            })
-        },
+        // getAccountInfo(id){
+        //   this.$http.get(`/sys/v1/user/info?id=${id}`)
+        //     .then(res=>{
+        //       if(res.data.code===0){
+        //         this.accountForm=res.data.data;
+        //         this.accountForm.password='111111'; //默认待清除密码
+        //
+        //         // this.accountForm.isOpen=this.accountForm.isOpen==='Y'?true:false;
+        //       }else{
+        //         this.$Message.error(res.data.msg);
+        //       }
+        //     })
+        // },
         //获取角色列表
         getRoleLists(){
           this.$http.get(`/sys/v1/role/getAllRoleList`)

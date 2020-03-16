@@ -59,9 +59,9 @@ export const otherRouter={
   name:'otherRouter',
   redirect:'/home',
   component:Main,
-  // children:[
-  //   {path:'/centerVisite',title:'中心回访',name:'centerVisite',component:()=>import('@/pages/visite/center-visite.vue')},
-  // ]
+  children:[
+    {path:'advertiserDetail',title:'广告主管理',name:'advertiserDetail',component:()=>import('@/pages/platform/components/advertDetail.vue')},
+  ]
 };
 //3、作为Main组件的子页面展示 并且在菜单中显示 （appRouter）
 export const appRouter=[
@@ -183,13 +183,14 @@ export const appRouter=[
     children:[
       {path:'service',meta:{},name:'service',title:'服务管理',component:()=>import('@/pages/main-components/parent-view.vue'),
         children:[
-          {path:'servicePro',meta:{},title:'服务项目',name:'servicePro',component:()=>import('@/pages/platform/homeService.vue')},
+          {path:'servicePro',meta:{},title:'服务栏目管理',name:'servicePro',component:()=>import('@/pages/platform/homeService.vue')},
           {path:'allService',meta:{},title:'全部服务管理',name:'allService',component:()=>import('@/pages/platform/allService.vue')},
           {path:'functionSet',meta:{},title:'小程序功能区配置',name:'functionSet',component:()=>import('@/pages/platform/functionSet.vue')},
         ]},
       {path:'broadcast',meta:{},name:'broadcast',title:'广告管理',component:()=>import('@/pages/main-components/parent-view.vue'),
         children:[
           {path:'advertiser',meta:{},title:'广告主管理',name:'advertiser',component:()=>import('@/pages/platform/advertiser')},
+          {path:'advertiserDetail',meta:{hideInMenu:true},title:'广告主详情',name:'advertiserDetail',component:()=>import('@/pages/platform/components/advertDetail.vue')},
           {path:'banner',meta:{},title:'banner广告',name:'banner',component:()=>import('@/pages/platform/banner')},
           {path:'repairRecommend',meta:{},title:'报修服务推荐管理',name:'repairRecommend',component:()=>import('@/pages/platform/repair-recommend.vue')},
         ]},

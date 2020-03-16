@@ -324,6 +324,7 @@
          this.serveListRemote(e)
        }
       },
+      // 列表
       onSearch(flag,type){
         this.loading = true;
         if (this.startTimeArr[0]) {
@@ -343,7 +344,7 @@
         parmas.pageSize = this.pageConfig.size;
         parmas.flag=flag;
         parmas.type=type;
-        this.$http.post(`/ad/banner/getAllAdByTypeId`,parmas).then(res=>{
+        this.$http.get(`/yyht/v1/ad/config/getPageListAdByTypeId`,{params:parmas}).then(res=>{
           if (res.data.code === 0){
             this.advertLists = res.data.data.list;
             this.pageConfig.total = res.data.data.totalCount;
@@ -471,8 +472,9 @@
         this.eidtImg = null;
         this.addModal.show = true;
       },
+      // 弹窗 服务分类下拉
       getTypeTree(){   //获取服务分类
-        this.$http.get(`/service/category/getAllServiceCategory`).then(res=>{
+        this.$http.get(`/yyht/v1/service/category/getAllServiceCategory`).then(res=>{
           if (res.data.code === 0){
               res.data.data.forEach((item,index)=>{
                 item.color = 'white'
@@ -496,7 +498,7 @@
       },
       addModalOpen(flag){
         if (flag === true){
-          this.$http.get(`/ad/owner/getOwnerName`).then(res=>{
+          this.$http.get(`/yyht/v1/ad/owner/getOwnerList`).then(res=>{
             if (res.data.code === 0){
               this.adOwnerList = res.data.data;
             } else {
@@ -527,8 +529,9 @@
           this.ifLogin = false;
         }
       },
+      // 栏目列表
       getAdTypeList(){
-        this.$http.get(`/ad/banner/getAdTypeList`).then(res=>{
+        this.$http.get(`/yyht/v1/ad/config/getAdTypeList`).then(res=>{
           if (res.data.code === 0){
             let _this = this;
             res.data.data.forEach(item=>{
@@ -630,7 +633,7 @@
       submitDelete(){
         this.disabledBtn = true;
         let id = this.deleteModal.id;
-        this.$http.delete(`/ad/banner/deleteAdById?id=${id}`).then(res=>{
+        this.$http.post(`/yyht/v1/ad/config/deleteAdById?id=${id}`).then(res=>{
           this.disabledBtn = false;
           if (res.data.code === 0){
             this.deleteModal.show = false;
@@ -744,11 +747,11 @@
       }
     },
     mounted() {
-      this.initTips();
+      // this.initTips();
       this.onSearch();
       this.getTypeTree();
       this.getAdTypeList();
-      this.getToken();
+      // this.getToken();
     }
   }
 </script>
