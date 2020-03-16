@@ -1,0 +1,78 @@
+/**/
+.modal-form{
+  width: 100%;
+  height: 50%;
+  border:0;
+}
+.top-search{
+  border: 1px solid #dddddd;
+  background: #ffffff;
+  height: 150px;
+}
+.start-app-body{
+  background: #ffffff;
+}
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 100px;
+  line-height: 100px;
+  text-align: center;
+  border: 1px dashed #d9d9d9;
+}
+.avatar {
+  width: 178px;
+  height: 100px;
+  display: block;
+}
+.recommend-content{
+  margin-left: 2%;
+  height: 100%;
+  .phone-view{
+    position: relative;
+    margin-left: 0.5%;
+    top: 0;
+    left: 0;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    width: 375px;
+    height: 800px;
+    .phone-screen{
+      background: #efefef;
+      position: absolute;
+      width: 325px;
+      top: 100px;
+      left: 25px;
+      right: 25px;
+      bottom: 93px;
+      max-height: 608px;
+      overflow-y: auto;
+    }
+    .phone-screen::-webkit-scrollbar {
+      width: 3px; //滚动条的宽度
+    }
+    .phone-screen::-webkit-scrollbar-thumb {
+      background-color: #339BF5;//滚动条的颜色
+      border-radius: 3px;//滚动条的边框倒角
+    }
+  }
+}
+.recommend-card{
+  display: flex;
+  justify-content: flex-start;
+  .recommend-right{
+    margin-left: 30px;
+    flex: 1;
+  }
+}
