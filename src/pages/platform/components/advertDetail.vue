@@ -850,7 +850,7 @@
           },
           addModalOpen(flag){
               if (flag === true){
-                this.$http.get(`/ad/owner/getOwnerName`).then(res=>{
+                this.$http.get(`/yyht/v1/ad/owner/getOwnerList`).then(res=>{
                   if (res.data.code === 0){
                     this.adOwnerList = res.data.data;
                   } else {

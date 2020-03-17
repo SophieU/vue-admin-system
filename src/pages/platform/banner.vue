@@ -1,7 +1,7 @@
 <template>
   <Card>
     <search-bar :searchForm="searchForm" ref="searchBar"
-                @on-add="showAdd" :typeId="adTypeId" @search="onSearch" @onReset="resetSearch"
+                @on-add="showAdd" :typeId="adTypeId" @search="getAdLists" @onReset="resetSearch"
                 @dateChange="dateChange"
     ></search-bar>
     <Tabs type="card" @on-click="tabChange">
@@ -18,6 +18,7 @@
         ></advert-table>
       </TabPane>
     </Tabs>
+
     <Modal
       @on-visible-change="addModalOpen"
       :title="addModal.type==='add'?'新增广告':'编辑广告'"
@@ -171,6 +172,7 @@
   import searchBar from './components/searchBar.vue'
   import advertTable from './components/advertTable.vue'
   import UploadImg from '../main-components/upload-img.vue'
+  import util from "../../libs/util";
   export default {
     name: "banner",
     components:{
@@ -299,20 +301,20 @@
       }
     },
     watch:{
-      pageConfig:{
-        handler:()=>{
-
-        },
-        deep:true
-      },
       'pageConfig.size':function () {
-        this.onSearch()
+        this.getAdLists()
       },
       'pageConfig.current':function () {
-        this.onSearch()
+        this.getAdLists()
       },
     },
     methods:{
+      secondOnServe(){
+
+      },
+      changeOnServe(){
+
+      },
       openChange(flag){ //下拉框展开收起时的方法
        if(flag == true){
          let data = "";
@@ -325,7 +327,7 @@
        }
       },
       // 列表
-      onSearch(flag,type){
+      getAdLists(flag,type){
         this.loading = true;
         if (this.startTimeArr[0]) {
           this.searchForm.beginStartTime = new Date(this.startTimeArr[0]).Format('yyyy-MM-dd hh:mm:ss');
@@ -344,6 +346,9 @@
         parmas.pageSize = this.pageConfig.size;
         parmas.flag=flag;
         parmas.type=type;
+
+        parmas = util.formatterParams(parmas)
+
         this.$http.get(`/yyht/v1/ad/config/getPageListAdByTypeId`,{params:parmas}).then(res=>{
           if (res.data.code === 0){
             this.advertLists = res.data.data.list;
@@ -368,7 +373,7 @@
         };
         this.startTimeArr = [];
         this.endTimeArr = [];
-        this.onSearch();
+        this.getAdLists();
       },
       dateChange(data){
         if (data.type === 1){
@@ -383,14 +388,14 @@
         if (data.order === 'desc') {
           flag = 'down'
         }
-        this.onSearch(flag,type)
+        this.getAdLists(flag,type)
       },
       commitDrag(data){
         this.$http.post(`/ad/banner/updateAdSort`,data).then(res=>{
           if (res.data.code !== 0){
             this.$Message.error(res.data.msg)
           }else {
-            this.onSearch()
+            this.getAdLists()
           }
         })
       },
@@ -408,7 +413,7 @@
         }
         this.$http.post(`/ad/banner/set/expire/remind?adConfigId=${adConfigId}&optionValue=${optionValue}`).then(res=>{
           if (res.data.code === 0){
-            this.onSearch();
+            this.getAdLists();
             this.$Message.success('操作成功')
           } else {
             this.$Message.error('操作失败')
@@ -490,11 +495,11 @@
         this.searchForm.adTypeId = Number(name);
         this.addModal.form.adTypeId = Number(name);
         name == '12'?this.typeDes = '图片大小1125px*600px，建议主图区域控制在图片下方420px高度': this.typeDes = '图片大小 345*156 比例 3.45：1.56'
-        this.onSearch();
+        this.getAdLists();
       },
       pageConfigChange(data){
         this.pageConfig = data;
-        this.onSearch()
+        this.getAdLists()
       },
       addModalOpen(flag){
         if (flag === true){
@@ -529,21 +534,12 @@
           this.ifLogin = false;
         }
       },
-      // 栏目列表
+      // 栏目列表-Tab
       getAdTypeList(){
-        this.$http.get(`/yyht/v1/ad/config/getAdTypeList`).then(res=>{
+        this.$http.get(`/yyht/v1/ad/config/getAdTypeListByType`).then(res=>{
           if (res.data.code === 0){
             let _this = this;
-            res.data.data.forEach(item=>{
-              if (item.id !== '6' && item.id !== '4' && item.id !==  '7') {
-                this.tipsData.forEach(tips=>{
-                  if (tips.adTypeId === item.id){
-                    this.$set(item,'tipsCount',tips.tipsCount)
-                  }
-                });
-                this.AdTypeList.push(item)
-              }
-            });
+            this.AdTypeList=res.data.data
             this.adTypeId = Number(this.AdTypeList[0].id)
           } else {
             this.$Message(res.data.msg)
@@ -618,7 +614,7 @@
                  this.$Message.success('修改成功');
                 }
                 this.pageConfig.current = 1;
-                this.onSearch();
+                this.getAdLists();
                 this.addModal.show = false
               } else {
                 this.$Message.error(res.data.msg)
@@ -638,7 +634,7 @@
           if (res.data.code === 0){
             this.deleteModal.show = false;
             this.$Message.success('删除成功');
-            this.onSearch();
+            this.getAdLists();
           } else {
             this.$Message.error(res.data.msg);
             this.deleteModal.show = false;
@@ -670,15 +666,6 @@
          }
          this.butName = true;
         }
-      },
-      secondOnServe(data){  //第二个模态框内容改变的方法
-      //  if(this.secondList.length > 0){
-      //     this.secondList.forEach(ele=>{
-      //     if(ele.id == data){
-      //       this.chooseServeModal.selectForm.itemName = ele.name
-      //     }
-      //   })
-      //  }
       },
       getServerItem(code){           //获取弹窗第二条数据
          let formData = new FormData();
@@ -728,27 +715,10 @@
       selectServe(){      //第二个模态框完成按钮
         this.chooseServeModal.show = false;
       },
-      initTips(){
-        let tips = this.$store.state.app.tipsData;
-        for (let i=0;i<tips.length;i++){
-          if (tips[i].adTypeId==='6' && tips[i].tipsCount >0){
-            this.tipsData = tips[i].adTipsVoList;
-            return
-          }
-        }
-      },
-      getToken(){
-        this.$http.get(`/base/qiniu/token`).then(res=>{
-          if (res.data.code === 0){
-            this.domain = res.data.data.domain;
-            this.qiniuToken.token = res.data.data.token;
-          }
-        })
-      }
     },
     mounted() {
       // this.initTips();
-      this.onSearch();
+      this.getAdLists();
       this.getTypeTree();
       this.getAdTypeList();
       // this.getToken();

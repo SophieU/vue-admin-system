@@ -87,7 +87,6 @@
               callback(new Error());
             }
           }
-
           return{
             loadingSend:false,
             editPwdInput:false,//修改密码
@@ -211,19 +210,19 @@
             })
         },
         //获取账号信息
-        // getAccountInfo(id){
-        //   this.$http.get(`/sys/v1/user/info?id=${id}`)
-        //     .then(res=>{
-        //       if(res.data.code===0){
-        //         this.accountForm=res.data.data;
-        //         this.accountForm.password='111111'; //默认待清除密码
-        //
-        //         // this.accountForm.isOpen=this.accountForm.isOpen==='Y'?true:false;
-        //       }else{
-        //         this.$Message.error(res.data.msg);
-        //       }
-        //     })
-        // },
+        getAccountInfo(id){
+          this.$http.get(`/sys/v1/user/info?id=${id}`)
+            .then(res=>{
+              if(res.data.code===0){
+                this.accountForm=res.data.data;
+                this.accountForm.password='111111'; //默认待清除密码
+
+                // this.accountForm.isOpen=this.accountForm.isOpen==='Y'?true:false;
+              }else{
+                this.$Message.error(res.data.msg);
+              }
+            })
+        },
         //获取角色列表
         getRoleLists(){
           this.$http.get(`/sys/v1/role/getAllRoleList`)

@@ -57,7 +57,7 @@
         </FormItem>
         <div class="labelBefore">
         <FormItem label="图标设置:">
-          <UploadImg :qiniuToken="qiniuToken" :domain="domain" ref="upImg" :eidtImg="eidtImg"  @onUpload="onUpload"></UploadImg>
+          <UploadImg :qiniuToken="qiniuToken" :multiple="false" ref="upImg" :eidtImg="eidtImg"  @uploadCallback="uploadCallback"></UploadImg>
         </FormItem>
         </div>
        </Form>
@@ -165,7 +165,7 @@ export default {
             let src = params.row.iconUrl
             return h('img',{
               attrs:{
-                src:src
+                src:'//'+src
               },
               style:{
                 height:'40px',
@@ -185,6 +185,9 @@ export default {
                 props:{
                   type:'primary',
                   size:'small'
+                },
+                style:{
+                  marginRight:'10px'
                 },
                 on:{
                   click:()=>{
@@ -244,9 +247,10 @@ export default {
       this.lists = data
     },
     getServerItem(code){           //获取弹窗第二条数据
-     let formData = new FormData();
-     formData.append('categoryId',code)
-     this.$http.post('/ad/banner/get/repair/category',formData).then(res=>{
+      let param = {
+       categoryId:code
+      }
+     this.$http.get('/yyht/v1/repair/category/select/next',{params:param}).then(res=>{
        if(res.data.code == 0){
          this.secondList = res.data.data
        }else{
@@ -255,7 +259,7 @@ export default {
      })
    },
     delThis(id){    //删除按钮
-     this.$http.delete(`/service/deleteServiceById?id=${id}`).then(res=>{
+     this.$http.get(`/yyht/v1/service/delete?id=${id}`).then(res=>{
       if(res.data.code == 0){
         this.$Message.success('删除成功');
         this.$store.commit('setDeleteModal',{model:false})
@@ -266,6 +270,7 @@ export default {
      })
     },
     changeServer(data){  //模态框选项发生变化事件
+      console.log(data)
       this.getServerItem(data);
       this.serverOptionList.forEach((item,index)=>{
         if(item.serviceId == data){
@@ -314,7 +319,7 @@ export default {
             }
          }
         if (data.imageUrl) {
-          this.eidtImg = [{name:'图标',url:data.imageUrl,status:'finished'}];
+          this.eidtImg = [{name:'图标',url:'//'+data.iconUrl,status:'finished'}];
           this.addAllForm.imgKey = data.imgKey;
         }
        }else{
@@ -344,7 +349,7 @@ export default {
       let name = query;
       this.$http.get(`/yyht/v1/service/getServiceByCategoryByCode?code=${this.poseObj.code}&name=${name}`).then(res=>{
         if(res.data.code == 0){
-          this.serverOptionList = res.data.data.records;
+          this.serverOptionList = res.data.data;
         }else{
           this.$Message.warning(res.data.msg)
         }
@@ -354,7 +359,7 @@ export default {
       let query = '';
       this.$http.get(`/yyht/v1/service/getServiceByCategoryByCode?code=${this.poseObj.code}&name=${query}`).then(res=>{
         if(res.data.code == 0){
-          this.serverOptionList = res.data.data.records;
+          this.serverOptionList = res.data.data;
           this.label = this.poseObj.code == 'E_PROJECT'?'请选择服务项目类型:': `请选择${this.poseObj.name}:`;
           this.modalShow = true;
         }else{
@@ -405,16 +410,16 @@ export default {
         }
       })
     },
-    getToken(){        //获取七牛token
-      this.$http.get(`/base/qiniu/token`).then(res=>{
-        if (res.data.code === 0){
-          this.domain = res.data.data.domain;
-          this.qiniuToken.token = res.data.data.token;
-        }else{
-          this.$Message.warning(res.data.msg)
-        }
-      })
-    },
+    // getToken(){        //获取七牛token
+    //   this.$http.get(`/base/qiniu/token`).then(res=>{
+    //     if (res.data.code === 0){
+    //       this.domain = res.data.data.domain;
+    //       this.qiniuToken.token = res.data.data.token;
+    //     }else{
+    //       this.$Message.warning(res.data.msg)
+    //     }
+    //   })
+    // },
     addModalChange(data){      //模态框状态变化
       if(data == false){
         this.title = '新增服务';
@@ -437,7 +442,7 @@ export default {
         this.belongList.length == 1? this.addAllForm.belong = this.belongList[0].id : this.addAllForm.belong = ''
       }
     },
-    onUpload(data){      //上传图片的方法
+    uploadCallback(data){      //上传图片的方法
       this.$set(this.addAllForm,'imgKey',data.key)
     },
     changeSize(e){  //分页修改当前尺寸
@@ -452,7 +457,7 @@ export default {
       this.loading = true;
       if(!data){data = ''}
       if(!item){item = ''}
-        this.$http.get(`/yyht/v1/service/getAllServiceByServiceTyId?PageSize=${this.pageConfig.size}&pageNo=${this.pageConfig.current}&id=${this.defaultServeId}&flag=${data}&type=${item}`).then(res=>{
+        this.$http.get(`/yyht/v1/service/getAllServiceByServiceTyIdForPage?PageSize=${this.pageConfig.size}&pageNo=${this.pageConfig.current}&id=${this.defaultServeId}&flag=${data}&type=${item}`).then(res=>{
           if(res.data.code == 0){
             this.lists = res.data.data.list;
             this.loading = false;
@@ -522,7 +527,7 @@ export default {
           if(!this.editorId){
             delete data.id
           }
-          this.$http.post('/service/addOrUpdateService',data).then(res=>{
+          this.$http.post('/yyht/v1/service/addOrUpdate',data).then(res=>{
             if(res.data.code == 0){
                this.addAllServe = false;
                this.getCol()

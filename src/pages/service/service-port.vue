@@ -94,7 +94,7 @@
           //获取列表
           getLists(){
             let params = `pageNo=${this.pageNo}&pageSize=${this.pageSize}`;
-            this.$http.get(`/repair/station/list?${params}`)
+            this.$http.get(`/yyht/v1/repair/station/pageList?${params}`)
               .then(res=>{
                 let data = res.data;
                 if(data.code===0){
@@ -109,7 +109,6 @@
           },
         //页码变化
         pageToggle(page){
-            console.log(page)
           this.pageNo=page;
           this.getLists();
         },

@@ -201,7 +201,7 @@
         },
           // 获取一级分类
         getTypeList(){
-          this.$http.get(`/repair/category/select/first`).then(res=>{
+          this.$http.get(`/yyht/v1/repair/category/select/first`).then(res=>{
             if(res.data.code===0){
               this.typeLists = res.data.data;
             }
@@ -232,7 +232,7 @@
         },
           // 新增节点（接口调用）
         addNodeAPI(params){
-          this.$http.post(`/repair/category/add`,{...params}).then(res=>{
+          this.$http.post(`/yyht/v1/repair/category/addOrUpdate`,{...params}).then(res=>{
             if(res.data.code===0){
               this.$Message.success('保存成功');
               this.initialForm();
@@ -244,7 +244,7 @@
         },
         // 编辑节点（接口调用）
         editNodeAPI(params){
-          this.$http.post(`/repair/category/edit`,{...params}).then(res=>{
+          this.$http.post(`/yyht/v1/repair/category/addOrUpdate`,{...params}).then(res=>{
             if(res.data.code===0){
               this.$Message.success('保存成功');
               // 初始化表单
@@ -359,7 +359,7 @@
         // 新增项目
         addNewProject(){
           // 未选中一级菜单时
-          if(!this.currentNode.id||this.currentNode.parentId){
+          if(!this.currentNode.id||this.currentNode.parentId==''){
             this.$Message.info('请先选择要添加到的项目分类')
             return false;
           }
@@ -383,7 +383,7 @@
           let _this = this;
           let id = this.currentNode.id;
           this.$store.commit('setDeleteModal',{model:true,callback:function(){
-              _this.$http.delete(`/repair/category/delete?id=${id}`).then(res=>{
+              _this.$http.delete(`/yyht/v1/repair/category/delete?id=${id}`).then(res=>{
                 if(res.data.code===0){
                   _this.$Message.success('删除成功');
                   _this.$store.commit('setDeleteModal',{model:false});
@@ -400,10 +400,10 @@
         },
         // 获取节点详情
         getDetail(id){
-          this.$http.get(`/repair/category/info?id=${id}`).then(res=>{
+          this.$http.get(`/yyht/v1/repair/category/info?id=${id}`).then(res=>{
             if(res.data.code===0){
               let data = res.data.data;
-              if(!this.currentNode.parentId){
+              if(this.currentNode.parentId==0){
                 // 一级节点
                 this.currentNodeType='first';
                 this.typeForm=_.cloneDeep(data);
@@ -423,17 +423,16 @@
           }
           this.$set(this.proForm,'iconCode',icon.iconCode)
           // this.proForm.iconCode = icon.iconCode;
-          console.log( this.proForm.iconCode )
         },
         changePort(nodeList,currentNode){
           this.currentNode = currentNode;
           this.getDetail(currentNode.id)
           this.editTypeForm=false; // 可编辑分类关态
-            this.editProForm=false; // 可编辑项目状态
+          this.editProForm=false; // 可编辑项目状态
 
         },
         getTreeLists(){
-          this.$http.get(`/repair/category/tree`).then(res=>{
+          this.$http.get(`/yyht/v1/repair/category/tree`).then(res=>{
             if(res.data.code===0){
               let data = res.data.data;
               this.treeLists=this.formatDataTree(data);
@@ -482,7 +481,8 @@
       mounted(){
           this.getTreeLists()
           this.getTypeList()
-          this.getRepireIcon()
+        // 接口暂无
+          // this.getRepireIcon()
       }
     }
 </script>

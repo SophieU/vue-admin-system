@@ -16,7 +16,7 @@
                           <p>图片大小{{image.adviseSizeDes}}</p>
                           <p>图片比例{{image.adviseScaleDes}}</p>
                         </div>
-                        <img :src="domain+image.targetImage" v-if="image.targetImage && image.targetImage.length>0">
+                        <img :src="'//'+image.url" v-if="image.targetImage && image.targetImage.length>0">
                         <input type="file" @change="uploadInputchange($event,index)" :id="'imgInput'+index" accept="image/png, image/jpeg, image/jpg" class="upload-hide-input" >
                         <!--<UploadImg ref="upImg" :eidtImg="eidtImg" :image="image" @onUpload="onUpload" class="setUpImg"></UploadImg>-->
                       </div>
@@ -189,7 +189,7 @@
 
 <script>
   import UploadImg from '../../main-components/upload-img.vue'
-  import Util from '../../../libs/util'
+  import _ from 'lodash'
     export default {
         name: "recommendSet",
         props:{
@@ -383,19 +383,21 @@
             let file = event.target.files[0];
             let randomNum = Math.floor(Math.random() * 1000); //随机数
             let name = Date.parse(new Date())+randomNum;
-            console.log(file)
-            const axiosInstance = this.$http.create({withCredentials: false});    //withCredentials 禁止携带cookie，带cookie在七牛上有可能出现跨域问题
+            const axiosInstance = this.$http.create({withCredentials: true});    //withCredentials 禁止携带cookie，带cookie在七牛上有可能出现跨域问题
             let data = new FormData();
             data.append('token', this.qiniuToken.token);     //七牛需要的token，叫后台给，是七牛账号密码等组成的hash
             data.append('file', file);
             axiosInstance({
               method: 'POST',
-              url: 'https://up.qbox.me',  //上传地址
+              url: '/base/qiniu/upload/image',  //上传地址
               data: data,
               timeout:30000,      //超时时间，因为图片上传有可能需要很久
             }).then(res =>{
-              this.$set(this.viewSetting.details[index],'targetImage',res.data.key);
-              this.viewSetting.details[index].targetImage = res.data.key;
+              let data = res.data.data
+              this.$set(this.viewSetting.details[index],'targetImage',data.key);
+              this.viewSetting.details[index].targetImage = data.key;
+              this.viewSetting.details[index].url = data.imageUrl;
+              console.log(data)
               document.getElementById("uploadFileInput").value = ''        //上传成功，把input的value设置为空，不然 无法两次选择同一张图片
               //上传成功...  (登录七牛账号，找到七牛给你的 URL地址) 和 data里面的key 拼接成图片下载地址
             }).catch(function(err) {
@@ -410,7 +412,7 @@
             })
           },
           getAllOwner(){
-            this.$http.get(`/ad/owner/getOwnerName`).then(res=>{
+            this.$http.get(`/yyht/v1/ad/owner/getOwnerList`).then(res=>{
               if (res.data.code === 0){
                 this.advertiserList = res.data.data
               } else {
@@ -441,7 +443,7 @@
             this.chooseServeModal.show = false;
           },
           commitSet(){
-            let parmas = Util.deepClone(this.viewSetting);
+            let parmas = _.cloneDeep(this.viewSetting)
             for (let i=0;i<parmas.details.length;i++){
               if (!parmas.details[i].targetImage || parmas.details[i].targetImage === ''){
                 this.$Message.error('推荐位'+(i + 1)+'图片不能为空');

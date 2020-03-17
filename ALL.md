@@ -320,37 +320,21 @@ http://localhost:8887/yyht/v1/recommend/config/target/categories
 删除推荐位   1
 /yyht/v1/recommend/config/delete?id=xxxx
 
-查询所有服务
-/yyht/v1/service/getAllService?serviceTypeId=xxx?serviceTypeName=xxxx
-查询未添加到首页的服务
-/yyht/v1/getAllServiceByInner?serviceTypeId=xxx?serviceTypeName=xxxx
-根据服务栏目id查询服务        1
-/yyht/v1/service/getAllServiceByServiceTyId?id=xxx&type=xxx
-根据服务id删除服务
-/yyht/v1/service/delete?id=xxx
-根据服务id查询信息      1
-/yyht/v1/service/getServiceInfoById?id=xxx
-添加或者修改服务
-/yyht/v1/service/addOrUpdate
-根据类型code查询数据(APP内转调用接口)     1
-/yyht/v1/service/getServiceByCategoryByCode?code=APP_JUMP&pageNo=xx&pageSize=xxx
-服务排序
-/yyht/v1/service/updateServiceSort
-根据code查询已添加的服务
-管理后台-服务（新增或者修改）
+
+管理后台-服务（新增或者修改） 1
 http://localhost:8887/yyht/v1/service/addOrUpdate
-管理后台-查询所有的服务（列表）
+管理后台-查询所有的服务（列表）    1
 http://localhost:8887/yyht/v1/service/getAllService?serviceTypeId=ce0021eedf5f489fa97c2ea8bf2f62d2
-管理后台-查询未添加到首页的服务
+管理后台-查询未添加到首页的服务    1
 http://localhost:8887/yyht/v1/service/getAllServiceByInner?serviceTypeId=ce0021eedf5f489fa97c2ea8bf2f62d2
-根据服务栏目id查询服务（服务首页使用）
+根据服务栏目id查询服务（服务首页使用）    1
 /yyht/v1/service/getAllServiceByServiceTyId?id=服务栏目ID&type=类型&flag=排列类型
 type可选值如下：createTime 创建时间、clickCount 点击量
 flag可选值：up 升序 down 降序
-根据服务id删除服务
+根据服务id删除服务  1
 /yyht/v1/service/delete?id=服务ID
-根据服务id查询信息
-/yyht/v1/service/getServiceInfoById?id=服务ID
+根据服务id查询信息      1
+/yyht/v1/service/getAllServiceByServiceTyIdForPage?id=服务ID
 根据类型code查询数据(APP内转调用接口)     1
 /yyht/v1/service/getServiceByCategoryByCode?code=xxx&name=xxx(非必填，查询使用)&pageNo=xx&pageSize=xxx
 code可选值：
@@ -374,3 +358,16 @@ code值目前有这些
     APP_JUMP
     H5
 
+/base/qiniu/token?environment=可选（wolf-dev/wolf-prd/wolf-uat）    1
+返回model:
+{
+    "code": 0,
+    "data": {
+        "domain": "q7adjw5as.bkt.clouddn.com/",
+        "token": "aPJ-aQjnkw0IUSnDIr7cwFurzythyDU3OHO2sbFW:vNaQRA0tfEbEPv53ywIG1_iStzc=:eyJzY29wZSI6IndvbGYtdWF0IiwiZGVhZGxpbmUiOjE1ODQzNjk0NDJ9"
+    },
+    "ts": 1584365845581
+}
+上传图片
+/base/qiniu/upload/image         1
+表单提交模式，改为图片上传模式；文件类型是file

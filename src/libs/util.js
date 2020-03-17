@@ -407,7 +407,7 @@ util.getRegion = function(cb){
 }
 // 获取服务类型列表数
 util.getTreeLists=(cb)=>{
-  axios.get(`/repair/category/tree`).then(res=>{
+  axios.get(`/yyht/v1/repair/category/tree`).then(res=>{
     if(res.data.code===0){
       typeof cb === 'function' &&cb(res.data.data);
     }else{

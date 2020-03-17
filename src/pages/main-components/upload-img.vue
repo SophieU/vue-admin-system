@@ -39,37 +39,38 @@
 
 </style>
 <template>
-    <div>
-      <div class="upload-list" v-for="item in uploadList">
-        <template v-if="item.status==='finished'">
-          <img :src="item.url" alt="item.name">
-          <div class="upload-list-cover">
-            <Icon type="ios-trash-outline" @click.native="handleRemove(item)"></Icon>
-          </div>
-        </template>
-        <template v-else>
-          <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
-        </template>
-      </div>
-      <Upload
-        ref="upload"
-        :show-upload-list="false"
-        :format="['jpg','jpeg','png']"
-        :on-success="handleSuccess"
-        :default-file-list="defaultList"
-        :max-size="2048"
-        :on-exceeded-size="handleMaxSize"
-        :before-upload="handleBeforeUpload"
-        type="drag"
-        multiple
-        action="//jsonplaceholder.typicode.com/posts/"
-        style="display: inline-block;width:58px;"
-      >
-        <div style="width: 58px;height:58px;line-height: 58px;">
-          <Icon type="ios-camera" size="20"></Icon>
+  <div>
+    <div class="upload-list" v-for="item in uploadList">
+      <template v-if="item.status==='finished'">
+        <img :src="item.url" :title="item.key">
+        <div class="upload-list-cover">
+          <Icon type="ios-trash-outline" @click.native="handleRemove(item.name)"></Icon>
         </div>
-      </Upload>
+      </template>
+      <template v-else>
+        <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
+      </template>
     </div>
+    <Upload
+      ref="upload"
+      :data="qiniuToken"
+      :show-upload-list="false"
+      :format="['jpg','jpeg','png']"
+      :on-success="handleSuccess"
+      :default-file-list="defaultList"
+      :max-size="2048"
+      :on-exceeded-size="handleMaxSize"
+      :before-upload="handleBeforeUpload"
+      type="drag"
+      :action="uploadUrl"
+      style="display: inline-block;width:58px;"
+      :with-credentials="true"
+    >
+      <div style="width: 58px;height:58px;line-height: 58px;">
+        <Icon type="ios-camera" size="20"></Icon>
+      </div>
+    </Upload>
+  </div>
 </template>
 
 <script>
@@ -78,45 +79,91 @@
   * 	 type:上传控件类型
   * */
 
-    export default {
-        name: "upload-img",
-      data(){
-          return {
-            defaultList:[],
-            uploadList:[],
-            imgName:'',
-            visible:false,
-
-          }
+  export default {
+    props: {
+      /*prefix:{
+        type:String,
+        required: true,
+      },*/
+      eidtImg:{
+        type:Array,
+        required: false,
       },
-      methods:{
-        handleSuccess(res,file){
-          file.url = 'https://o5wwk8baw.qnssl.com/7eb99afb9d5f317c912f08b5212fd69a/avatar';
-          file.name = '7eb99afb9d5f317c912f08b5212fd69a';
-          console.log('upload success')
-        },
-        handleMaxSize(){
-          console.log('exceed size')
-        },
-        handleBeforeUpload(){
-          console.log('before upload')
-          const check=this.uploadList.length<5;
-          if(!check){
-            this.$Notice.warning({
-              title:'超过5张图，不能再传了'
-            })
-          }
-          return check;
-        },
-        handleRemove(file){
-          const fileList = this.$refs.upload.fileList;
-          this.$refs.upload.fileList.splice(fileList.indexOf(file),1);
-        }
+      qiniuToken:{
+        type: Object
       },
-      mounted () {
-        this.uploadList = this.$refs.upload.fileList;
+      domain:{
+        type:String
       }
+    },
+    name: "upload-img",
+    computed:{
+      uploadUrl(){
+        // let protocol = location.protocol;
+        return this.$http.defaults.baseURL + '/base/qiniu/upload/image'
+
+      }
+    },
+    data(){
+      return {
+        defaultList:[],
+        uploadList:[],
+        imgName:'',
+        visible:false,
+      }
+    },
+    watch:{
+      eidtImg:{
+        //使用watch值是对象的第三种情况
+        handler:function(val){
+          this.uploadList = val;
+        },
+        //getList里面通过searchValue去搜索数据库
+        immediate:true
+      }
+    },
+    methods:{
+      clearFiles(){
+        this.$refs.upload.clearFiles();
+        this.uploadList = [];
+      },
+      handleSuccess(res,file){
+        // file.url = this.domain + file.response.key;
+        file.url='//'+res.data.imageUrl
+        this.uploadList = [file];
+        console.log(file)
+        this.$emit('uploadCallback', res.data);
+      },
+      handleMaxSize(){
+        this.$Message.warning(`超出图片大小范围，请重新选择图片`)
+      },
+      handleBeforeUpload(file){
+        let randomNum = Math.floor(Math.random() * 1000); //随机数
+        let name = Date.parse(new Date())+randomNum;
+        this.qiniuToken.key = name;
+        // this.qiniuToken.key = file.name;
+      },
+      handleRemove(file,list){
+        this.uploadList = [];
+        let res = {
+          key:''
+        };
+        this.$emit('onUpload',res)
+      },
+      getToken(){
+        this.$http.get(`/base/qiniu/token`).then(res=>{
+          if (res.data.code === 0){
+            this.domain = res.data.data.domain;
+            sessionStorage.setItem('domain',res.data.data.domain);
+            this.qiniuToken.token = res.data.data.token;
+          }
+        })
+      }
+    },
+    mounted () {
+      //this.getToken()
     }
+  }
 </script>
 
 

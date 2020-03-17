@@ -24,12 +24,6 @@
       <FormItem label="服务网点电话" prop="phone">
         <Input :disabled="viewInfo" placeholder="请输入手机或座机号" @on-keydown="validateInputTel"  v-model="portSettingForm.phone" class="form-input"/>
       </FormItem>
-      <FormItem label="是否属于天富自营" prop="isSelf">
-        <Select class="form-input" v-model="portSettingForm.isSelf" :disabled="viewInfo" placeholder="请选择">
-          <Option value="Y">是</Option>
-          <Option value="N">否</Option>
-        </Select>
-      </FormItem>
       <FormItem label="服务区域设置" prop="regionList">
         <Checkbox
           v-model="checkAllRegion"
@@ -51,18 +45,6 @@
       <FormItem label="登陆密码" prop="password">
         <Input :disabled="viewInfo" type="password" placeholder="请设置6~10位密码"  v-model="portSettingForm.password" class="form-input"/>
       </FormItem>
-      <FormItem label="备用网点">
-        <i-switch  :disabled="viewInfo" v-model="portSettingForm.isSlave" @on-change="toggleSlave">
-          <span slot="open">是</span>
-          <span slot="close">否</span>
-        </i-switch>
-      </FormItem>
-      <template v-if="title==='添加服务网点'">
-        <FormItem label="商户收款码：">
-          <Input v-model="portSettingForm.buttCode" placeholder="请输入商户收款码" style="width:300px;"/>
-          <div class="tips" style="font-size:12px;width:300px;margin-top:5px;line-height:1.5em;">收单商户授权码是在收单商户在支付通道注册完成后，由支付通道生成。如需查询需收单商户登陆支付通道后台进行查看。</div>
-        </FormItem>
-      </template>
       <FormItem label="服务商权限管控：" prop="state">
         <Select  :disabled="viewInfo" style="width:300px;" v-model="portSettingForm.state" placeholder="请选择服务商权限管控">
           <Option value="NORMAL">正常</Option>
@@ -229,9 +211,10 @@
             return false;
           }
         },
+        // 网点可用区域
         getStation(id){
           let params = id?`id=${id}`:'';
-          this.$http.get(`/repair/station/region/list?${params}`)
+          this.$http.get(`/yyht/v1/repair/station/region/list?${params}`)
             .then(res=>{
               if(res.data.code===0){
                 let data=res.data.data;
@@ -263,19 +246,18 @@
           };
 
 
-          let url = '';
+          let url = '/yyht/v1/repair/station/addOrUpdate';
           if(formData.id){
             //有id为修改
-            url='/repair/station/edit';
             params.id=formData.id;
             params.stationAdmin.id=formData.stationId;
             if(formData.password!=='000000'){ //未修改密码时的默认值
               params.stationAdmin.password=formData.password;
             }
           }else{
-            url='/repair/station/add';
             params.stationAdmin.password=formData.password;
           }
+
           if(formData.buttCode){
             params.buttCode = formData.buttCode;
           }
@@ -303,7 +285,7 @@
         //查询网点信息
         getStationInfo(id){
           // /repair/station/info?id=1
-          this.$http.get(`/repair/station/info?id=${id}`)
+          this.$http.get(`/yyht/v1/repair/station/info?repairStationId=${id}`)
             .then(res=>{
               if(res.data.code===0){
                 let data = res.data.data;

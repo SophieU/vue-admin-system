@@ -149,7 +149,7 @@
             //提交新原因
             this.editingId='';
             let param = util.formatterParams(val);
-            this.$http.post(`/repair/statement/reason/save?${param}`)
+            this.$http.post(`/yyht/v1/repair/statement/reason/addOrUpdate?${param}`)
               .then(res=>{
                 if(res.data.code===0){
                   this.$Message.success('保存成功');
@@ -163,7 +163,7 @@
         delThis(type,index){
           if(!type) return;
           let id=this[type][index].id;
-          this.$http.delete(`/repair/statement/reason/delete?id=${id}`)
+          this.$http.get(`/yyht/v1/repair/statement/reason/delete?id=${id}`)
             .then(res=>{
               if(res.data.code===0){
                 this.$Message.success('删除成功');
@@ -174,7 +174,7 @@
             })
         },
         getLists(){
-          this.$http.get(`/repair/statement/reason/list`)
+          this.$http.get(`/yyht/v1/repair/statement/reason/list`)
             .then(res=>{
               if(res.data.code===0){
                 let data = res.data.data;
@@ -184,43 +184,6 @@
             })
         },
         formateData(data){
-          /* data =[
-            {
-              "id": "1",
-              "statementType": "ORDER",
-              "orderStateType": "2",
-              "statementName": "重新派单",
-              "sortIndex": 1
-            },
-            {
-              "id": "2",
-              "statementType": "ORDER",
-              "orderStateType": "1",
-              "statementName": "取消订单",
-              "sortIndex": 1
-            },
-            {
-              "id": "3",
-              "statementType": "ORDER",
-              "orderStateType": "2",
-              "statementName": "关闭订单",
-              "sortIndex": 2
-            },
-            {
-              "id": "4",
-              "statementType": "AFTER_SALE",
-              "orderStateType": "",
-              "statementName": "重新派单",
-              "sortIndex": 1
-            },
-            {
-              "id": "5",
-              "statementType": "AFTER_SALE",
-              "orderStateType": "",
-              "statementName": "关闭售后",
-              "sortIndex": 2
-            }
-          ];*/
           this.editingId='';
           let afterSale=[],before=[],after=[];
           data.forEach(item=>{

@@ -351,7 +351,7 @@
           },
         // 获取单个分类信息，用于编辑
         getTypeInfo(id){
-            this.$http.get(`/repair/category/info?id=${id}`)
+            this.$http.get(`/yyht/v1/repair/category/info?id=${id}`)
               .then(res=>{
                 if(res.data.code===0){
                   this.typeForm=res.data.data;
@@ -368,15 +368,15 @@
         saveType(){
             let params = this.typeForm;
             params.hasDtdServiceFee=this.hasFee?'Y':'N';
-            let url = '';
-            if(params.id.length>0){
-              //编辑
-              url='/repair/category/edit';
-              //删除多余属性
-            }else{
-              //添加
-              url='/repair/category/add';
-            }
+            let url = '/yyht/v1/repair/category/addOrUpdate';
+            // if(params.id.length>0){
+            //   //编辑
+            //   url='/repair/category/edit';
+            //   //删除多余属性
+            // }else{
+            //   //添加
+            //   url='/repair/category/add';
+            // }
             this.loadingSend=true;
 
             this.$refs['typeForm'].validate(valid=>{
@@ -420,8 +420,8 @@
         //删除分类
         deleteType(id){
           this.$http({
-            url:`/repair/category/delete?id=${id}`,
-            method:'delete',
+            url:`/yyht/v1/repair/category/delete?id=${id}`,
+            method:'get',
           }).then(res=>{
             if(res.data.code===0){
               this.$Message.info('删除成功');
@@ -484,7 +484,7 @@
       },
       mounted(){
           this.getTypeLists();
-          this.getIconLists();
+          // this.getIconLists();
       }
     }
 </script>
