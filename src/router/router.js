@@ -61,6 +61,18 @@ export const otherRouter={
   component:Main,
   children:[
     {path:'advertiserDetail',title:'广告主管理',name:'advertiserDetail',component:()=>import('@/pages/platform/components/advertDetail.vue')},
+    {path:'staffDetail',title:'人员详情',name:'staffDetail',meta:{hideInMenu:true},component:()=>import('@/pages/staff/staff-detail'),
+      children:[
+        {path:'',name:'staffDetail',title:'基本信息',meta:{},component:()=>import('@/pages/staff/staff-component/staff-base')},
+        {path:'inviteRecord',title:'邀请记录',meta:{hideInMenu:true},name:'inviteRecord',component:()=>import('@/pages/staff/staff-component/invite-record')},
+        {path:'walletRecord',title:'钱包记录',meta:{hideInMenu:true},name:'walletRecord',component:()=>import('@/pages/staff/staff-component/wallet-record')},
+        {path:'orderLists',title:'工单列表',meta:{hideInMenu:true},name:'serviceOrderLists',component:()=>import('@/pages/staff/staff-component/staff-order-income')},
+        // {path:'staffOrderIncome',title:'工单收益',meta:{hideInMenu:true},name:'staffOrderIncome',component:()=>import('@/pages/staff/staff-component/staff-order-income')},
+        // {path:'staffOrderInfo',title:'工单信息',meta:{hideInMenu:true},name:'staffOrderInfo',component:()=>import('@/pages/staff/staff-component/staff-order-info')},
+        // {path:'staffEvaluate',title:'评价',meta:{hideInMenu:true},name:'staffEvaluate',component:()=>import('@/pages/staff/staff-component/staff-evaluate')},
+        // {path:'staffControl',title:'账号管控',meta:{hideInMenu:true},name:'staffControl',component:()=>import('@/pages/staff/staff-component/staff-control')},
+      ]
+    },
   ]
 };
 //3、作为Main组件的子页面展示 并且在菜单中显示 （appRouter）
@@ -125,7 +137,8 @@ export const appRouter=[
     meta:{single:false},
     children:[
       {path:'normal',meta:{},icon:'md-locate',title:'普通用户',name:'normal',component:()=>import('@/pages/staff/staff-admin.vue')},
-      {path:'worker',meta:{},icon:'ios-compass',title:'服务师傅',name:'worker',component:()=>import('@/pages/staff/staff-admin.vue')},
+      {path:'worker',meta:{},icon:'ios-compass',title:'服务师傅',name:'worker',component:()=>import('@/pages/staff/staff-service.vue')},
+
     ]
   },{
     path:'/order',

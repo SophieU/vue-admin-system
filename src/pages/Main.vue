@@ -187,10 +187,10 @@
       watch:{
           '$route'(to){
             this.$store.commit('setCurrentPageName',to.name);
-
             // this.$store.commit('increateTag',to);
 
             let pathArr = util.setCurrentPath(this,this.$route.name);
+
             if(pathArr.length>=3){
               let arr = [pathArr[0].name,pathArr[1].name];
               this.$store.commit('addOpenSubmenu',arr,true); //展开子菜单

@@ -54,6 +54,6 @@ new Vue({
 
 function loadGaoDe(){
   var script = document.createElement('script')
-  script.src='https://webapi.amap.com/maps?v=1.4.15&key=8a1c307c3702ccf7303aae5617321199&plugin=AMap.MouseTool&plugin=AMap.Geocoder'
+  script.src='https://webapi.amap.com/maps?v=1.4.15&key=8a1c307c3702ccf7303aae5617321199&plugin=AMap.MouseTool&plugin=AMap.Geocoder&plugin=AMap.PolyEditor'
   document.body.append(script)
 }

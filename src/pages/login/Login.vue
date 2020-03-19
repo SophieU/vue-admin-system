@@ -99,6 +99,7 @@
                     // this.getQiNiuToken();
                     setTimeout(()=>{
                      this.$router.push({name:'home'});
+                      this.loading()
                    },1000)
                   }else{
                     this.$Message.error(res.data.msg);

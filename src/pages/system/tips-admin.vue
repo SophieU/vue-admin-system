@@ -49,7 +49,7 @@
       },
       methods:{
           getTips(){
-            this.$http.get('/repair/reminder/info')
+            this.$http.get('/yyht/v1/reminder/info')
               .then(res=>{
                 if(res.data.code===0){
                   let data = res.data.data;
@@ -100,12 +100,7 @@
             let serviceTime = this.editor1.txt.html();
             let serviceFee = this.editor2.txt.html();
             let other = this.editor3.txt.html();
-            // let params = {
-            //   serviceTime:serviceTime,
-            //   serviceFee:serviceFee,
-            //   other:other
-            // };
-            this.$http.post(`/repair/reminder/save`,{
+            this.$http.post(`/yyht/v1/reminder/saveOrUpdate`,{
               serviceTime:serviceTime,
               serviceFee:serviceFee,
               other:other

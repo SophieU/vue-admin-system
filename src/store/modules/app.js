@@ -1,5 +1,4 @@
-// import {otherRouter,appRouter} from '@/router/router'
-import {forbid,appRouter} from '@/router/router'
+import {forbid,otherRouter,appRouter} from '@/router/router'
 import util from '@/libs/util'
 import Vue from 'vue'
 import axios from 'axios'
@@ -24,7 +23,7 @@ const app = {
     ],
     menuList:[],//菜单
     routers:[
-      // otherRouter,
+      otherRouter,
       forbid,
       ...appRouter
     ], //路由

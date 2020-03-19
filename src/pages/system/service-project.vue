@@ -105,8 +105,11 @@
                 <FormItem class="form-item" label="员工结算标准">
                   <Input :disabled="!editProForm" v-model="proForm.employeeDtdServiceCommission"/>
                 </FormItem>
-                <FormItem class="form-item" label="服务说明">
+                <FormItem class="form-item" label="服务备注">
                   <Input :disabled="!editProForm" type="textarea" v-model="proForm.description"/>
+                </FormItem>
+                <FormItem class="form-item editor-item" label="服务说明">
+                  <div id="serviceDescription" ></div>
                 </FormItem>
                 <FormItem label="选择图标样式">
                   <ul class="icon-lists">
@@ -135,6 +138,7 @@
     import InputNumber from "../main-components/input-money";
     import util from '../../libs/util'
     import axios from '@/libs/api'
+    import E from "wangeditor";
     export default {
         name: "service-project",
       components: {InputNumber},
@@ -312,6 +316,8 @@
           for(let key in formData){
             params[key] = formData[key];
           }
+          //富文本内容
+          params.serviceDescription = this.editor1.txt.html();
           if(this.editProFormType==='add'){
             // 新增项目分类
             this.addNodeAPI(params)
@@ -476,11 +482,45 @@
             this.getTreeLists();
           }
         },
-
+        initialEditor(){
+          //富文本
+          let config=[
+            'head',  // 标题
+            'bold',  // 粗体
+            'fontSize',  // 字号
+            'fontName',  // 字体
+            'italic',  // 斜体
+            'underline',  // 下划线
+            'strikeThrough',  // 删除线
+            'foreColor',  // 文字颜色
+            'backColor',  // 背景颜色
+            'image', //插入图片
+            'link',  // 插入链接
+            'list',  // 列表
+            'justify',  // 对齐方式
+            'undo',  // 撤销
+            'redo'  // 重复
+          ]
+          this.editor1 = new E('#serviceDescription');
+          let editor1 = this.editor1;
+          editor1.customConfig.menus =config;
+          editor1.create();
+          this.editor1.$textElem.attr('contenteditable', false)
+        }
+      },
+      watch:{
+        editProForm(newVal,oldVal){
+          if(!newVal){
+            this.editor1.$textElem.attr('contenteditable', false)
+          }else{
+            this.editor1.$textElem.attr('contenteditable', true)
+          }
+        }
       },
       mounted(){
           this.getTreeLists()
           this.getTypeList()
+          this.initialEditor()
         // 接口暂无
           // this.getRepireIcon()
       }
@@ -488,6 +528,24 @@
 </script>
 
 <style scoped lang="scss">
+  .editor-wrapper{
+    position: relative;
+    .btn-group{
+      position: absolute;
+      right: 0;
+      top: -40px;
+    }
+    .editor-mask{
+      position: absolute;
+      background: rgba(243,243,243,0.5);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 999999;
+      cursor:not-allowed;
+    }
+  }
 .form-box{
   width:400px;
 }
@@ -529,5 +587,8 @@
   }
   .inline-button{
     display: inline-block;
+  }
+  .editor-item{
+    width: 100%;
   }
 </style>

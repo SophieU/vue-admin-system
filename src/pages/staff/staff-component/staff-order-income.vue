@@ -1,37 +1,5 @@
 <template>
   <div>
-    <Card class="mb-15">
-      <p slot="title">工单统计</p>
-      <table class="native-table mb-15">
-        <thead>
-        <tr>
-          <th>历史工单总数</th>
-          <th>历史收益总计</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-          <td>{{orderTotal.totalOrderNum}}</td>
-          <td>{{orderTotal.totalEarning}}</td>
-        </tr>
-        </tbody>
-      </table>
-      <table class="native-table mb-15">
-        <thead>
-        <tr>
-          <th>本月工单总数</th>
-          <th>本月收益总计</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-          <td>{{orderTotal.currentMonthOrderNum}}</td>
-          <td>{{orderTotal.currentMonthEarning}}</td>
-        </tr>
-        </tbody>
-      </table>
-
-    </Card>
     <Card>
       <p slot="title">工单列表</p>
       <div class="clearfix mb-15">
@@ -40,7 +8,6 @@
         </div>
         <div class="pull-right">
           <Button @click="filter=true">筛选</Button>
-          <Button @click="exportExcel" type="primary">excel导出</Button>
         </div>
       </div>
       <div class="table-wrapper">
@@ -139,7 +106,7 @@
             let id = this.id;
             let query = `pageNo=${this.pageNo}&pageSize=${this.pageSize}&id=${id}`;
             let param =util.formatterParams(filter);
-            this.$http.post(`/server/order/earning/list?${query}&${param}`).then(res=>{
+            this.$http.post(`/yyht/v1/service/user/order/pageList?${query}&${param}`).then(res=>{
                 if(res.data.code===0){
                   let data = res.data.data;
                   this.lists=data.list;
@@ -153,16 +120,6 @@
                   }
                 }else{
                   console.log('工单收益列表失败：'+res.data.msg);
-                }
-              })
-          },
-          getOrderTotal(id){
-            this.$http.get(`/server/order/earning/count?id=${id}`)
-              .then(res=>{
-                if(res.data.code===0){
-                  this.orderTotal=res.data.data;
-                }else{
-                  console.log('工单统计信息失败：'+res.data.msg);
                 }
               })
           },
@@ -187,14 +144,6 @@
               }
             }
             console.log(filterForm)
-           /* let filterParam={
-              repairCategoryId:filterForm.repairCategoryId
-            };
-            if(filterForm.dateRange[0]&&filterForm.dateRange[1]){
-              filterParam.startDate=util.formateTime(filterForm.dateRange[0],true);
-              filterParam.endDate=util.formateTime(filterForm.dateRange[1],true);
-            }*/
-
             this.getLists(filterForm);
         },
         pageChange(val){
@@ -205,32 +154,10 @@
             this.pageSize=val;
             this.getLists();
         },
-        exportExcel(){
-          let filterParam = {...this.filterForm};
-          delete filterParam.dateRange;
-          let param = util.formatterParams(filterParam);
-          // for(let key in filterParam){
-          //   if(filterParam[key].length>0||filterParam[key]>0){
-          //     param[key]=filterParam[key];
-          //   }
-          // }
 
-          // delete filterForm.dateRange;
-          let id = this.id;
-          this.$http.post(`/server/order/earning/list/export?id=${id}&${param}`,null,{responseType:'blob'}).then(res=>{
-            util.downloadExcel(res);
-
-          })
-        }
       },
       mounted(){
           this.id=this.$route.query.id;
-       /* if(this.$route.query.id){
-          this.id=this.$route.query.id;
-        }else{
-          this.id=sessionStorage.getItem('viewStaffId');
-        }*/
-        this.getOrderTotal(this.id);
         this.getLists();
         this.getRepairType();
       }

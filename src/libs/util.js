@@ -195,8 +195,9 @@ util.setCurrentPath=function(vm,name){
           }
         });
 
-      if(thirdChildObj){
+      if(thirdChildObj&&currentPathObj.name!=='otherRouter'){
         //三级菜单中有像工单管理这样的特殊情况
+
         let isSingle=currentPathObj.meta.single;
           currentPathArr = [
             {
@@ -217,17 +218,33 @@ util.setCurrentPath=function(vm,name){
           ];
 
       }else{
-          currentPathArr = [
-            {
-              title: currentPathObj.title,
-              path: '',
-              name: currentPathObj.name
-            },
-            {
-              title: childObj.title,
-              path: currentPathObj.path + '/' + childObj.path,
-            }
-          ];
+          if(currentPathObj.name==='otherRouter'){
+            currentPathArr = [
+              {
+                title: '首页',
+                path: '/content/home',
+                name: 'home'
+              },
+              {
+                title: childObj.title,
+                path:  currentPathObj.path + '/' + childObj.path,
+                name: name
+              }
+            ];
+          }else{
+            currentPathArr = [
+              {
+                title: currentPathObj.title,
+                path: '',
+                name: currentPathObj.name
+              },
+              {
+                title: childObj.title,
+                path: currentPathObj.path + '/' + childObj.path,
+              }
+            ];
+          }
+
         }
 
       }

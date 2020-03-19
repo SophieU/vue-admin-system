@@ -1,236 +1,263 @@
-<style scoped lang="scss">
-  @import "../staff";
-</style>
 <template>
-  <div v-if="info">
-    <Row :gutter="15">
-      <Col :lg="12" :sm="24">
-        <Card class="mb-15">
-            <p slot="title">基础信息：</p>
-            <div slot="extra" style="margin-top:-5px;">
-              <Button @click="saveInfo" v-if="edit" type="primary" >保存</Button>
-              <Button type="primary" :disabled="edit" @click="edit=true;showGroupSelect=true">编辑</Button>
-            </div>
-            <div class="info-panel">
-              <ul class="form-ul">
-                <li>
-                  <span class="label">姓名：</span>
-                  <span>{{info.trueName}}</span>
-                </li>
-                <li>
-                  <span class="label">电话：</span>
-                  <span>{{info.mobile}}</span>
-                </li>
-                <li>
-                  <span class="label">工号：</span>
-                  <span>{{info.workNumber}}</span>
-                </li>
-                <li>
-                  <span class="label">上班状态：</span>
-                  <span class="text-grey">{{info.workStateName}}</span>
-                </li>
-                <li>
-                  <span class="label">所属网点：</span>
-                  <Select @on-change="changeStation" v-model="info.repairStationId" :disabled="!edit" style="width: 200px;">
-                    <Option :key="station.id" v-for="station in stationLists" :value="station.id">{{station.name}}</Option>
-                  </Select>
-                </li>
-                <li>
-                  <span class="label">所属组：</span>
-                  <div v-show="!showGroupSelect">
-                    <span style="margin-right: 15px;">{{info.groupName}}</span>
-                    <!-- <Button class="text-blue" type="text" @click="viewGroup(info.groupId)">查看组信息</Button> -->
-                  </div>
-                  <Select v-model="info.groupId" @on-change="selectedGroup" style="width:160px;" v-show="showGroupSelect">
-                    <Option v-for="(group,index) in groupLists" :key="index" :value="group.id">{{group.name}}</Option>
-                  </Select>
-                </li>
-                <li style="align-items: flex-start;">
-                  <span class="label" style="display:block;padding-top: 7px;">该组服务区域：</span>
-                  <div class="area-lists" v-show="showDistrict">
-                    <Tag type="dot" v-for="(region,index) in regionList" :key="index">{{region}}</Tag>
-                  </div>
-                </li>
-                <li>
-                  <span class="label">账号状态：</span>
-                  <span class="text-grey">{{info.accountsStateName}}</span>
-                </li>
-                <li>
-                  <span class="label">账号管控：</span>
-                  <span class="text-grey">{{info.businessStateName}}</span>
-                </li>
-              </ul>
-            </div>
-        </Card>
-        <Card>
-          <p slot="title">账号信息：</p>
-          <div slot="extra" style="margin-top:-5px;">
-            <Button type="primary" @click="$router.push({name:'staffAccountInfo',query:{id:info.id}})">查看</Button>
-          </div>
-          <ul class="form-ul">
-            <li>
-              <span class="label">账号：</span>
-              <span>{{info.username}}</span>
-            </li>
-          </ul>
-        </Card>
-      </Col>
-      <Col :lg="12" :sm="24">
-        <Card class="mb-15">
-          <p slot="title">服务类型：</p>
-          <div slot="extra" style="margin-top:-5px;">
-            <Button type="primary" @click="$router.push({name:'staffServiceType',query:{id:info.id}})">查看</Button>
-          </div>
-          <ul class="service-lists">
-            <!--<li class="service-tag" :key="service" v-for="service in info.serviceCategoryList">{{service}}</li>-->
-            <!--分类树-->
-            <Tree ref="repairTree" class="column_3" :data="info.repairCategoryTree" ></Tree>
-          </ul>
-        </Card>
-        <Card>
-          <p slot="title">统计：</p>
-          <div slot="extra" style="margin-top:-5px;">
-            <Button type="primary" @click="$router.push({name:'staffOrderIncome',query:{id:info.id}})">查看</Button>
-          </div>
-          <ul class="form-ul_column2">
-            <li>历史处理工单：<span>{{info.orderCountInfo.totalOrderNum}}</span></li>
-            <li>本月处理工单：<span>{{info.orderCountInfo.currentMonthOrderNum}}</span></li>
-            <li>历史售后工单：<span>{{info.orderCountInfo.totalAfterSaleOrderNum}}</span></li>
-            <li>本月售后工单：<span>{{info.orderCountInfo.currentMonthAfterSaleOrderNum}}</span></li>
-            <li>历史申述次数：<span>{{info.orderCountInfo.totalAppealNum}}</span></li>
-            <li>本月申述次数：<span>{{info.orderCountInfo.currentMonthAppealNum}}</span></li>
-          </ul>
-        </Card>
-      </Col>
-    </Row>
+  <Card>
 
-    <!-- <Modal :title="userGroupInfo.stationName+'-'+userGroupInfo.groupName" v-model="showGroupModal">
-      <div >
-        <h4 style="font-size: 14px;margin-bottom:5px;">服务区域：</h4>
-        <div class="areaWrap">
-          <span :key="item" v-for="item in userGroupInfo.regionNames" class="tag">{{item}}</span>
+    <Form class="form-wrap">
+      <div class="info-block mb-15">
+        <p class="info-title">
+          <span>人员信息</span>
+        </p>
+        <div class="info-content">
+          <FormItem label="师傅姓名：" >
+            <Input readonly v-model="baseInfo.trueName"/>
+          </FormItem>
+          <FormItem label="师傅电话：">
+            <Input readonly v-model="baseInfo.mobile"/>
+          </FormItem>
+          <FormItem label="服务网点：">
+            <Input readonly v-model="baseInfo.repairStationName"/>
+          </FormItem>
+
         </div>
       </div>
-      <div slot="footer">
-        <Button @click="showGroupModal=false">关闭</Button>
+      <div class="info-block mb-15 ">
+        <p class="info-title">师傅状态</p>
+        <div v-if="applyState==0" class="info-content">
+          <Alert show-icon>当前账号需要您先审核</Alert>
+          <FormItem label="是否通过审核：">
+            <Select class="form-control" v-model="accountInfo.applyState">
+              <Option value="1">是</Option>
+              <Option value="-1">否</Option>
+            </Select>
+          </FormItem>
+         <FormItem label="审核说明：">
+           <Input type="textarea" v-model="accountInfo.applyRemark" />
+         </FormItem>
+          <FormItem>
+            <Button class="pull-right" @click="saveChange('accountInfo')" type="primary">保存</Button>
+          </FormItem>
+        </div>
+        <div v-else class="info-content">
+          <FormItem label="账号状态设置">
+            <i-switch size="large" v-model="accountInfo.accountsState" true-value="NORMAL" false-value="DISABLE" @on-change="change">
+              <span slot="open">启用</span>
+              <span slot="close">停用</span>
+            </i-switch>
+          </FormItem>
+        </div>
       </div>
-    </Modal> -->
-  </div>
+      <template v-if="applyState!==0">
+        <div class="info-block mb-15">
+          <p class="info-title">
+            <span>师傅扣点比例</span>
+            <Button @click="toggleService" :type="disService?'default':'primary'" size="small">{{disService?'编辑':'保存'}}</Button>
+          </p>
+          <div class="info-content">
+            <FormItem label="人工费扣点方式">
+              <Select :disabled="disService" v-model="sysService.sysServiceProjectType" class="form-item" >
+                <Option value="FIXED">固定金额型</Option>
+                <Option value="PERCENT">按百分比型</Option>
+                <Option value="NONE">无</Option>
+              </Select>
+            </FormItem>
+            <template  v-show="sysService.sysServiceProjectType!=='NONE'&&!!sysService.sysServiceProjectType">
+              <FormItem :disabled="disService" label="人工费扣点值">
+                <Input v-model="sysService.sysServiceProjectValue">
+                  <span v-if="sysService.sysServiceProjectType==='PERCENT'" slot="append">%</span>
+                  <span v-else slot="append">元</span>
+                </Input>
+              </FormItem>
+            </template>
+
+            <FormItem label="材料费扣点方式">
+              <Select :disabled="disService" v-model="sysService.sysMaterialProjectType" class="form-item" >
+                <Option value="FIXED">固定金额型</Option>
+                <Option value="PERCENT">按百分比型</Option>
+                <Option value="NONE">无</Option>
+              </Select>
+            </FormItem>
+            <template v-show="sysService.sysMaterialProjectType!=='NONE'&&!!sysService.sysServiceProjectType">
+              <FormItem label="材料费扣点值">
+                <Input :disabled="disService" v-model="sysService.sysMaterialProjectValue">
+                  <span v-if="sysService.sysServiceProjectType==='PERCENT'" slot="append">%</span>
+                  <span v-else slot="append">元</span>
+                </Input>
+              </FormItem>
+            </template>
+
+          </div>
+        </div>
+        <div class="info-block mb-15">
+          <p class="info-title">
+            <span>业务状态</span>
+            <Button size="small" :type="disBusiness?'default':'success'" @click="toggleBusiness">{{disBusiness?'编辑':'保存'}}</Button>
+          </p>
+          <div class="info-content">
+            <FormItem label="业务状态调整">
+              <Select :disabled="disBusiness" v-model="businessState" class="form-item mb-15" >
+                <Option value="NORMAL">正常</Option>
+                <Option value="DISABLE_ACCEPT_REPAIR_ORDER">禁止接工单</Option>
+                <Option value="DISABLE">禁用账号</Option>
+              </Select>
+            </FormItem>
+          </div>
+        </div>
+      </template>
+
+
+    </Form>
+  </Card>
 </template>
 
 <script>
     export default {
-        name: "staff-base",
+        name: "staff-account",
+      computed:{
+        username(){
+          let account = this.$store.state.app.staffAccount;
+          if(account){
+            return account.username;
+          }else{
+            return '';
+          }
+        },
+      },
       data(){
         return {
-          info:null,
-          edit:false,
-          stationLists:[],
-          showGroupModal:false,
-          userGroupInfo:{}, //员工服务组信息
-          showGroupSelect:false,
-          showDistrict:true,
-          groupLists:[], //组信息
-          regionList:[], //组的服务区域
+          userId:'',
+          disInfo:true,
+          baseInfo:{
+            trueName:'',
+            mobile:'',
+            repairStationName:'',
+          },
+          disService:true,
+          sysService:{
+            "serviceUserId":"",
+            "sysServiceProjectType":"",
+            "sysServiceProjectValue":"",
+            "sysMaterialProjectType":"", //系统材料费扣点方式（1、固定值 FIXED；2、百分比 PERCENT；3、无 NONE；）
+            "sysMaterialProjectValue":"",
+          },
+          columns:[],
+          orderLists:[],
+          applyState:0,
+          accountInfo:{
+            "applyState":0,  // 审核状态（1、-1 审核失败；2、0 待审核 3、 1 审核成功）
+            "applyRemark":"",
+            "accountsState":"" //帐号状态（1、正常NORMAL；2、停用DISABLE；）
+          },
+          disBusiness:true,
+          businessState:''
         }
       },
       methods:{
-        selectedGroup(val){
-          if(!val) return;
-          this.showDistrict=true;
-          this.$http.get(`/server/group/region?groupId=${val}`)
-            .then(res=>{
+        change(){
+
+        },
+        toggleService(){
+          this.disService = !this.disService
+          if(!this.disService){
+            this.saveChange('sysService')
+          }
+        },
+          // 服务师傅详情
+          getDetail(id){
+            this.$http.get(`/yyht/v1/service/user/detail?id=${id}`).then(res=>{
               if(res.data.code===0){
                 let data = res.data.data;
-                this.regionList=data;
+                this.userId = data.id;
+                for(let key in this.baseInfo){
+                  this.baseInfo[key] = data[key]
+                }
+                for(let key in this.sysService){
+                  this.sysService[key] = data[key]
+                }
+                for(let key in this.accountInfo){
+                  this.accountInfo[key] = data[key]
+                }
+                this.businessState = data.businessState
+                this.applyState = data.applyState   //防止表单state变动影响
+                console.log(res.data.data)
               }
             })
-        },
-        changeStation(val){
-          this.showGroupSelect=true;
-          this.showDistrict=false;
-          this.info.groupId='';
-          this.$http.get(`/server/find/group?stationId=${val}`)
-            .then(res=>{
-              if(res.data.code===0){
-                let data = res.data.data;
-                this.groupLists=data;
-              }
-            })
-        },
-        getStation(){
-          this.$http.get(`/repair/station/select/list`)
-            .then(res=>{
-              if(res.data.code===0){
-                this.stationLists=res.data.data;
-              }else{
-                console.log('员工列表网点下拉'+res.data.msg);
-              }
-            })
-        },
-        formatTreeData(data){
-          let res = data.map(item=>{
-            item.title=  item.name;
-            if(item.children&&item.children.length>0){
-              item.children = this.formatTreeData(item.children)
+          },
+        // 编辑bussinessState
+        toggleBusiness(){
+            if(this.disBusiness){
+              this.disBusiness = false
+            }else{
+              let params = `serviceUserId=${this.userId}&businessState=${this.businessState}`
+              this.$http.post(`/yyht/v1/service/user/change/businessState?${params}`).then(res=>{
+                if(res.data.code===0){
+                  this.$Message.success('保存成功')
+                }else{
+                  this.$Message.info('保存失败')
+                }
+              })
             }
-            return item
-          })
-          return res
         },
-        getInfo(id){
-          this.$http.get(`/server/info?id=${id}`)
-            .then(res=> {
+        saveChange(changeKey){
+          let params
+          if(changeKey==='accountInfo'){
+            params = this.accountInfo;
+            params.serviceUserId = this.userId
+          }
+          if(changeKey==='sysService'){
+            params = this.sysService
+            this.sysService.serviceUserId = this.userId
+          }
+          console.log(params)
+            this.$http.post(`/yyht/v1/service/user/applyServiceUser`,params).then(res=>{
               if(res.data.code===0){
-                this.info=res.data.data;
-                let repairCategoryTree = res.data.data.repairCategoryTree;
-                this.info.repairCategoryTree = this.formatTreeData(repairCategoryTree);
-                this.groupLists= res.data.data.groupList;
-                this.regionList=res.data.data.regionList;
-                this.$store.commit('setStaffServiceType',this.info.repairCategoryTree);
-                //员工账号信息不可编辑，密码只为显示
-                this.$store.commit('setStaffAccount',{username:this.info.username});
+                this.$Message.success('状态更新成功')
               }else{
-                console.log('人员基础信息获取失败：'+res.data.msg)
-              }
-
-            })
-        },
-        saveInfo(){
-          let stationId=this.info.repairStationId;
-          let id = this.info.id;
-          let serviceGroupId=this.info.groupId;
-          this.$http.post(`/server/change/station?id=${id}&stationId=${stationId}&serviceGroupId=${serviceGroupId}`)
-            .then(res=>{
-              if(res.data.code===0){
-                this.$Message.success('网点修改成功');
-                this.edit=false;
-                this.showGroupSelect=false; //返回显示组信息
-                this.getInfo(this.id);
-              }else{
-                this.$Message.error(res.data.msg);
+                this.$Message.error('状态更新失败')
               }
             })
         },
-        // viewGroup(id){
-        //   this.$http.get(`/server/group/info?id=${id}`)
-        //     .then(res=>{
-        //       if(res.data.code===0){
-        //         this.userGroupInfo = res.data.data;
-        //         this.showGroupModal=true;
 
-        //       }else{
-        //         this.$Message.error('获取组信息失败：'+res.data.msg);
-        //       }
-        //     })
-        // }
       },
       mounted(){
-          this.id= this.$route.query.id;
-          this.getInfo(this.id);
-          this.getStation();
-
+          let id = this.$route.query.id;
+          this.getDetail(id)
       }
     }
 </script>
 
+<style scoped lang="scss">
+.form-item{
+  width: 250px;
+}
+  .info-block{
+    margin-right: 50px;
+    .info-title{
+     display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      position: relative;
+      padding-left: 15px;
+      &:before{
+        content: "";
+        display: inline-block;
+        width: 8px;
+        height: 20px;
+        background: #2b85e4;
+        position: absolute;
+        left: 0;
+        top:50%;
+        transform: translateY(-50%);
+      }
+    }
+    .info-content{
+      width: 250px;
+    }
+  }
+  .form-wrap{
+    display: flex;
+    flex-wrap: wrap;
+  }
+  /deep/ .ivu-form-item{
+    margin-bottom: 10px;
+  }
+</style>
