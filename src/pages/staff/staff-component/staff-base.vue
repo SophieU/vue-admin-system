@@ -260,7 +260,7 @@
             for(let key in params){
               params[key] = this.normalUserInfo[key]
             }
-            this.$http.post(`/yyht/v1/service/user/changeUserMsg`,params).then(res=>{
+            this.$http.post(`/yyht/v1/user/changeUserMsg`,params).then(res=>{
               if(res.data.code===0){
                 this.disNormalUser=true;
                 this.$Message.success('保存成功')
