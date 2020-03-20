@@ -48,17 +48,6 @@
               <Option  v-for="(item,index) in stationLists" :key="item.id" :value="item.id">{{item.name}}</Option>
             </Select>
           </form-item>
-          <form-item label="所属组">
-            <Select  v-model="filterForm.serviceGroupId"  not-found-text="请先选择服务网点">
-              <Option v-for="group in groupLists" :key="group.id" :value="group.id">{{group.name}}</Option>
-            </Select>
-          </form-item>
-          <form-item class="inline_form_item" label="网点休息中">
-            <i-switch v-model="filterForm.workState" true-value="VACATION" :false-value="null"></i-switch>
-          </form-item>
-          <form-item class="inline_form_item" label="备用网点值班中">
-            <i-switch  v-model="filterForm.pareDotWork" true-value="Y" :false-value="null"></i-switch>
-          </form-item>
           <form-item class="inline_form_item" label="账号停用">
             <i-switch v-model="filterForm.accountsState" true-value="DISABLE" :false-value="null"></i-switch>
           </form-item>
@@ -103,7 +92,7 @@
                     },
                     on:{
                       click:()=>{
-                        let id = param.row.id;
+                        let id = param.row.userId;
                         _this.$router.push({name:'staffDetail',query:{id:id,queryType:'normal'}})
                       }
                     }
@@ -115,7 +104,7 @@
             pageSize:10,
             totalCount:0,
             stationLists:[],//网点列表
-            groupLists:[], //组列表
+            // groupLists:[], //组列表
             showFilterGroup:[], //组列表只有在选择了网点时显示
             filterForm:{
               trueName:'',
@@ -162,15 +151,15 @@
                 }
               })
           },
-        getGroup(stationId){
-          let stationIdIn=stationId?stationId:''
-          this.$http.get(`/server/service/group/list?stationId=${stationIdIn}`)
-            .then(res=>{
-              if(res.data.code===0){
-                this.groupLists=res.data.data;
-              }
-            })
-        },
+        // getGroup(stationId){
+        //   let stationIdIn=stationId?stationId:''
+        //   this.$http.get(`/server/service/group/list?stationId=${stationIdIn}`)
+        //     .then(res=>{
+        //       if(res.data.code===0){
+        //         this.groupLists=res.data.data;
+        //       }
+        //     })
+        // },
         getLists(filter){
           let param = `pageNo=${this.pageNo}&pageSize=${this.pageSize}`;
           if(filter){

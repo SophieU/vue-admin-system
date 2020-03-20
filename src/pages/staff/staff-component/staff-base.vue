@@ -1,7 +1,70 @@
 <template>
   <Card>
+    <Form class="normal-form" v-if="queryType==='normal'" :label-width="80">
+      <div class="normal-left">
+        <div class="normal-title">基本信息
 
-    <Form class="form-wrap">
+          <Button class="normal-btn" @click="generateQrCode">生成二维码</Button>
+        </div>
+        <div class="normal-table">
+          <div class="table-row">
+            <label>用户姓名：</label>
+            <span>{{normalUserInfo.trueName}}</span>
+          </div>
+           <div class="table-row">
+            <label>用户电话：</label>
+            <span>{{normalUserInfo.mobile}}</span>
+          </div>
+           <div class="table-row">
+            <label>用户昵称：</label>
+            <span>{{normalUserInfo.nickName}}</span>
+          </div>
+          <div class="table-row">
+            <label>微信Id：</label>
+            <span>{{normalUserInfo.wxXcxOpenId}}</span>
+          </div>
+        </div>
+
+      </div>
+      <div class="normal-right">
+        <div class="normal-title">
+          可变更信息
+          <Button @click="toggleNormal" class="normal-btn">{{disNormalUser?'编辑':'保存'}}</Button>
+        </div>
+        <FormItem label="用户类型：">
+          <Select :disabled="disNormalUser" v-model="normalUserInfo.userType">
+            <Option value="USER">普通用户</Option>
+            <Option value="ADMIN">超级管理员</Option>
+            <Option value="SERVICE_USER">系统用户</Option>
+            <Option value="MERCHANT">商户类型</Option>
+          </Select>
+        </FormItem>
+        <FormItem label="会员状态">
+          <i-switch size="large" :disabled="disNormalUser" v-model="normalUserInfo.UserStateEnum" true-value="OPEN" false-value="CLOSE">
+            <span slot="open">开启</span>
+            <span slot="close">关闭</span>
+          </i-switch>
+        </FormItem>
+        <FormItem label="分佣类型：">
+          <Select :disabled="disNormalUser" v-model="normalUserInfo.commissionType">
+            <Option value="FIXED">固定金额型</Option>
+            <Option value="PERCENT">按百分比型</Option>
+            <Option value="NONE">无</Option>
+          </Select>
+        </FormItem>
+        <template  v-show="normalUserInfo.commissionType!=='NONE'&&!!normalUserInfo.commissionType">
+          <FormItem label="分佣值：">
+            <div>
+              <InputNumber :disabled="disNormalUser" v-model="normalUserInfo.commissionValue"></InputNumber>
+              <span v-if="normalUserInfo.commissionType" >%</span>
+              <span v-else>元</span>
+            </div>
+          </FormItem>
+        </template>
+      </div>
+
+    </Form>
+    <Form v-if="queryType==='service'" class="form-wrap">
       <div class="info-block mb-15">
         <p class="info-title">
           <span>人员信息</span>
@@ -21,29 +84,33 @@
       </div>
       <div class="info-block mb-15 ">
         <p class="info-title">师傅状态</p>
-        <div v-if="applyState==0" class="info-content">
-          <Alert show-icon>当前账号需要您先审核</Alert>
-          <FormItem label="是否通过审核：">
-            <Select class="form-control" v-model="accountInfo.applyState">
-              <Option value="1">是</Option>
-              <Option value="-1">否</Option>
-            </Select>
-          </FormItem>
-         <FormItem label="审核说明：">
-           <Input type="textarea" v-model="accountInfo.applyRemark" />
-         </FormItem>
-          <FormItem>
-            <Button class="pull-right" @click="saveChange('accountInfo')" type="primary">保存</Button>
-          </FormItem>
-        </div>
-        <div v-else class="info-content">
-          <FormItem label="账号状态设置">
-            <i-switch size="large" v-model="accountInfo.accountsState" true-value="NORMAL" false-value="DISABLE" @on-change="change">
-              <span slot="open">启用</span>
-              <span slot="close">停用</span>
-            </i-switch>
-          </FormItem>
-        </div>
+        <template v-if="applyState==0">
+          <div class="info-content">
+            <Alert show-icon>当前账号需要您先审核</Alert>
+            <FormItem label="是否通过审核：">
+              <Select class="form-control" v-model="accountInfo.applyState">
+                <Option value="1">是</Option>
+                <Option value="-1">否</Option>
+              </Select>
+            </FormItem>
+            <FormItem label="审核说明：">
+              <Input type="textarea" v-model="accountInfo.applyRemark" />
+            </FormItem>
+            <FormItem>
+              <Button class="pull-right" @click="saveChange('accountInfo')" type="primary">保存</Button>
+            </FormItem>
+          </div>
+        </template>
+       <template v-else>
+         <div class="info-content">
+           <FormItem label="账号状态设置">
+             <i-switch size="large" v-model="accountInfo.accountsState" true-value="NORMAL" false-value="DISABLE" @on-change="saveChange('accountInfo','switch')">
+               <span slot="open">启用</span>
+               <span slot="close">停用</span>
+             </i-switch>
+           </FormItem>
+         </div>
+       </template>
       </div>
       <template v-if="applyState!==0">
         <div class="info-block mb-15">
@@ -60,11 +127,12 @@
               </Select>
             </FormItem>
             <template  v-show="sysService.sysServiceProjectType!=='NONE'&&!!sysService.sysServiceProjectType">
-              <FormItem :disabled="disService" label="人工费扣点值">
-                <Input v-model="sysService.sysServiceProjectValue">
-                  <span v-if="sysService.sysServiceProjectType==='PERCENT'" slot="append">%</span>
-                  <span v-else slot="append">元</span>
-                </Input>
+              <FormItem label="人工费扣点值">
+                <div>
+                  <InputNumber :disabled="disService" v-model="sysService.sysServiceProjectValue"></InputNumber>
+                  <span v-if="sysService.sysServiceProjectType==='PERCENT'" >%</span>
+                  <span v-else>元</span>
+                </div>
               </FormItem>
             </template>
 
@@ -77,10 +145,12 @@
             </FormItem>
             <template v-show="sysService.sysMaterialProjectType!=='NONE'&&!!sysService.sysServiceProjectType">
               <FormItem label="材料费扣点值">
-                <Input :disabled="disService" v-model="sysService.sysMaterialProjectValue">
-                  <span v-if="sysService.sysServiceProjectType==='PERCENT'" slot="append">%</span>
-                  <span v-else slot="append">元</span>
-                </Input>
+               <div class="form-item">
+                 <InputNumber :disabled="disService" v-model="sysService.sysMaterialProjectValue" />
+
+                 <span v-if="sysService.sysServiceProjectType==='PERCENT'" >%</span>
+                 <span v-else >元</span>
+               </div>
               </FormItem>
             </template>
 
@@ -89,7 +159,7 @@
         <div class="info-block mb-15">
           <p class="info-title">
             <span>业务状态</span>
-            <Button size="small" :type="disBusiness?'default':'success'" @click="toggleBusiness">{{disBusiness?'编辑':'保存'}}</Button>
+            <Button size="small" :type="disBusiness?'default':'primary'" @click="toggleBusiness">{{disBusiness?'编辑':'保存'}}</Button>
           </p>
           <div class="info-content">
             <FormItem label="业务状态调整">
@@ -124,6 +194,11 @@
       data(){
         return {
           userId:'',
+          queryType:'', //页面类型： service-服务师傅，normal-普通用户
+          disNormalUser:true,
+          normalUserInfo:{ //普通用户信息
+
+          },
           disInfo:true,
           baseInfo:{
             trueName:'',
@@ -140,7 +215,7 @@
           },
           columns:[],
           orderLists:[],
-          applyState:0,
+          applyState:'',
           accountInfo:{
             "applyState":0,  // 审核状态（1、-1 审核失败；2、0 待审核 3、 1 审核成功）
             "applyRemark":"",
@@ -151,13 +226,48 @@
         }
       },
       methods:{
-        change(){
-
+          // 普通用户-生成二维码
+        generateQrCode(){
+          this.$http.get(`/api/v1/user/makeInviteQr?userId=${this.userId}`).then(res=>{
+            if(res.data.code===0){
+              console.log(res.data.data)
+            }
+          })
         },
-        toggleService(){
-          this.disService = !this.disService
-          if(!this.disService){
-            this.saveChange('sysService')
+        //普通用户详情
+        getUserDetail(id){
+          this.$http.get(`/yyht/v1/user/detail?userId=${id}`).then(res=>{
+            if(res.data.code===0){
+              this.normalUserInfo = res.data.data;
+            }else{
+              console.log(res.data.msg)
+            }
+          })
+        },
+        // 普通用户-编辑
+        toggleNormal(){
+          if(this.disNormalUser){
+            this.disNormalUser = false
+          }else{
+            let params = {
+              userId:this.userId,
+              userType:'',
+              trueName:'',
+              userState:'',
+              commissionType:'',
+              commissionValue:'',
+            }
+            for(let key in params){
+              params[key] = this.normalUserInfo[key]
+            }
+            this.$http.post(`/yyht/v1/service/user/changeUserMsg`,params).then(res=>{
+              if(res.data.code===0){
+                this.disNormalUser=true;
+                this.$Message.success('保存成功')
+              }else{
+                this.$Message.error('保存失败')
+              }
+            })
           }
         },
           // 服务师傅详情
@@ -181,7 +291,15 @@
               }
             })
           },
-        // 编辑bussinessState
+        // 师傅
+        toggleService(){
+          if(this.disService){
+            this.disService = !this.disService
+          }else{
+            this.saveChange('sysService')
+          }
+        },
+        // 师傅-编辑bussinessState
         toggleBusiness(){
             if(this.disBusiness){
               this.disBusiness = false
@@ -190,26 +308,38 @@
               this.$http.post(`/yyht/v1/service/user/change/businessState?${params}`).then(res=>{
                 if(res.data.code===0){
                   this.$Message.success('保存成功')
+                  this.disBusiness = true
                 }else{
                   this.$Message.info('保存失败')
                 }
               })
             }
         },
-        saveChange(changeKey){
+        // 师傅
+        saveChange(changeKey,from){
           let params
           if(changeKey==='accountInfo'){
             params = this.accountInfo;
             params.serviceUserId = this.userId
+            if(from==='switch'){
+              delete this.accountInfo.applyState
+              delete this.accountInfo.applyRemark
+            }
           }
           if(changeKey==='sysService'){
             params = this.sysService
             this.sysService.serviceUserId = this.userId
+            if(!parseFloat(this.sysService.sysServiceProjectType)||!parseFloat(this.sysService.sysServiceProjectType)){
+              this.$Message.error('扣点值格式不正确，请重新输入数字')
+            }
           }
-          console.log(params)
             this.$http.post(`/yyht/v1/service/user/applyServiceUser`,params).then(res=>{
               if(res.data.code===0){
                 this.$Message.success('状态更新成功')
+                this.getDetail(this.userId)
+                if(changeKey==='sysService'){
+                  this.disService = true
+                }
               }else{
                 this.$Message.error('状态更新失败')
               }
@@ -218,8 +348,13 @@
 
       },
       mounted(){
-          let id = this.$route.query.id;
-          this.getDetail(id)
+          this.userId = this.$route.query.id;
+          this.queryType = this.$route.query.queryType;
+          if(this.queryType==='service'){
+            this.getDetail(this.userId)
+          }else{
+            this.getUserDetail(this.userId)
+          }
       }
     }
 </script>
@@ -259,5 +394,56 @@
   }
   /deep/ .ivu-form-item{
     margin-bottom: 10px;
+  }
+  /deep/ .ivu-input-number{
+    width:200px;
+  }
+
+  .normal-form{
+    display: flex;
+    .normal-title{
+      font-weight: bold;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      position: relative;
+      padding-left: 10px;
+      &:before{
+        content: "";
+        display: block;
+        width: 5px;
+        height: 5px;
+        background: #2b85e4;
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-8px);
+      }
+      .normal-btn{
+        position: absolute;
+        right: 0;
+        top: -4px;
+      }
+    }
+    .normal-left{
+      flex: 1 0 0;
+      margin-right: 30px;
+    }
+    .normal-right{
+      flex: 1 0 0;
+
+    }
+    .normal-table{
+      .table-row{
+        padding:4px 10px;
+        label{
+          display: inline-block;
+          width: 100px;
+          text-align: right;
+          margin-right: 10px;
+          color: #333;
+        }
+      }
+    }
+
   }
 </style>

@@ -34,7 +34,7 @@
           let id = this.$route.query.id;
           this.queryType = this.$route.query.queryType;
           this.id=id;
-          console.log(this.queryType)
+          console.log(this.id)
         },
     }
 </script>
