@@ -82,6 +82,7 @@
   }
   .order-item{
     display: flex;
+    flex-wrap: wrap;
     padding: 4px 0;
     .label{
       font-weight: bold;
@@ -90,6 +91,10 @@
     }
     .item-info{
       display: block;
+    }
+    .order-sub-item{
+      flex:100% 0 0;
+      padding-left: 70px;
     }
   }
   .nav-ul{

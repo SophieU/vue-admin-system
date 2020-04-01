@@ -146,26 +146,23 @@ export const appRouter=[
     name:'order',
     component:Main,
     icon:'ios-briefcase',
-    meta:{single:false},
+    meta:{single:true},
     children:[
       // {path:'order-points',meta:{},name:'order_points',icon:'ios-briefcase',title:'工单概况',component:()=>import('@/pages/order/order-points.vue')},
       {path:'order-filter',meta:{},name:'order_filter',icon:'ios-briefcase',title:'报修工单管理',component:()=>import('@/pages/order/order-search.vue')},
       // {path:'distribute-order',meta:{},name:'distribute-order',icon:'ios-briefcase',title:'维修工单人工处理',component:()=>import('@/pages/order/distribute-station.vue')},
       // {path:'meal-order',meta:{},name:'meal-order',icon:'ios-briefcase',title:'套餐订单管理',component:()=>import('@/pages/order/meal-order.vue')},
-      // {
-      //   path:'order-detail',meta:{},title:"工单详情",component:()=>import('@/pages/order/order-detail'),
-      //   children:[
-      //     {path:'',meta:{},name:'orderDetail',title:'处理流程',component:()=>import('@/pages/order/order-com/order-flow')},
-      //     {path:'fee-detail',meta:{hideInMenu:true},title:'收费明细',name:'feeDetail',component:()=>import('@/pages/order/order-com/fee-detail')},
-      //     {path:'after-service',meta:{hideInMenu:true},title:'售后质保',name:'afterService',component:()=>import('@/pages/order/order-com/after-service')},
-      //     {path:'order-income',meta:{hideInMenu:true},title:'工单收益',name:'orderDetailIncome',component:()=>import('@/pages/order/order-com/order-income')},
-      //     {path:'visited-info',meta:{hideInMenu:true},title:'回访信息',name:'visitedInfo',component:()=>import('@/pages/order/order-com/visited-info')},
-      //     {path:'order-prove',meta:{hideInMenu:true},title:'证据证明',name:'orderProve',component:()=>import('@/pages/order/order-com/order-prove')},
-      //     {path:'order-control',meta:{hideInMenu:true},title:'订单操作',name:'orderControl',component:()=>import('@/pages/order/order-com/order-control')},
-      //     {path:'customer-evaluation',meta:{hideInMenu:true},title:'客户评价',name:'customEva',component:()=>import('@/pages/order/order-com/custom-evaluation')},
-      //     {path:'order-log',meta:{hideInMenu:true},title:'工单日志',name:'orderLog',component:()=>import('@/pages/order/order-com/order-log')},
-      //   ]
-      // },
+      {
+        path:'order-detail',name:'orderDetailParent',meta:{hideInMenu:true},title:"工单详情",component:()=>import('@/pages/order/order-detail'),
+        children:[
+          {path:'',meta:{},name:'orderDetail',title:'处理流程',component:()=>import('@/pages/order/order-com/order-flow')},
+          {path:'visited-info',meta:{hideInMenu:true},title:'回访信息',name:'visitedInfo',component:()=>import('@/pages/order/order-com/visited-info')},
+          // {path:'order-prove',meta:{hideInMenu:true},title:'证据证明',name:'orderProve',component:()=>import('@/pages/order/order-com/order-prove')},
+          // {path:'order-control',meta:{hideInMenu:true},title:'订单操作',name:'orderControl',component:()=>import('@/pages/order/order-com/order-control')},
+          // {path:'customer-evaluation',meta:{hideInMenu:true},title:'客户评价',name:'customEva',component:()=>import('@/pages/order/order-com/custom-evaluation')},
+          // {path:'order-log',meta:{hideInMenu:true},title:'工单日志',name:'orderLog',component:()=>import('@/pages/order/order-com/order-log')},
+        ]
+      },
       // {path:'meal-detail',meta:{hideInMenu:true},name:'meal-detail',title:'订单详情',component:()=>import('@/pages/order/order-com/meal-detail')}
     ]
   },

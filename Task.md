@@ -30,3 +30,8 @@
     - 新增/编辑：`/yyht/v1/repair/category/addOrUpdate`:保存新服务时报错："系统处理错误"
 12. 申述原因配置：
     - 列表接口：`/yyht/v1/repair/statement/reason/list`:返回的数据结果中，orderStateType字段为空无法区分是“上门前”还是“上门后”
+13. 工单列表：
+    - 区域列表(下拉选择）：`/repair/call/center/v1/repair/region/list`下拉接口404
+    - baseInfo404：/repair/call/center/v1/repair/order/baseInf
+    - 处理流程404：/repair/call/center/v1/repair/order/schedule
+    - 回访信息列表：/yyht/v1/repair/order/return/visit/list?id=a551164163c64f868ea744d769dac503  系统处理错误

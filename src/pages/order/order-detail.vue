@@ -21,7 +21,7 @@
             <!--报修地址等-->
             <div class="order-item">
               <span class="label">报修区域：</span>
-              <span class="item-info">{{baseInfo.regionName}}</span>
+              <span class="item-info">{{baseInfo.repairRegionName}}</span>
             </div>
             <div class="order-item">
               <span class="label">详细地址：</span>
@@ -29,7 +29,7 @@
             </div>
             <div class="order-item">
               <span class="label">用户手机：</span>
-              <span class="item-info">{{baseInfo.ysyUserPhone}}</span>
+              <span class="item-info">{{baseInfo.userPhone}}</span>
             </div>
              <div class="order-item">
               <span class="label">联系人姓名：</span>
@@ -45,13 +45,13 @@
             <div class="order-item">
               <span class="label">接单师傅：</span>
               <span class="item-info">
-                <span>{{baseInfo.receiveUserName}}</span>
-                <span v-if="baseInfo.receiveUserId" @click="viewStaff(baseInfo.receiveUserId)" class="text-blue" style="margin-left:10px;cursor:pointer;">查看</span>
+                <span>{{dispatchInfo.masterName}}</span>
+                <span v-if="dispatchInfo.id" @click="viewStaff(dispatchInfo.id)" class="text-blue" style="margin-left:10px;cursor:pointer;">查看</span>
               </span>
             </div>
             <div class="order-item">
               <span class="label">师傅电话：</span>
-              <span class="item-info">{{baseInfo.receiveUserPhone}}</span>
+              <span class="item-info">{{dispatchInfo.masterPhone}}</span>
 
             </div>
             <Divider />
@@ -67,29 +67,49 @@
               <span v-else>无</span>
             </div>
             <!--费用等-->
+<!--            <Divider />-->
+<!--            <div class="order-item">-->
+<!--              <span class="label">工单费用：</span>-->
+<!--              <span class="item-info">{{baseInfo.amount}}</span>-->
+<!--            </div>-->
+<!--            <div class="order-item">-->
+<!--              <span class="label">工单渠道：</span>-->
+<!--              <span class="item-info">{{baseInfo.orderSource}}</span>-->
+<!--            </div>-->
+            <!--费用明细-->
             <Divider />
             <div class="order-item">
-              <span class="label">工单费用：</span>
-              <span class="item-info">{{baseInfo.amount}}</span>
+              <span class="label">费用清单：</span>
+              <div class="order-sub-item">
+                <p class="sub-item-text" v-for="item in repairOrderAmountVos" :key="item.type">
+                  <span class="label">{{item.name}}：</span>
+                  <span>{{item.amount}}</span>
+                </p>
+              </div>
             </div>
             <div class="order-item">
-              <span class="label">工单渠道：</span>
-              <span class="item-info">{{baseInfo.orderSource}}</span>
+              <span class="label">费用明细：</span>
+              <div class="order-sub-item">
+                <p class="sub-item-text" v-for="item in repairOrderOfferPlanVoList" :key="item.type">
+                  <span class="label">{{item.planName}}：</span>
+                  <span>{{item.amount}}</span>
+                </p>
+              </div>
             </div>
             <!--回访等-->
             <Divider />
-            <div class="order-item">
-              <span class="label">质保中：</span>
-              <span class="item-info">{{baseInfo.isWarranty}}</span>
-            </div>
-            <div class="order-item">
-              <span class="label">售后记录：</span>
-              <span class="item-info">{{baseInfo.afterSalesServiceCount}}</span>
-            </div>
-            <div class="order-item">
-              <span class="label">故障原因：</span>
-              <span class="item-info">{{baseInfo.faultReason}}</span>
-            </div>
+<!--            <div class="order-item">-->
+<!--              <span class="label">质保中：</span>-->
+<!--              <span class="item-info">{{baseInfo.isWarranty}}</span>-->
+<!--            </div>-->
+<!--            <div class="order-item">-->
+<!--              <span class="label">售后记录：</span>-->
+<!--              <span class="item-info">{{baseInfo.afterSalesServiceCount}}</span>-->
+<!--            </div>-->
+<!--            <div class="order-item">-->
+<!--              <span class="label">故障原因：</span>-->
+<!--              <span class="item-info">{{baseInfo.faultReason}}</span>-->
+<!--            </div>-->
             <div class="order-item">
               <span class="label">服务网点：</span>
               <span class="item-info">{{baseInfo.stationName}}</span>
@@ -104,14 +124,14 @@
           <Card class="order-detail-right">
             <ul class="mb-15 nav-ul">
               <router-link exact active-class="text-blue" replace tag="li" :to="{name:'orderDetail',query:{id:id}}">处理流程</router-link>
-              <router-link active-class="text-blue" replace tag="li" :to="{name:'feeDetail',query:{id:id}}">收费明细</router-link>
-              <router-link active-class="text-blue" replace tag="li" :to="{name:'orderProve',query:{id:id}}">证据证明</router-link>
-              <router-link active-class="text-blue" replace tag="li" :to="{name:'orderDetailIncome',query:{id:id}}">工单收益</router-link>
-              <router-link active-class="text-blue" replace tag="li" :to="{name:'afterService',query:{id:id}}">售后质保</router-link>
+<!--              <router-link active-class="text-blue" replace tag="li" :to="{name:'feeDetail',query:{id:id}}">收费明细</router-link>-->
+<!--              <router-link active-class="text-blue" replace tag="li" :to="{name:'orderProve',query:{id:id}}">证据证明</router-link>-->
+<!--              <router-link active-class="text-blue" replace tag="li" :to="{name:'orderDetailIncome',query:{id:id}}">工单收益</router-link>-->
+<!--              <router-link active-class="text-blue" replace tag="li" :to="{name:'afterService',query:{id:id}}">售后质保</router-link>-->
               <router-link active-class="text-blue" replace tag="li" :to="{name:'visitedInfo',query:{id:id}}">回访信息</router-link>
-              <router-link active-class="text-blue" replace tag="li" :to="{name:'orderControl',query:{id:id,state:baseInfo.orderState,isWarranty:baseInfo.isWarranty}}">订单操作</router-link>
-              <router-link active-class="text-blue" replace tag="li" :to="{name:'orderLog',query:{id:id}}">工单日志</router-link>
-              <router-link active-class="text-blue" replace tag="li" :to="{name:'customEva',query:{id:id}}">客户评价</router-link>
+<!--              <router-link active-class="text-blue" replace tag="li" :to="{name:'orderControl',query:{id:id,state:baseInfo.orderState,isWarranty:baseInfo.isWarranty}}">订单操作</router-link>-->
+<!--              <router-link active-class="text-blue" replace tag="li" :to="{name:'orderLog',query:{id:id}}">工单日志</router-link>-->
+<!--              <router-link active-class="text-blue" replace tag="li" :to="{name:'customEva',query:{id:id}}">客户评价</router-link>-->
             </ul>
             <router-view></router-view>
           </Card>
@@ -127,6 +147,9 @@
           return {
             id:'',
             baseInfo:{},
+            dispatchInfo:{}, //派单信息
+            repairOrderAmountVos:[], //费用清单
+            repairOrderOfferPlanVoList:[], //费用明细
             stateArr:[
               {title:'待分配',state:'ASSIGNED'},
               {title:'待上门',state:'WAIT_DOOR'},
@@ -145,7 +168,7 @@
       methods:{
         getBaseInfo(){
           let id = this.id;
-          this.$http.get(`/repair/order/baseInfo?id=${id}`)
+          this.$http.get(`/yyht/v1/repair/order/baseInfo?id=${id}`)
             .then(res=>{
               if(res.data.code===0){
                 let data = res.data.data;
@@ -156,8 +179,10 @@
                     data.orderState=item.title;
                   }
                 });
-                this.baseInfo=res.data.data;
-                this.inviteStaffVoList =data&& data.inviteStaffVoList; //协作人员
+                this.baseInfo=res.data.data.baseInfo;
+                this.dispatchInfo=res.data.data.dispatchInfo;
+                this.repairOrderAmountVos=res.data.data.repairOrderAmountVos;
+                this.repairOrderOfferPlanVoList=res.data.data.repairOrderOfferPlanVoList;
               }else{
                 console.log('工单基础信息获取失败：'+res.data.msg);
               }

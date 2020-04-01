@@ -47,9 +47,7 @@
           <Button type="primary" @click="showModal=true">新建</Button>
           <Button @click="filter=true">所有查询条件</Button>
         </div>
-        <div class="pull-right">
-          <Button type="primary" @click="downloadExcel">excel导出</Button>
-        </div>
+
       </div>
 
       <div class="tabler-wrapper">
@@ -211,33 +209,49 @@
             columns:[
               {title:'创建日期',key:'createTime',sortable:true,align:'center',minWidth:150},
               {title:'客户手机',key:'userPhone',align:'center',width:120},
-              {title:'联系人姓名',key:'userName',align:'center',width:120},
+              {title:'客户姓名',key:'userName',align:'center',width:120},
               {title:'服务项目',key:'repairCategoryName',align:'center',width:100},
               {title:'服务网点',key:'stationName',align:'center',width:100},
-              {title:'接单师傅',key:'receiveUserName',align:'center',width:100},
-              {title:'工单状态',key:'orderState',align:'center',width:100},
-              {title:'报修地址',key:'repairAddress',align:'center',width:100},
-              {title:'客户评价',key:'commentResult',align:'center',width:100,render:(h,params)=>{
-                  if(!params.row.commentResult&&!params.row.commentType){
-                    return h('span','暂无评价')
-                  }else if(params.row.commentType==='SYSTEM'){
-                    return h('span','默认好评')
-                  }else{
-                     return h('span',params.row.commentResult)
+              {title:'服务人员',key:'receiveUserName',align:'center',width:100},
+              {title:'工单状态',key:'orderState',align:'center',width:100,render:(h,params)=>{
+                  let map = {
+                    'ASSIGNED':'待分配',
+                    'WAIT_DOOR':'待上门',
+                    'STAY_PAY':'代付款',
+                    'FINISH':'已完成',
+                    'CANCEL':'已取消',
+                    'CLOSED':'已关闭',
+                    'EXCEPTIO':'异常'
                   }
+                  let text = map[params.row.orderState]
+                  return h('span',text)
                 }},
-              {title:'证据',key:'hasEvidence',align:'center',width:100},
-              {title:'回访记录',key:'hasReturnVisit',align:'center',width:100},
-              {title:'质保中',key:'isWarranty',align:'center',width:100},
-              {title:'售后中',key:'isAfterSale',align:'center',width:100},
-              {title:'售后记录',key:'afterSaleRecord',align:'center',width:100},
-              {title:'优惠金额',key:'discountAmount',align:'center',width:100,render:(h,params)=>{
-                if(params.row.discountAmount){
-                  return params.row.discountAmount;
-                }else{
-                  return '-'
-                }
-              }},
+              {title:'报修地址',key:'repairAddress',align:'center',width:100},
+              {title:'回访记录',key:'hasReturnVisit',align:'center',width:100,render:(h,params)=>{return h('span',{},params.row.hasReturnVisit==='Y'?'有':'无')}},
+              {title:'客户评价',key:'commentResult',align:'center',width:100,render:(h,params)=>{
+                  let map = {
+                    '1':'未评价',
+                    '2':'满意',
+                    '3':'不满意'
+                  }
+                  let text = map[params.row.commentState]
+                  if(!text){
+                    text= '暂无评价'
+                  }
+                  return h('span',text)
+                }},
+              // {title:'证据',key:'hasEvidence',align:'center',width:100},
+              // {title:'回访记录',key:'hasReturnVisit',align:'center',width:100},
+              // {title:'质保中',key:'isWarranty',align:'center',width:100},
+              // {title:'售后中',key:'isAfterSale',align:'center',width:100},
+              // {title:'售后记录',key:'afterSaleRecord',align:'center',width:100},
+              // {title:'优惠金额',key:'discountAmount',align:'center',width:100,render:(h,params)=>{
+              //   if(params.row.discountAmount){
+              //     return params.row.discountAmount;
+              //   }else{
+              //     return '-'
+              //   }
+              // }},
               {title:'工单编号',key:'orderSn',align:'center',minWidth:200},
               {title:'操作',fixed:'right',align:'center',width:150,render:(h,params)=>{
                 let _this = this;
@@ -326,17 +340,6 @@
             this.telValid=true;
           }
         },
-        downloadExcel(){
-          let filterForm = {...this.filterForm};
-          delete filterForm.dateRange;
-          this.$http.post(`/repair/order/list/export`,{
-            ...filterForm
-          },{responseType:'blob'})
-            .then(res=>{
-              util.downloadExcel(res);
-            })
-
-        },
         toggleTab(ind){
           let arr = this.orderNav.map((item,index)=>{
             if(index===ind){
@@ -374,7 +377,7 @@
             delete filter.dateRange;
             param=Object.assign({},param,filter);
           }
-          this.$http.post(`/repair/order/list`,{...param}).then(res=>{
+          this.$http.post(`/yyht/v1/repair/order/pageList`,{...param}).then(res=>{
             this.loadingTable=false;
             if(res.data.code===0){
               let data= res.data.data;
@@ -442,7 +445,7 @@
         },
         //不同状态的数值
         getStateCount(){
-          this.$http.get(`/repair/order/state/count`)
+          this.$http.get(`/yyht/v1/repair/order/state/count`)
             .then(res=>{
               if(res.data.code===0){
                 let data = res.data.data;

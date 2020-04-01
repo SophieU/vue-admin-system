@@ -17,7 +17,6 @@
         <thead>
         <tr>
           <th>创建日期</th>
-          <th>售后回访</th>
           <th>工单状态</th>
           <th>服务项目</th>
           <th>服务网点</th>
@@ -31,14 +30,13 @@
         <tbody>
         <tr v-for="item in lists" :key="item.id">
            <td>{{item.createTime}}</td>
-          <td>{{item.afterSaleVisit}}</td>
-          <td>{{item.orderState}}</td>
+          <td>{{item.orderStateName}}</td>
           <td>{{item.repairCategoryName}}</td>
           <td>{{item.repairStationName}}</td>
           <td>{{item.receiveUserName}}</td>
           <td>{{item.orderSn}}</td>
-          <td>{{item.linkVisitState}}</td>
-          <td v-if="tabActive==='visited'">{{item.returnVisitResult}}</td>
+          <td>{{item.visitState}}</td>
+          <td v-if="tabActive==='visited'">{{item.returnVisitResultName}}</td>
           <td  v-if="tabActive==='visited'">
             <Button @click="$router.push({name:'orderDetail',query:{id:item.orderId}})"  type="text">查看</Button>
           </td>
@@ -182,7 +180,7 @@
         getLists(filter){
           let query = `pageNo=${this.pageNo}&pageSize=${this.pageSize}&isReturnVisit=${this.isReturnVisit}`;
           let param=util.formatterParams(filter);
-          this.$http.post(`/repair/return/visit/list?${query}&${param}`)
+          this.$http.post(`/yyht/v1/repair/return/visit/pageList?${query}&${param}`)
             .then(res=>{
               if(res.data.code===0){
                 let data= res.data.data;
@@ -243,7 +241,7 @@
             this.getLists(filterForm);
         },
         getCount(){
-            this.$http.get(`/repair/return/visit/state/count`)
+            this.$http.get(`/yyht/v1/repair/return/visit/state/count`)
               .then(res=>{
                 if(res.data.code===0){
                   let data = res.data.data;

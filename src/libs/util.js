@@ -379,19 +379,19 @@ util.formateParamBool=function(obj,prop,toBoolean){
   return obj;
 };
 // 获取报修分类下拉
-util.getRepairType=function(cb){
-  axios.get('/repair/category/list')
-    .then(res=>{
-      if(res.data.code===0){
-        typeof cb==='function'&&cb(res.data.data);
-      }else{
-        console.log('util.getRepairType失败：'+res.data.msg);
-      }
-    })
-};
+// util.getRepairType=function(cb){
+//   axios.get('/repair/category/list')
+//     .then(res=>{
+//       if(res.data.code===0){
+//         typeof cb==='function'&&cb(res.data.data);
+//       }else{
+//         console.log('util.getRepairType失败：'+res.data.msg);
+//       }
+//     })
+// };
 //获取服务网点下拉
 util.getStationLists=function(cb){
-  axios.get('/repair/station/select/list')
+  axios.get('/yyht/v1/repair/station/select/list')
     .then(res=>{
       if(res.data.code===0){
         typeof cb==='function'&&cb(res.data.data);
@@ -413,7 +413,7 @@ util.getDepartment=function(cb){
 };
 //获取报修区域下拉
 util.getRegion = function(cb){
-  axios.get('/repair/region/list')
+  axios.get(' /yyht/v1/repair/region/list')
     .then(res=>{
       if(res.data.code===0){
         typeof cb==='function'&&cb(res.data.data);
@@ -434,7 +434,7 @@ util.getTreeLists=(cb)=>{
 },
 // 获取服务类型一级列表下拉
 util.getRepairTypeDropdown = function(cb){
-  axios.get(`/repair/category/select/first`)
+  axios.get(`/yyht/v1/repair/category/select/first`)
     .then(res=>{
       if(res.data.code===0){
         typeof cb === 'function' &&cb(res.data.data);
@@ -445,7 +445,7 @@ util.getRepairTypeDropdown = function(cb){
 }
 // 获取服务类型二级列表下拉
 util.getRepairTypeNext = function(id,cb){
-  axios.get(`/repair/category/select/next?parentId=${id}`)
+  axios.get(`/yyht/v1/repair/category/select/next?parentId=${id}`)
     .then(res=>{
       if(res.data.code===0){
         typeof cb === 'function' &&cb(res.data.data);
@@ -456,7 +456,7 @@ util.getRepairTypeNext = function(id,cb){
 }
 // 获取服务类型树
 util.getRepairTypeTree = function(cb){
-  axios.get(`/repair/category/tree`).then(res=>{
+  axios.get(`/yyht/v1/repair/category/tree`).then(res=>{
     if(res.data.code===0){
       typeof cb === 'function' &&cb(res.data.data);
     }else{

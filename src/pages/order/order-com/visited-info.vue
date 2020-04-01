@@ -103,7 +103,7 @@
       },
       methods:{
           getLists(id){
-            this.$http.get(`/repair/order/return/visit/list?id=${id}`)
+            this.$http.get(`/yyht/v1/repair/order/return/visit/list?id=${id}`)
               .then(res=>{
                 if(res.data.code===0){
                   this.lists=res.data.data.map(item=>{
