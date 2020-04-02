@@ -42,7 +42,7 @@
   <div>
     <div class="upload-list" v-for="item in uploadList">
       <template v-if="item.status==='finished'">
-        <img :src="item.url" :title="item.key">
+        <img :src="item.url">
         <div class="upload-list-cover">
           <Icon type="ios-trash-outline" @click.native="handleRemove(item.name)"></Icon>
         </div>
@@ -53,6 +53,7 @@
     </div>
     <Upload
       ref="upload"
+      :disabled="imgDisabled == true?false:true"
       :data="qiniuToken"
       :show-upload-list="false"
       :format="['jpg','jpeg','png']"
@@ -81,6 +82,9 @@
 
   export default {
     props: {
+      imgDisabled:{
+        type:Boolean
+      },
       /*prefix:{
         type:String,
         required: true,
@@ -129,9 +133,8 @@
       },
       handleSuccess(res,file){
         // file.url = this.domain + file.response.key;
-        file.url='//'+res.data.imageUrl
+        file.url=res.data.imageUrl;
         this.uploadList = [file];
-        console.log(file)
         this.$emit('uploadCallback', res.data);
       },
       handleMaxSize(){
