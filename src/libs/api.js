@@ -6,8 +6,8 @@ let domin = window.location.hostname;
 
 // 192.168.0.133:8887
 // baseUrl = 'http://192.168.0.133:8887'
-// baseUrl = 'http://182.254.234.236:9001' //外网
-   baseUrl = 'http://192.168.0.67:8887'
+baseUrl = 'http://182.254.234.236:9001' //外网
+//    baseUrl = 'http://192.168.0.67:8887'
 // if (domin === 'hjzx.yishengyue.cn') {
 //    //正式
 //   baseUrl = 'https://hjzxjk.yishengyue.cn/repair/call/center/v1/'

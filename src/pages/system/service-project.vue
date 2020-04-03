@@ -23,7 +23,7 @@
              <Button type="primary" @click="addNewProjectType" icon="md-add">新建服务项目分类</Button>
             </div>
             <div style="height: 50px"></div>
-            <Tree :render="renderContent" :data="treeLists"></Tree>
+            <Tree :render="renderContent" :data="treeLists" class="demo-tree-render"></Tree>
           </Card>
         </Col>
         <Col span="16">
@@ -36,7 +36,7 @@
               <serveItem :editTypeForm="editTypeForm" :editTypeFormType="editTypeFormType" @initInput="clearInput"></serveItem>
             </div>
             <div v-else>
-              <serverProject :editProForm="editProForm" :editProFormType="editProFormType" @initInput="clearInput"></serverProject>
+              <serverProject :detail="detail" :editProForm="editProForm" :editProFormType="editProFormType" @initInput="clearInput" :parentData="parentData"></serverProject>
             </div>
           </Card>
         </Col>
@@ -74,6 +74,8 @@
               currentNodeType:'first', // first-一级节点，sub-二级节点
               editTypeFormType:'add', //add-新增，edit-编辑
               editProFormType:'add', //add-新增，edit-编辑
+              detail:'',//获取编辑详细信息
+              parentData:null,
               treeLists:[],
               currentNode:{},
             }
@@ -108,13 +110,30 @@
                 }
               }),
               h('span',{
+                class:'span',
                 style:{
                   cursor:'pointer',
+                  display:'inline-block',
+                  padding:'2px',
+                  backgroundColor:data.background
                 },
                 on:{
-                  click:function(){
+                  click:()=>{
+                    // _this.$nextTick(()=>{
+                    //   let spanList = document.getElementsByClassName('span');
+                    //   Array.prototype.forEach.call(spanList,item=>{
+                    //     if (item.style.backgroundColor === '#E6E6FA' && data.background ==='#E6E6FA'){
+                    //       return
+                    //     }
+                    //     item.style.backgroundColor = ''
+                    //   });
+                    //   _this.$set(data,'background','#E6E6FA');
+                    // });
                     _this.currentNode = data;
-                    _this.getDetail(data.id);
+                    _this.parentData = data;
+                    _this.detail = 'getDetail';
+                    data.parentId == 0 ? this.currentNodeType='first':this.currentNodeType='sub';
+                    _this.editProForm = true;
                     _this.editTypeForm=false; // 可编辑分类关态
                     _this.editProForm=false; // 可编辑项目状态
                   }
@@ -139,10 +158,9 @@
                 },
                 on: {
                   click: () => {
-                    _this.append(data);
+                    _this.parentData = data;
                     _this.currentNode.id = data.id;
-                    _this.parentId = data.parentId;
-                    if(data.parentId !== '0'){_this.currentNodeType = 'sub'}
+                    _this.currentNode.parentId = data.parentId;
                     _this.addNewProject()
                   }
                 }
@@ -164,14 +182,14 @@
             ])
           ])
         },
-        append (data) {
-          const children = data.children || [];
-          children.push({
-            title: '默认名称',
-            expand: true
-          });
-          this.$set(data, 'children', children);
-        },
+        // append (data) {
+        //   const children = data.children || [];
+        //   children.push({
+        //     title: '默认名称',
+        //     expand: true
+        //   });
+        //   this.$set(data, 'children', children);
+        // },
         clearInput(){  //服务分类保存后清空
           this.getTreeLists();
           this.editTypeForm=false;// 可编辑分类关态
@@ -224,7 +242,7 @@
             id:'',
           }
         },
-        // 新增项目
+        // 新增项目(子节点）
         addNewProject(){
           // 未选中一级菜单时
           if(!this.currentNode.id||this.currentNode.parentId==''){
@@ -252,25 +270,6 @@
               })
 
             }});
-        },
-        // 获取节点详情
-        getDetail(id){
-          this.$http.get(`/yyht/v1/repair/category/info?id=${id}`).then(res=>{
-            if(res.data.code===0){
-              let data = res.data.data;
-              if(this.currentNode.parentId==0){
-                // 一级节点
-                this.currentNodeType='first';
-                this.typeForm=_.cloneDeep(data);
-              }else{
-                // 二级节点
-                this.currentNodeType = 'sub';
-                this.proForm=_.cloneDeep(data);
-                this.eidtImg = [{name: data.imgName, url: this.proForm.iconCode, status: 'finished'}];
-              }
-
-            }
-          })
         },
         getTreeLists(){
           this.$http.get(`/yyht/v1/repair/category/tree`).then(res=>{   //获取树数据
@@ -327,6 +326,9 @@
 </script>
 
 <style scoped lang="scss">
+  .demo-tree-render .ivu-tree-title{
+    width: 100%;
+  }
 .form-box{
   width:400px;
 }

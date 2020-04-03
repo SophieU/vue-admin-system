@@ -47,12 +47,6 @@
             </Select>
           </FormItem>
         </template>
-        <FormItem class="form-item" label="用户下单是否可选">
-          <Select :disabled="!editProForm" v-model="proForm.isUserCanUse">
-            <Option value="Y">是</Option>
-            <Option value="N">否</Option>
-          </Select>
-        </FormItem>
         <FormItem class="form-item" label="是否在APP上展示">
           <Select :disabled="!editProForm" v-model="proForm.isShow">
             <Option value="Y">是</Option>
@@ -60,7 +54,7 @@
           </Select>
         </FormItem>
         <FormItem label="选择图标样式">
-          <UploadImage :eidtImg="eidtImg" ref="upImg" :qiniuToken="qiniuToken" :imgDisabled="imgDisabled" @uploadCallback="uploadUrl"></UploadImage>
+          <UploadImage :eidtImg="eidtImg" ref="upImg" :qiniuToken="qiniuToken" :imgDisabled="!editProForm" @uploadCallback="uploadUrl"></UploadImage>
         </FormItem>
         <FormItem class="form-item" label="服务备注">
           <Input :disabled="!editProForm" type="textarea" v-model="proForm.description"/>
@@ -77,6 +71,7 @@
 </template>
 
 <script>
+  import _ from 'lodash'
   import tinymce from '../../main-components/tinymce';
   import UploadImage from '../../main-components/upload-img'
   import InputNumber from "../../main-components/input-money";
@@ -89,14 +84,20 @@
         },
         editProFormType:{
           type:String
+        },
+        parentData:{
+          type:Object
+        },
+        detail:{
+          type:String
         }
       },
       watch:{
-          editProFormType:{
-             handler(newValue){
-               newValue == 'edit'? this.imgDisabled = true:this.imgDisabled = false
-             }
+        parentData:{
+          handler(newValue,oldValue){
+            this.getDetail(newValue.id)
           }
+        }
       },
       data(){
           return{
@@ -148,7 +149,7 @@
           let params = {
             id:'',
             name:'',
-            parentId:'',
+            parentId:this.parentData.parentId,
             serviceFee:'',
             isUserCanUse:'',
             hasDtdServiceFee:'',
@@ -178,12 +179,25 @@
             }
           })
         },
+        // 获取节点详情
+        getDetail(id){
+          this.$http.get(`/yyht/v1/repair/category/info?id=${id}`).then(res=>{
+            if(res.data.code===0){
+              let data = res.data.data;
+              this.currentNodeType = 'sub';
+              this.proForm=_.cloneDeep(data);
+              this.eidtImg = [{name: data.imgName, url: this.proForm.iconCode, status: 'finished'}];
+            }
+          })
+        },
         // 新增节点（接口调用）
         addNodeAPI(params){
           this.$http.post(`/yyht/v1/repair/category/addOrUpdate`,{...params}).then(res=>{
             if(res.data.code===0){
               this.$Message.success('保存成功');
               this.$emit('initInput');
+              this.eidtImg = null;
+              this.$refs['upImg'].clearFiles();
               this.proForm = {
                 id:'',
                 name:'',
@@ -243,7 +257,8 @@
         },
       },
       mounted() {
-        this.getTypeList()
+        this.getTypeList();
+        this.detail?this.getDetail(this.parentData.id):''
       }
     }
 </script>

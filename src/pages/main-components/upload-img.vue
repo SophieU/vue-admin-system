@@ -53,7 +53,7 @@
     </div>
     <Upload
       ref="upload"
-      :disabled="imgDisabled == true?false:true"
+      :disabled="imgDisabled == true?true:false"
       :data="qiniuToken"
       :show-upload-list="false"
       :format="['jpg','jpeg','png']"
