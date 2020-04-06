@@ -127,10 +127,10 @@
       }
     },
     methods:{
-      clearFiles(){
-        this.$refs.upload.clearFiles();
-        this.uploadList = [];
-      },
+      // clearFiles(){
+      //   this.$refs.upload.clearFiles();
+      //   this.uploadList = [];
+      // },
       handleSuccess(res,file){
         // file.url = this.domain + file.response.key;
         file.url=res.data.imageUrl;

@@ -17,7 +17,6 @@
         Id: Id,
         Editor: null,
         DefaultConfig: {
-          auto_focus:true,
           branding: false,
           height: 500,
           theme: 'silver',
@@ -179,7 +178,7 @@
     },
     mounted () {
       this.getToken();
-      this.init()
+      this.init();
     },
     // beforeDestroy () {
     //   // 销毁tinymce

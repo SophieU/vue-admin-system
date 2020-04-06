@@ -23,7 +23,7 @@
              <Button type="primary" @click="addNewProjectType" icon="md-add">新建服务项目分类</Button>
             </div>
             <div style="height: 50px"></div>
-            <Tree :render="renderContent" :data="treeLists" class="demo-tree-render"></Tree>
+            <Tree :render="renderContent" ref="tree" :data="treeLists" class="demo-tree-render"></Tree>
           </Card>
         </Col>
         <Col span="16">
@@ -31,12 +31,13 @@
             <p slot="title">{{currentNodeType!=='sub'?'服务项目分类':'服务项目'}}</p>
               <div class="pull-right">
                 <Button  @click="editNode" type="primary">编辑</Button>
+                <Button  @click="delThis(currentNode.id)" type="error">删除</Button>
               </div>
             <div v-if="currentNodeType!=='sub'">
-              <serveItem :editTypeForm="editTypeForm" :editTypeFormType="editTypeFormType" @initInput="clearInput"></serveItem>
+              <serveItem :editTypeForm="editTypeForm" :editTypeFormType="editTypeFormType" @initInput="clearInput" :parentData="parentData"></serveItem>
             </div>
             <div v-else>
-              <serverProject :detail="detail" :editProForm="editProForm" :editProFormType="editProFormType" @initInput="clearInput" :parentData="parentData"></serverProject>
+              <serverProject :editProForm="editProForm" :editProFormType="editProFormType" @initInput="clearInput" :parentData="parentData" :deleteClear="deleteClear"></serverProject>
             </div>
           </Card>
         </Col>
@@ -74,8 +75,8 @@
               currentNodeType:'first', // first-一级节点，sub-二级节点
               editTypeFormType:'add', //add-新增，edit-编辑
               editProFormType:'add', //add-新增，edit-编辑
-              detail:'',//获取编辑详细信息
               parentData:null,
+              deleteClear:'clear',
               treeLists:[],
               currentNode:{},
             }
@@ -87,7 +88,7 @@
             {
             style: {
               display: 'inline-block',
-              width: '100%'
+              width: '100%',
             }
           },
             [
@@ -110,32 +111,25 @@
                 }
               }),
               h('span',{
-                class:'span',
                 style:{
                   cursor:'pointer',
                   display:'inline-block',
-                  padding:'2px',
-                  backgroundColor:data.background
                 },
+                domProps:{
+                  className:'btn'
+                 },
                 on:{
-                  click:()=>{
-                    // _this.$nextTick(()=>{
-                    //   let spanList = document.getElementsByClassName('span');
-                    //   Array.prototype.forEach.call(spanList,item=>{
-                    //     if (item.style.backgroundColor === '#E6E6FA' && data.background ==='#E6E6FA'){
-                    //       return
-                    //     }
-                    //     item.style.backgroundColor = ''
-                    //   });
-                    //   _this.$set(data,'background','#E6E6FA');
-                    // });
+                  click:(e)=>{
+                     let btns=this.$refs.tree.$el.querySelectorAll('.btn')
+                     for(let i=0;i<btns.length;i++){
+                      btns[i].style.backgroundColor='#fff'
+                     }
+                    e.path[0].style.backgroundColor="#B0C4DE";//当前点击的元素
                     _this.currentNode = data;
                     _this.parentData = data;
-                    _this.detail = 'getDetail';
-                    data.parentId == 0 ? this.currentNodeType='first':this.currentNodeType='sub';
+                     data.parentId == 0 ? this.currentNodeType='first':this.currentNodeType='sub';
                     _this.editProForm = true;
                     _this.editTypeForm=false; // 可编辑分类关态
-                    _this.editProForm=false; // 可编辑项目状态
                   }
                 }
               }, data.title)
@@ -148,72 +142,53 @@
               }
             }, [
               h('Button', {
-                props: Object.assign({}, this.buttonProps, {
-                  icon: 'md-add'
-                }),
+                props:{
+                  type:'default',
+                  size:'small'
+                },
                 style: {
-                  marginRight: '8px',
-                  color:'#007fff',
                   display:data.parentId == 0?'block':'none'
                 },
                 on: {
                   click: () => {
+                     let btns=_this.$refs.tree.$el.querySelectorAll('.btn')
+                     for(let i=0;i<btns.length;i++){
+                      btns[i].style.backgroundColor='#fff'
+                     }
                     _this.parentData = data;
                     _this.currentNode.id = data.id;
                     _this.currentNode.parentId = data.parentId;
                     _this.addNewProject()
                   }
                 }
-              }),
-              h('Button', {
-                props: Object.assign({}, this.buttonProps, {
-                  icon: 'md-close'
-                }),
-                style:{
-                  color:'red',
-                  display:data.parentId != 0?'block':'none'
-                },
-                on: {
-                  click: () => {
-                    _this.delThis(data.id)
-                  }
-                }
-              })
+              },'＋')
             ])
           ])
         },
-        // append (data) {
-        //   const children = data.children || [];
-        //   children.push({
-        //     title: '默认名称',
-        //     expand: true
-        //   });
-        //   this.$set(data, 'children', children);
-        // },
         clearInput(){  //服务分类保存后清空
           this.getTreeLists();
           this.editTypeForm=false;// 可编辑分类关态
           this.editProForm=false // 可编辑项目状态
         },
-        initialForm(){
-          // 初始化表单
-          this.proForm={
-              id:'',
-              name:'',
-              parentId:'',
-              serviceFee:'',
-              isUserCanUse:'',
-              hasDtdServiceFee:'',
-              dtdServiceFee:'',
-              isPrepayDtd:'',
-              description:'',
-              sortIndex:'',
-              iconCode:'',
-              isShow:'Y',
-          };
-          this.$refs.upImg.clearFiles();
+        // initialForm(){
+        //   // 初始化表单
+        //   this.proForm={
+        //       id:'',
+        //       name:'',
+        //       parentId:'',
+        //       serviceFee:'',
+        //       isUserCanUse:'',
+        //       hasDtdServiceFee:'',
+        //       dtdServiceFee:'',
+        //       isPrepayDtd:'',
+        //       description:'',
+        //       sortIndex:'',
+        //       iconCode:'',
+        //       isShow:'Y',
+        //   };
+        //   this.$refs.upImg.clearFiles();
 
-        },
+        // },
           // 编辑节点（交互通用）
         editNode(){
           if(!this.currentNodeType){
@@ -261,7 +236,8 @@
                   _this.$Message.success('删除成功');
                   _this.$store.commit('setDeleteModal',{model:false});
                   _this.getTreeLists();
-                  _this.initialForm();
+                  _this.deleteClear = 'clear';
+                  // _this.initialForm();
                   _this.$forceUpdate(); //强制刷新
                 }else{
                   _this.$Message.info('删除失败：'+res.data.msg)

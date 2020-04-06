@@ -88,14 +88,20 @@
         parentData:{
           type:Object
         },
-        detail:{
+        deleteClear:{
           type:String
         }
       },
       watch:{
         parentData:{
           handler(newValue,oldValue){
-            this.getDetail(newValue.id)
+            if(newValue.parentId != '0'){this.getDetail(newValue.id)}
+            else{this.cancelForm()}
+          }
+        },
+        deleteClear:{
+          handler(){
+            this.cancelForm()
           }
         }
       },
@@ -258,7 +264,7 @@
       },
       mounted() {
         this.getTypeList();
-        this.detail?this.getDetail(this.parentData.id):''
+        this.getDetail(this.parentData.id)
       }
     }
 </script>

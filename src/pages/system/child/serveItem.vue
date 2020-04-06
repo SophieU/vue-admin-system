@@ -22,6 +22,7 @@
 </template>
 
 <script>
+  import _ from 'lodash'
     export default {
         name: "serveItem",
       props:{
@@ -31,6 +32,19 @@
         editTypeFormType:{
           type:String
         },
+        parentData:{
+          type:Object
+        },
+        detail:{
+          type:String
+        }
+      },
+      watch:{
+        parentData:{
+          handler(newValue,oldValue){
+            if(newValue.parentId == '0'){this.getDetail(newValue.id)}
+          }
+        }
       },
       data(){
           return{
@@ -73,6 +87,15 @@
                 // 编辑项目分类
                 this.editNodeAPI(params);
               }
+            }
+          })
+        },
+        getDetail(id){
+          this.$http.get(`/yyht/v1/repair/category/info?id=${id}`).then(res=>{
+            if(res.data.code===0){
+              let data = res.data.data;
+              this.currentNodeType = 'first';
+              this.typeForm=_.cloneDeep(data);
             }
           })
         },
