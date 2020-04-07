@@ -38,7 +38,7 @@
               <serveItem :editTypeForm="editTypeForm" :editTypeFormType="editTypeFormType" @initInput="clearInput" @loadFlag="loadFlag" :parentData="selfData"></serveItem>
             </div>
             <div v-else>
-              <serverProject :editProForm="editProForm" :editProFormType="editProFormType" @initInput="clearInput" @loadFlag="loadFlag" :parentData="parentData" :deleteClear="deleteClear"></serverProject>
+              <serverProject :editProForm="editProForm" @saveLoading="saveLoading" :editProFormType="editProFormType" @initInput="clearInput" @loadFlag="loadFlag" :parentData="parentData" :deleteClear="deleteClear"></serverProject>
             </div>
           </Card>
         </Col>
@@ -159,9 +159,9 @@
                      for(let i=0;i<btns.length;i++){
                       btns[i].style.backgroundColor='#fff'
                      }
-                    _this.parentData = data;
                     _this.currentNode.id = data.id;
                     _this.currentNode.parentId = data.parentId;
+                    _this.editProFormType = 'add';
                     _this.addNewProject()
                   }
                 }
@@ -176,6 +176,9 @@
           this.getTreeLists();
           this.editTypeForm=false;// 可编辑分类关态
           this.editProForm=false // 可编辑项目状态
+        },
+        saveLoading(){  //保存按钮的loading唤醒
+          this.loading = true;
         },
           // 编辑节点（交互通用）
         editNode(){
@@ -198,12 +201,6 @@
           this.editTypeForm = true;
           this.currentNodeType='first';
           this.editTypeFormType = 'add';
-          this.typeForm={
-            name:'',
-            sortIndex:null,
-            isShow:'',
-            id:'',
-          }
         },
         // 新增项目(子节点）
         addNewProject(){
@@ -213,7 +210,6 @@
             return false;
           }
           this.editProForm = true;
-          this.editProFormType = 'add';
           this.currentNodeType='sub';
         },
         delThis(id){

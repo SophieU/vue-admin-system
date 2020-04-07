@@ -12,6 +12,7 @@
           </div>
         </div>
         <div class="table-wrapper">
+          <Spin fix v-show="tableLoading == true">加载中...</Spin>
           <Table :data="accountList" :columns="column"></Table>
           <div class="pagination">
             <Page :current.sync="pageNo" :total="totalCount" :page-size="pageSize" show-elevator
@@ -26,6 +27,7 @@
              :mask-closable="false"
               @on-visible-change="modalChange"
       >
+        <Spin fix v-show="loading == true">加载中...</Spin>
         <div class="modal_wrap_form">
           <Form ref="accountForm" :model="accountForm" :rules="accountRule" label-position="top">
             <FormItem label="登陆账号" prop="loginName">
@@ -34,6 +36,10 @@
             <FormItem label="登陆密码" prop="password">
               <Input :maxlength="10"  :disabled="view||!editPwdInput" type="password" v-model="accountForm.password">
                 <Button v-show="modalTitle!=='新建账号'" :disabled="view" slot="append" @click="editPwd">修改密码</Button>
+              </Input>
+            </FormItem>
+            <FormItem label="用户昵称" prop="nickName">
+              <Input :maxlength="10"  :disabled="view" v-model="accountForm.nickName">
               </Input>
             </FormItem>
             <FormItem label="账户角色" prop="roleId">
@@ -59,7 +65,7 @@
           </Form>
         </div>
         <div slot="footer">
-          <Button  @click="activeModal=false">取消</Button>
+          <Button  @click="activeModal=false">关闭</Button>
           <Button v-if="view" type="primary" @click="view=false;modalTitle='编辑账号'">编辑</Button>
           <Button :loading="loadingSend" v-if="!view" type="primary" @click="saveAccount">确定</Button>
         </div>
@@ -88,7 +94,9 @@
             }
           }
           return{
-            loadingSend:false,
+            loadingSend:false,  //BUTTON的遮罩
+            tableLoading:true,  //table的遮罩
+            loading:false,      //模态框的遮罩
             editPwdInput:false,//修改密码
             view:false, //查看状态
             pageNo:1,
@@ -100,6 +108,15 @@
               {
                 title:'账号',
                 key:'loginName',
+                align:'center'
+              },
+              {
+                title:'关联用户(userId)',
+                key:'userId',
+                align:'center'
+              }, {
+                title:'角色名称',
+                key:'roleName',
                 align:'center'
               },{
                 title:'手机',
@@ -122,22 +139,43 @@
                 align:'center',
                 render:(h,params)=>{
                   let _this = this;
-
+                  let id =params.row.id;
                   return h('div',[
                     h('Button',{
                       props:{
-                        type:'success',
+                        type:'primary',
+                        size:'small'
+                      },
+                      style:{
+                        marginRight:'5px'
+                      },
+                      on:{
+                        click(){
+                          _this.activeModal=true;
+                          _this.loading = true;
+                          _this.editPwdInput=false;
+                          _this.view=false;
+                          _this.modalTitle='查看账号';
+                          _this.accountForm.id = id;
+                          _this.getAccountInfo(id);
+                          _this.view = true;
+                        }
+                      }
+                    },'查看'),
+                    h('Button',{
+                      props:{
+                        type:'warning',
                         size:'small'
                       },
                       on:{
                         click(){
-                          let id =params.row.id;
                           _this.activeModal=true;
+                          _this.loading = true;
                           _this.editPwdInput=false;
                           _this.view=false;
                           _this.modalTitle='编辑账号';
-                          _this.accountForm=params.row;
-
+                          _this.accountForm.id = id;
+                          _this.getAccountInfo(id);
                         }
                       }
                     },'编辑')
@@ -154,7 +192,7 @@
               password:'',
               mobile:'',
               type:'',
-              isOpen:'Y',
+              isOpen:'OPEN',
               roleId:'',
               // id:'',
             },
@@ -176,14 +214,14 @@
         openModalNew(){
           this.view=false;
           this.modalTitle='新建账号';
+          this.loading = false;
           this.accountForm={
             loginName:'',
+            nickName:'',
             password:'',
             mobile:'',
-            isOpen:'Y',
+            isOpen:'OPEN',
             roleId:'',
-            // id:'',
-            type:''
           };
           this.activeModal=true;
           this.editPwdInput=true;
@@ -196,7 +234,7 @@
           this.pageSize=val;
           this.getLists();
         },
-        getLists(){
+        getLists(){  //获取分页List
           let params = `pageNo=${this.pageNo}&pageSize=${this.pageSize}`;
           this.$http.get(`/sys/v1/user/pageList?${params}`)
             .then(res=>{
@@ -204,6 +242,7 @@
                 let data = res.data.data;
                 this.totalCount=data.totalCount;
                 this.accountList=data.list;
+                this.tableLoading = false;
               }else{
                 console.log('账户管理列表：'+res.data.msg);
               }
@@ -216,7 +255,7 @@
               if(res.data.code===0){
                 this.accountForm=res.data.data;
                 this.accountForm.password='111111'; //默认待清除密码
-
+                this.loading = false;
                 // this.accountForm.isOpen=this.accountForm.isOpen==='Y'?true:false;
               }else{
                 this.$Message.error(res.data.msg);
@@ -235,8 +274,9 @@
         },
         //保存账号
         saveAccount(){
+          delete this.accountForm.type;
+          delete this.accountForm.userId;
           let account = this.accountForm;
-
           this.loadingSend=true;
           this.$refs['accountForm'].validate(valid=>{
             if(valid){
@@ -258,7 +298,6 @@
               this.loadingSend=false;
             }
           })
-
         },
         editPwd(){
           this.accountForm.password='';
@@ -268,16 +307,13 @@
           if(!visible){
             this.accountForm={
               loginName:'',
+              nickName:'',
               password:'',
               mobile:'',
-              isOpen:'Y',
+              isOpen:'OPEN',
               roleId:'',
-              id:'',
-              callCenterId:'',
-              type:''
             };
             this.$refs['accountForm'].resetFields();
-
           }
         }
 

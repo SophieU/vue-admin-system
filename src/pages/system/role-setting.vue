@@ -1,5 +1,6 @@
 <template>
   <div class="role-setting">
+    <Spin fix v-show="loading == true">加载中...</Spin>
     <Card style="padding-bottom: 30px;">
       <div class="clearfix mb-15">
         <div class="pull-left">
@@ -29,8 +30,6 @@
             </Col>
           </Row>
         </Form>
-
-
       </div>
     </Card>
   </div>
@@ -44,6 +43,7 @@
           loadingSend:false,
           type:1, //页面操作类型—— 1:新建，0：编辑，2：查看
           id:'',
+          loading:true,
           viewInfo:false, //查看/编辑 状态
           roleInfo:{
             name:'',
@@ -83,18 +83,21 @@
             })
         },
         saveThis(){
-            this.loadingSend=true;
+          this.loadingSend=true;
           let url='';
           let params=this.roleInfo;
-          url='/sys/v1/role/defend'
+          url='/sys/v1/role/defend';
           this.$refs['roleInfo'].validate(valid=>{
             if(valid){
-              this.$http.post(url,{
+              let data = {
                 name:params.name,
                 description:params.description,
                 menuIds:this.authListsCheck,
-                id:params.id
-              }).then(res=>{
+                roleId:params.id,
+                roleId:this.$route.query.id
+              };
+              if(this.$route.query.type == 1){delete data.id}
+              this.$http.post(url,data).then(res=>{
                 if(res.data.code===0){
                   this.$Message.success('保存成功');
                   this.$router.push({name:'role'});
@@ -112,7 +115,7 @@
         },
         //获取所有资源列表
         getAuth(){
-          this.$http.get(`/sys/v1/role/findAllMenu`)
+          this.$http.get(`/sys/v1/role/findAllMenuTree`)
             .then(res=>{
               if(res.data.code===0){
                 let data = res.data.data;
@@ -139,6 +142,7 @@
                  });
                }
                   this.authLists=transformRes;
+                  this.loading = false;
               }else{
                 console.log(res.data.msg);
               }

@@ -34,7 +34,7 @@
         <template v-if="proForm.hasDtdServiceFee==='Y'">
           <FormItem class="form-item" label="上门费金额">
             <template v-if="!editProForm">
-              <Input :disabled="!editProForm" v-model="proForm.dtdServiceFee" />
+              <Input :disabled="!editProForm" v-model="proForm.dtdServiceFee"/>
             </template>
             <template v-else>
               <InputNumber v-model="proForm.dtdServiceFee" />
@@ -103,6 +103,12 @@
           handler(){
             this.cancelForm()
           }
+        },
+        editProFormType:{
+          handler(newValue){
+            console.log(1111,newValue)
+           if(newValue == 'add'){this.cancelForm()}
+          }
         }
       },
       data(){
@@ -158,6 +164,7 @@
         },
         // 保存项目
         saveProForm(){
+          this.$emit('saveLoading');
           let formData = this.proForm;
           let params = {
             id:'',
@@ -211,6 +218,7 @@
           this.$http.post(`/yyht/v1/repair/category/addOrUpdate`,{...params}).then(res=>{
             if(res.data.code===0){
               this.$Message.success('保存成功');
+              this.$emit('loadFlag');
               this.cancelForm();
             }else{
               this.$Message.error(res.data.msg)
@@ -222,6 +230,7 @@
           this.$http.post(`/yyht/v1/repair/category/addOrUpdate`,{...params}).then(res=>{
             if(res.data.code===0){
               this.$Message.success('保存成功');
+              this.$emit('loadFlag');
               this.cancelForm();
             }else{
               this.$Message.error(res.data.msg)
@@ -242,7 +251,7 @@
         },
       },
       mounted() {
-        if(this.parentData.parentId){this.getDetail(this.parentData.id)}
+        if(this.parentData){this.getDetail(this.parentData.id)}
         this.getTypeList();
         this.getDetail(this.parentData.id)
       }
@@ -251,8 +260,53 @@
 
 <style lang="scss">
   .server-project{
-    .ivu-input,.ivu-select{
-      width:30%
+    .form-box{
+      width:400px;
     }
+    .form-item{
+      width:400px;
+    }
+    .icon-lists{
+      width: 700px;
+      padding: 10px;
+      max-height: 400px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      .icon-wrap{
+        width:120px;
+        float: left;
+        cursor:pointer;
+        margin: 5px;
+        text-align: center;
+        &.active{
+          position: relative;
+          &::before{
+            content: '';
+            display: block;
+            width: 100%;
+            height: 100%;
+            border: 3px solid #57a3f3;
+            position: absolute;
+            left:0;
+            top:-3px;
+          }
+        }
+        img{
+          width:40px;
+          height: 40px;
+          display: block;
+          margin: 0 auto;
+        }
+      }
+    }
+    .inline-button{
+      display: inline-block;
+    }
+    .editor-item{
+      width: 100%;
+    }
+    /*.form-item .ivu-input,.ivu-select{*/
+    /*  width:30%*/
+    /*}*/
   }
 </style>

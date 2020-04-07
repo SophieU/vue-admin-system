@@ -2,7 +2,7 @@
   <div>
     <Card>
       <Row :gutter="40">
-        <Col class="column" span="8">
+        <Col class="column" span="11">
           <div class="column-header clearfix mb-15">
             <h3 class="pull-left">申述原因（上门前）</h3>
             <Button class="pull-right" type="primary" @click="addAppeal('before')">新增</Button>
@@ -16,14 +16,14 @@
                   <Button type="error" @click="delThis('before',index)">删除</Button>
                 </template>
                <template v-if="!item.id||editingId===item.id">
-                 <Button @click="saveThis('before',index)" type="success">保存</Button>
+                 <Button @click="saveThis('before',index)" :loading="loading" type="success">保存</Button>
                  <Button @click="formateData(tempData)">取消</Button>
                </template>
               </div>
             </div>
           </div>
         </Col>
-        <Col class="column" span="8">
+        <Col class="column" span="12">
           <div class="column-header clearfix mb-15">
             <h3 class="pull-left">申述原因（上门后）</h3>
             <Button class="pull-right" type="primary"  @click="addAppeal('after')">新增</Button>
@@ -37,34 +37,35 @@
                   <Button type="error" @click="delThis('after',index)">删除</Button>
                 </template>
                 <template v-if="!item.id||editingId===item.id">
-                  <Button @click="saveThis('after',index)" type="success">保存</Button>
+                  <Button @click="saveThis('after',index)" :loading="loading" type="success">保存</Button>
                   <Button @click="formateData(tempData)">取消</Button>
                 </template>
               </div>
             </div>
           </div>
         </Col>
-        <Col class="column" span="8">
-          <div class="column-header clearfix mb-15">
-            <h3 class="pull-left">申述原因（售后）</h3>
-            <Button class="pull-right" type="primary"  @click="addAppeal('afterSale')">新增</Button>
-          </div>
-          <div class="column-body mt-15">
-            <div class="appeal-item" v-for="(item,index) in afterSale" :key="index">
-              <Input class="appeal-input" v-model="item.statementName"  :maxlength="20" :disabled="editingId!==item.id&&!!item.id"/>
-              <div class="btn-groups">
-                <template v-if="item.id&&editingId!==item.id">
-                  <Button  @click="editThis('afterSale',index)">编辑</Button>
-                  <Button type="error" @click="delThis('afterSale',index)">删除</Button>
-                </template>
-                <template v-if="!item.id||editingId===item.id">
-                  <Button @click="saveThis('afterSale',index)" type="success">保存</Button>
-                  <Button @click="formateData(tempData)">取消</Button>
-                </template>
-              </div>
-            </div>
-          </div>
-        </Col>
+<!--        TODO这一版本暂时取消售后-->
+<!--        <Col class="column" span="8">-->
+<!--          <div class="column-header clearfix mb-15">-->
+<!--            <h3 class="pull-left">申述原因（售后）</h3>-->
+<!--            <Button class="pull-right" type="primary"  @click="addAppeal('afterSale')">新增</Button>-->
+<!--          </div>-->
+<!--          <div class="column-body mt-15">-->
+<!--            <div class="appeal-item" v-for="(item,index) in afterSale" :key="index">-->
+<!--              <Input class="appeal-input" v-model="item.statementName"  :maxlength="20" :disabled="editingId!==item.id&&!!item.id"/>-->
+<!--              <div class="btn-groups">-->
+<!--                <template v-if="item.id&&editingId!==item.id">-->
+<!--                  <Button  @click="editThis('afterSale',index)">编辑</Button>-->
+<!--                  <Button type="error" @click="delThis('afterSale',index)">删除</Button>-->
+<!--                </template>-->
+<!--                <template v-if="!item.id||editingId===item.id">-->
+<!--                  <Button @click="saveThis('afterSale',index)" type="success">保存</Button>-->
+<!--                  <Button @click="formateData(tempData)">取消</Button>-->
+<!--                </template>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </Col>-->
       </Row>
     </Card>
   </div>
@@ -76,6 +77,7 @@
         name: "appeal",
       data(){
           return{
+            loading:false,
             before:[],
             after:[],
             afterSale:[],
@@ -132,6 +134,7 @@
           this.editingId='new';
         },
         saveThis(type,index){
+          this.loading = true;
           let val = this[type][index];
           let content =val.statementName;
 
@@ -148,12 +151,13 @@
             }
             //提交新原因
             this.editingId='';
-            let param = util.formatterParams(val);
-            this.$http.post(`/yyht/v1/repair/statement/reason/addOrUpdate?${param}`)
+            // let param = util.formatterParams(val);
+            this.$http.post(`/yyht/v1/repair/statement/reason/addOrUpdate`,val)
               .then(res=>{
                 if(res.data.code===0){
                   this.$Message.success('保存成功');
                   this.getLists();
+                  this.loading = false;
                 }else{
                   this.$Message.error(res.data.msg);
                 }
@@ -163,15 +167,18 @@
         delThis(type,index){
           if(!type) return;
           let id=this[type][index].id;
-          this.$http.get(`/yyht/v1/repair/statement/reason/delete?id=${id}`)
-            .then(res=>{
-              if(res.data.code===0){
-                this.$Message.success('删除成功');
-                this.getLists();
-              }else{
-                this.$Message.error(res.data.msg);
-              }
-            })
+          this.$store.commit('setDeleteModal',{model:true,callback:function(){
+              this.$http.post(`/yyht/v1/repair/statement/reason/delete?id=${id}`)
+                .then(res=>{
+                  if(res.data.code===0){
+                    this.$Message.success('删除成功');
+                    this.$store.commit('setDeleteModal',{model:false});
+                    this.getLists();
+                  }else{
+                    this.$Message.error(res.data.msg);
+                  }
+                })
+            }});
         },
         getLists(){
           this.$http.get(`/yyht/v1/repair/statement/reason/list`)

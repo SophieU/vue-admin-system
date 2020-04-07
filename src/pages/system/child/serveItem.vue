@@ -70,7 +70,7 @@
           }
       },
       mounted() {
-        if(this.parentData.parentId){this.getDetail(this.parentData.id)}
+        if(this.parentData){this.getDetail(this.parentData.id)}
       },
       methods:{
         // 保存项目分类
@@ -156,48 +156,6 @@
   .serve-item{
     .form-box{
       width:400px;
-    }
-    .form-item{
-      width:400px;
-    }
-    .icon-lists{
-      width: 700px;
-      padding: 10px;
-      max-height: 400px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      .icon-wrap{
-        width:120px;
-        float: left;
-        cursor:pointer;
-        margin: 5px;
-        text-align: center;
-        &.active{
-          position: relative;
-          &::before{
-            content: '';
-            display: block;
-            width: 100%;
-            height: 100%;
-            border: 3px solid #57a3f3;
-            position: absolute;
-            left:0;
-            top:-3px;
-          }
-        }
-        img{
-          width:40px;
-          height: 40px;
-          display: block;
-          margin: 0 auto;
-        }
-      }
-    }
-    .inline-button{
-      display: inline-block;
-    }
-    .editor-item{
-      width: 100%;
     }
   }
 </style>

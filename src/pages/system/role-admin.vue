@@ -7,7 +7,14 @@
           </div>
         </div>
         <div class="table-wrapper">
+          <Spin fix v-show="loading == true">加载中...</Spin>
           <Table :data="roleLists" :columns="roleColumns"></Table>
+        </div>
+        <div class="pagination">
+          <Page  :total="pageConfig.totalCount" :current="pageConfig.pageNo" :page-size="pageConfig.pageSize" show-elevator
+                 @on-change="pageChange"
+                 @on-page-size-change="pageSizeChange"
+          ></Page>
         </div>
       </Card>
     </div>
@@ -18,6 +25,7 @@
         name: "role-admin",
       data(){
           return{
+            loading:true,
             roleColumns:[
               {
                 title:'角色名',
@@ -51,7 +59,7 @@
                     },'查看'),
                      h('Button',{
                       props:{
-                        type:'success',
+                        type:'warning',
                         size:'small'
                       },
                        on:{
@@ -67,10 +75,24 @@
               }
             ],
             roleLists:[],
-
+            pageConfig:{
+              pageNo:1,
+              pageSize:10,
+              totalCount:0,
+            }
           }
       },
       methods:{
+        pageChange(e){  //分页当前页码改变
+          this.loading = true;
+          this.pageConfig.pageNo = e;
+          this.getRoleLists()
+        },
+        pageSizeChange(e){  //分页页数改变
+          this.loading = true;
+          this.pageConfig.pageSize = e;
+          this.getRoleLists()
+        },
           goControl(type,id){
             /*
             * @params: type:跳转类型，1:新建，0：编辑，2：查看
@@ -78,11 +100,12 @@
             this.$router.push({name:'editRole',query:{type:type,id:id}});
           },
         getRoleLists(){
-          this.$http.get(`/sys/v1/role/getAllRoleList`)
+          this.$http.get(`/sys/v1/role/findRoleListWithPage?pageNo=${this.pageConfig.pageNo}&pageSize=${this.pageConfig.pageSize}`)
             .then(res=>{
               if(res.data.code===0){
-                let data = res.data.data;
-                this.roleLists=data;
+                this.pageConfig.totalCount = res.data.data.totalCount;
+                this.roleLists=res.data.data.list;
+                this.loading = false;
               }
             })
         },
