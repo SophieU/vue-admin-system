@@ -11,6 +11,7 @@
       const Id = Date.now();
       return {
         domain:'',
+        flag:true,
         qiniuToken:{
           token:''
         },
@@ -20,6 +21,7 @@
           branding: false,
           height: 500,
           theme: 'silver',
+          readonly:false,
           menubar: true,
           menu: {
             edit: {title: '编辑', items: 'undo redo | cut copy paste pastetext | selectall'},
@@ -46,7 +48,6 @@
             preview
           `,
           // CONFIG
-          readonly : false,
           forced_root_block: 'p',
           force_p_newlines: true,
           importcss_append: true,
@@ -63,20 +64,20 @@
             .mce-object-iframe        { width:100%; box-sizing:border-box; margin:0; padding:0; }
             ul,ol                     { list-style-position:inside; }
           `,
-          images_upload_url: `https://up.qbox.me/`,
-          images_upload_base_path: '',
-          insert_button_items: 'image link | inserttable',
-          images_upload_credentials: false,
-          image_title: false,
+          // images_upload_url: `https://up.qbox.me/`,
+          // images_upload_base_path: '',
+          // insert_button_items: 'image link | inserttable',
+          // images_upload_credentials: false,
+          // image_title: false,
           // CONFIG: Paste
-          paste_retain_style_properties: 'all',
-          paste_word_valid_elements: '*[*]',        // word需要它
-          paste_data_images: true,                  // 粘贴的同时能把内容里的图片自动上传，非常强力的功能
-          paste_convert_word_fake_lists: false,     // 插入word文档需要该属性
-          paste_webkit_styles: 'all',
-          paste_merge_formats: true,
-          nonbreaking_force_tab: false,
-          paste_auto_cleanup_on_paste: false,
+          // paste_retain_style_properties: 'all',
+          // paste_word_valid_elements: '*[*]',        // word需要它
+          // paste_data_images: true,                  // 粘贴的同时能把内容里的图片自动上传，非常强力的功能
+          // paste_convert_word_fake_lists: false,     // 插入word文档需要该属性
+          // paste_webkit_styles: 'all',
+          // paste_merge_formats: true,
+          // nonbreaking_force_tab: false,
+          // paste_auto_cleanup_on_paste: false,
           // CONFIG: Font
           fontsize_formats: '10px 11px 12px 14px 16px 18px 20px 24px',
           // CONFIG: StyleSelect
@@ -163,12 +164,24 @@
       withCredentials: {
         default: false,
         type: Boolean
+      },
+      editProForm:{
+        type:Boolean
       }
     },
     watch:{
       content:{
         handler(newValue, oldValue){
-          tinyMCE.activeEditor.setContent(newValue);
+          if(this.flag){
+            tinyMCE.activeEditor.setContent(newValue);
+          }
+          this.flag=true;
+        },
+        deep:true
+      },
+      editProForm:{
+        handler(newValue, oldValue){
+         this.DefaultConfig.readonly = newValue
         },
         deep:true
       }
@@ -242,7 +255,8 @@
             // 抛出 'input' 事件钩子，同步value数据
             editor.on(
               'input change undo redo', () => {
-                self.$emit('input', editor.getContent())
+                self.flag=false;
+                self.$emit('input', editor.getContent());
               }
             )
           }

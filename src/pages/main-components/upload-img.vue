@@ -44,7 +44,7 @@
       <template v-if="item.status==='finished'">
         <img :src="item.url">
         <div class="upload-list-cover">
-          <Icon type="ios-trash-outline" @click.native="handleRemove(item.name)"></Icon>
+          <Icon v-show="imgDisabled == false" type="ios-trash-outline" @click.native="handleRemove(item.name)"></Icon>
         </div>
       </template>
       <template v-else>

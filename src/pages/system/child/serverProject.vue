@@ -60,7 +60,7 @@
           <Input :disabled="!editProForm" type="textarea" v-model="proForm.description"/>
         </FormItem>
         <FormItem class="form-item editor-item" label="服务说明">
-          <tinymce @input="changeInput" @on-upload-complete="uploadComplete" :content="proForm.serviceDescription" @on-upload-fail="uploadFile" ref="editor"></tinymce>
+          <tinymce @input="changeInput" :editProForm="!editProForm"  @on-upload-complete="uploadComplete" :content="proForm.serviceDescription" @on-upload-fail="uploadFile" ref="editor"></tinymce>
         </FormItem>
         <FormItem v-show="editProForm">
           <Button  @click="saveProForm" type="primary">保存</Button>
@@ -96,7 +96,7 @@
         parentData:{
           handler(newValue,oldValue){
             if(newValue.parentId != '0'){this.getDetail(newValue.id)}
-            else{this.cancelForm()}
+            // else{this.cancelForm()}
           }
         },
         deleteClear:{
@@ -135,36 +135,45 @@
         // 取消当前编辑表单状态（类型，项目通用）
         cancelForm(){
             this.proForm = {
-              name:'',
-              parentId:'',
-              serviceFee:'',
-              isUserCanUse:'',
-              hasDtdServiceFee:'',
-              dtdServiceFee:'',
-              isPrepayDtd:'',
-              description:'',
+              id:'',
+              name:'',  //服务项目名称
+              parentId:'', //所属服务类型
+              serviceFee:'',//人工费不低于
+              hasDtdServiceFee:'',//是否收取上门费
+              dtdServiceFee:'',//上门费金额
+              isPrepayDtd:'',//是否需要支付上门费
+              iconCode:'',//图片名称
+              isUserCanUse:'',//用户下单是否可选
+              isShow:'Y',//是否在APP上显示
+              longName:'',
               sortIndex:'',
-              iconCode:'',
-              isShow:'Y',
+              description:'', //textarea描述信息
+              serviceDescription:'',//富文本编辑器内的内容
             };
-          this.editProForm=false
+          this.$emit('initInput');
+          this.eidtImg = null;
+          this.$nextTick(()=>{
+          this.$refs['upImg'].clearFiles();
+          })
         },
         // 保存项目
         saveProForm(){
           let formData = this.proForm;
           let params = {
             id:'',
-            name:'',
-            parentId:this.parentData.parentId,
-            serviceFee:'',
-            isUserCanUse:'',
-            hasDtdServiceFee:'',
-            dtdServiceFee:'',
-            isPrepayDtd:'',
-            description:'',
+            name:'',  //服务项目名称
+            parentId:this.parentData.parentId, //所属服务类型
+            serviceFee:'',//人工费不低于
+            hasDtdServiceFee:'',//是否收取上门费
+            dtdServiceFee:'',//上门费金额
+            isPrepayDtd:'',//是否需要支付上门费
+            iconCode:'',//图片名称
+            isUserCanUse:'',//用户下单是否可选
+            isShow:'Y',//是否在APP上显示
+            longName:'',
             sortIndex:'',
-            iconCode:'',
-            isShow:'Y',
+            description:'', //textarea描述信息
+            serviceDescription:'',//富文本编辑器内的内容
           }
           for(let key in formData){
             params[key] = formData[key];
@@ -193,6 +202,7 @@
               this.currentNodeType = 'sub';
               this.proForm=_.cloneDeep(data);
               this.eidtImg = [{name: data.imgName, url: this.proForm.iconCode, status: 'finished'}];
+              this.$emit('loadFlag')
             }
           })
         },
@@ -201,23 +211,7 @@
           this.$http.post(`/yyht/v1/repair/category/addOrUpdate`,{...params}).then(res=>{
             if(res.data.code===0){
               this.$Message.success('保存成功');
-              this.$emit('initInput');
-              this.eidtImg = null;
-              this.$refs['upImg'].clearFiles();
-              this.proForm = {
-                id:'',
-                name:'',
-                parentId:'',
-                serviceFee:'',
-                isUserCanUse:'',
-                hasDtdServiceFee:'',
-                dtdServiceFee:'',
-                isPrepayDtd:'',
-                description:'',
-                sortIndex:'',
-                iconCode:'',
-                isShow:'Y',
-              }
+              this.cancelForm();
             }else{
               this.$Message.error(res.data.msg)
             }
@@ -228,22 +222,7 @@
           this.$http.post(`/yyht/v1/repair/category/addOrUpdate`,{...params}).then(res=>{
             if(res.data.code===0){
               this.$Message.success('保存成功');
-              // 初始化表单
-              this.proForm = {
-                id:'',
-                name:'',
-                parentId:'',
-                serviceFee:'',
-                isUserCanUse:'',
-                hasDtdServiceFee:'',
-                dtdServiceFee:'',
-                isPrepayDtd:'',
-                description:'',
-                sortIndex:'',
-                iconCode:'',
-                isShow:'Y',
-              }
-              this.$emit('initInput');
+              this.cancelForm();
             }else{
               this.$Message.error(res.data.msg)
             }
@@ -263,6 +242,7 @@
         },
       },
       mounted() {
+        if(this.parentData.parentId){this.getDetail(this.parentData.id)}
         this.getTypeList();
         this.getDetail(this.parentData.id)
       }

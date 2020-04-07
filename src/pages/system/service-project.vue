@@ -28,16 +28,17 @@
         </Col>
         <Col span="16">
           <Card>
+            <Spin fix v-show="loading == true">加载中...</Spin>
             <p slot="title">{{currentNodeType!=='sub'?'服务项目分类':'服务项目'}}</p>
               <div class="pull-right">
                 <Button  @click="editNode" type="primary">编辑</Button>
                 <Button  @click="delThis(currentNode.id)" type="error">删除</Button>
               </div>
             <div v-if="currentNodeType!=='sub'">
-              <serveItem :editTypeForm="editTypeForm" :editTypeFormType="editTypeFormType" @initInput="clearInput" :parentData="parentData"></serveItem>
+              <serveItem :editTypeForm="editTypeForm" :editTypeFormType="editTypeFormType" @initInput="clearInput" @loadFlag="loadFlag" :parentData="selfData"></serveItem>
             </div>
             <div v-else>
-              <serverProject :editProForm="editProForm" :editProFormType="editProFormType" @initInput="clearInput" :parentData="parentData" :deleteClear="deleteClear"></serverProject>
+              <serverProject :editProForm="editProForm" :editProFormType="editProFormType" @initInput="clearInput" @loadFlag="loadFlag" :parentData="parentData" :deleteClear="deleteClear"></serverProject>
             </div>
           </Card>
         </Col>
@@ -76,9 +77,11 @@
               editTypeFormType:'add', //add-新增，edit-编辑
               editProFormType:'add', //add-新增，edit-编辑
               parentData:null,
+              selfData:null,
               deleteClear:'clear',
               treeLists:[],
               currentNode:{},
+              loading:false
             }
         },
       methods:{
@@ -120,16 +123,17 @@
                  },
                 on:{
                   click:(e)=>{
-                     let btns=this.$refs.tree.$el.querySelectorAll('.btn')
+                     let btns=this.$refs.tree.$el.querySelectorAll('.btn');
                      for(let i=0;i<btns.length;i++){
                       btns[i].style.backgroundColor='#fff'
                      }
                     e.path[0].style.backgroundColor="#B0C4DE";//当前点击的元素
                     _this.currentNode = data;
-                    _this.parentData = data;
-                     data.parentId == 0 ? this.currentNodeType='first':this.currentNodeType='sub';
-                    _this.editProForm = true;
+                     data.parentId == 0 ? _this.currentNodeType='first':_this.currentNodeType='sub';
+                     data.parentId == 0 ? _this.selfData = data :_this.parentData = data;
+                    _this.editProForm = false;
                     _this.editTypeForm=false; // 可编辑分类关态
+                    _this.loading = true;
                   }
                 }
               }, data.title)
@@ -165,30 +169,14 @@
             ])
           ])
         },
+        loadFlag(){  //控制遮罩层
+          this.loading = false
+        },
         clearInput(){  //服务分类保存后清空
           this.getTreeLists();
           this.editTypeForm=false;// 可编辑分类关态
           this.editProForm=false // 可编辑项目状态
         },
-        // initialForm(){
-        //   // 初始化表单
-        //   this.proForm={
-        //       id:'',
-        //       name:'',
-        //       parentId:'',
-        //       serviceFee:'',
-        //       isUserCanUse:'',
-        //       hasDtdServiceFee:'',
-        //       dtdServiceFee:'',
-        //       isPrepayDtd:'',
-        //       description:'',
-        //       sortIndex:'',
-        //       iconCode:'',
-        //       isShow:'Y',
-        //   };
-        //   this.$refs.upImg.clearFiles();
-
-        // },
           // 编辑节点（交互通用）
         editNode(){
           if(!this.currentNodeType){
@@ -237,7 +225,6 @@
                   _this.$store.commit('setDeleteModal',{model:false});
                   _this.getTreeLists();
                   _this.deleteClear = 'clear';
-                  // _this.initialForm();
                   _this.$forceUpdate(); //强制刷新
                 }else{
                   _this.$Message.info('删除失败：'+res.data.msg)

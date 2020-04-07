@@ -43,6 +43,7 @@
         parentData:{
           handler(newValue,oldValue){
             if(newValue.parentId == '0'){this.getDetail(newValue.id)}
+
           }
         }
       },
@@ -67,6 +68,9 @@
 
             }
           }
+      },
+      mounted() {
+        if(this.parentData.parentId){this.getDetail(this.parentData.id)}
       },
       methods:{
         // 保存项目分类
@@ -96,6 +100,7 @@
               let data = res.data.data;
               this.currentNodeType = 'first';
               this.typeForm=_.cloneDeep(data);
+              this.$emit('loadFlag')
             }
           })
         },
@@ -142,24 +147,6 @@
             isShow:''
           };
           this.editTypeForm=false
-          // if(this.currentNodeType==='first'){
-          //
-          // }else if(this.currentNodeType==='sub'){
-          //   this.proForm = {
-          //     name:'',
-          //     parentId:'',
-          //     serviceFee:'',
-          //     isUserCanUse:'',
-          //     hasDtdServiceFee:'',
-          //     dtdServiceFee:'',
-          //     isPrepayDtd:'',
-          //     description:'',
-          //     sortIndex:'',
-          //     iconCode:'',
-          //     isShow:'Y',
-          //   };
-          //   this.editProForm=false // 可编辑项目状态
-          // }
         },
       }
     }
