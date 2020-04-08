@@ -228,10 +228,12 @@
         },
         pageChange(val){
           this.pageNo=val;
+          this.tableLoading = true;
           this.getLists();
         },
         pageSizeChange(val){
           this.pageSize=val;
+          this.tableLoading = true;
           this.getLists();
         },
         getLists(){  //获取分页List
@@ -288,6 +290,7 @@
                   this.$Message.success('保存成功');
                   this.activeModal=false;
                   this.editPwdInput=false;
+                  this.tableLoading = true;
                   this.getLists();
                 }else{
                   this.$Message.error(res.data.msg);

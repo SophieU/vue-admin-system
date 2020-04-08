@@ -3,6 +3,7 @@
     <Card>
       <Row :gutter="40">
         <Col class="column" span="11">
+          <Spin fix v-show="beforeLoading == true">加载中...</Spin>
           <div class="column-header clearfix mb-15">
             <h3 class="pull-left">申述原因（上门前）</h3>
             <Button class="pull-right" type="primary" @click="addAppeal('before')">新增</Button>
@@ -24,6 +25,7 @@
           </div>
         </Col>
         <Col class="column" span="12">
+          <Spin fix v-show="afterLoading == true">加载中...</Spin>
           <div class="column-header clearfix mb-15">
             <h3 class="pull-left">申述原因（上门后）</h3>
             <Button class="pull-right" type="primary"  @click="addAppeal('after')">新增</Button>
@@ -78,6 +80,8 @@
       data(){
           return{
             loading:false,
+            beforeLoading:true,
+            afterLoading:true,
             before:[],
             after:[],
             afterSale:[],
@@ -142,11 +146,13 @@
           if(this[type] instanceof Array){
             if(content.length<=0){
               this.$Message.info('请先填写申述原因再保存');
+              this.loading = false;
               return;
             }
             let reg = /^[A-Za-z0-9\u4e00-\u9fa5]+$/;
             if(!reg.test(content)){
               this.$Message.info('申述原因不能含有特殊字符以及空格');
+              this.loading = false;
               return;
             }
             //提交新原因
@@ -165,6 +171,7 @@
           }
         },
         delThis(type,index){
+          const _this = this;
           if(!type) return;
           let id=this[type][index].id;
           this.$store.commit('setDeleteModal',{model:true,callback:function(){
@@ -172,8 +179,9 @@
                 .then(res=>{
                   if(res.data.code===0){
                     this.$Message.success('删除成功');
+                    type=='before'?_this.beforeLoading = true:_this.afterLoading = true;
                     this.$store.commit('setDeleteModal',{model:false});
-                    this.getLists();
+                    _this.getLists();
                   }else{
                     this.$Message.error(res.data.msg);
                   }
@@ -186,6 +194,8 @@
               if(res.data.code===0){
                 let data = res.data.data;
                 this.tempData=data;
+                this.beforeLoading = false;
+                this.afterLoading = false;
                 this.formateData(data);
               }
             })
@@ -209,7 +219,7 @@
         }
       },
       mounted(){
-          this.getLists();
+        this.getLists();
       }
     }
 </script>

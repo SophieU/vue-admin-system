@@ -1,5 +1,5 @@
 <template>
-  <Modal v-model="modelInner" width="360">
+  <Modal v-model="modelInner" @on-visible-change="deleteChange" width="360">
     <p slot="header" style="color:#f60;text-align:center">
       <Icon type="ios-information-circle"></Icon>
       <span>删除提醒</span>
@@ -9,7 +9,8 @@
       <p>确认要删除吗?</p>
     </div>
     <div slot="footer">
-      <Button type="error" size="large" long :loading="delete_loading" @click="del">删除</Button>
+      <Button type="default" size="large" @click="cancelDelet">取消</Button>
+      <Button type="error" size="large" :loading="delete_loading" @click="del">删除</Button>
     </div>
   </Modal>
 </template>
@@ -25,7 +26,8 @@
       },
       props:{
           model:Boolean,
-        callback:Function
+          callback:Function,
+          loading:Boolean
       },
       computed:{
           modelInner:{
@@ -40,8 +42,15 @@
           }
       },
       methods:{
+        deleteChange(data){
+          data == false?this.delete_loading = false:'';
+        },
         del(){
-         this.callback();
+          this.delete_loading = true;
+          this.callback();
+        },
+        cancelDelet(){
+          this.$store.commit('setDeleteModal',{model:false})
         }
       }
     }

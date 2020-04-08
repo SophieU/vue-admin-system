@@ -1,6 +1,7 @@
 <template>
     <div>
       <Card class="mb-15">
+        <Spin fix v-show="loadingTime == true">加载中...</Spin>
         <p slot="title">服务时间提示</p>
         <div slot="extra">
           <div class="inner-center" style="margin-top: -5px;">
@@ -14,6 +15,7 @@
         </div>
       </Card>
       <Card class="mb-15">
+        <Spin fix v-show="loadingFee == true">加载中...</Spin>
         <p slot="title">服务费用提示</p>
         <div>
           <div id="serveFee"> </div>
@@ -21,14 +23,12 @@
         </div>
       </Card>
       <Card class="mb-15">
+        <Spin fix v-show="loadingTip == true">加载中...</Spin>
         <p slot="title">其他提示</p>
         <div>
           <div id="otherTips"> </div>
           <!--<Input  v-model="other" type="textarea" :rows="5"/>-->
         </div>
-      </Card>
-      <Card>
-
       </Card>
     </div>
 </template>
@@ -42,6 +42,9 @@
           serviceTime:'',
           serviceFee:'',
           other:'',
+          loadingTime:true,
+          loadingFee:true,
+          loadingTip:true,
           editor1:{},
           editor2:{},
           editor3:{}
@@ -75,18 +78,21 @@
                   editor1.customConfig.menus =config;
                   editor1.create();
                   editor1.txt.html(data.serviceTime);
+                  this.loadingTime = false;
 
                   this.editor2 = new E('#serveFee');
                   let editor2 = this.editor2;
                   editor2.customConfig.menus =config;
                   editor2.create();
                   editor2.txt.html(data.serviceFee);
+                  this.loadingFee = false;
 
                    this.editor3 = new E('#otherTips');
                   let editor3 = this.editor3;
                   editor3.customConfig.menus =config;
                   editor3.create();
                   editor3.txt.html(data.other);
+                  this.loadingTip = false;
 
                   this.serviceTime=data.serviceTime;
                   this.serviceFee=data.serviceFee;

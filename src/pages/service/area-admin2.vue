@@ -1,5 +1,6 @@
 <template>
     <div>
+      <Spin fix v-show="loading == true">加载中...</Spin>
       <Card v-if="pageType==='list'">
         <div class="clearfix mb-15">
           <div class="pull-left">
@@ -7,7 +8,7 @@
           </div>
         </div>
         <div class="table-wrapper">
-          <Table :loading="loading" :data="areaLists" :columns="areaColumns"></Table>
+          <Table :data="areaLists" :columns="areaColumns"></Table>
           <div class="pagination">
             <Page :page-size="10" :current="pageNo"
               @on-change="(page)=>getAreaLists(page)"

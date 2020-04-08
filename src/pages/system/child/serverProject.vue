@@ -71,10 +71,7 @@
 </template>
 
 <script>
-  import _ from 'lodash'
-  import tinymce from '../../main-components/tinymce';
-  import UploadImage from '../../main-components/upload-img'
-  import InputNumber from "../../main-components/input-money";
+
     export default {
       name: "serverProject",
       components: {UploadImage,InputNumber,tinymce},
@@ -106,7 +103,6 @@
         },
         editProFormType:{
           handler(newValue){
-            console.log(1111,newValue)
            if(newValue == 'add'){this.cancelForm()}
           }
         }
@@ -156,11 +152,10 @@
               description:'', //textarea描述信息
               serviceDescription:'',//富文本编辑器内的内容
             };
+          this.$set(this.proForm,'serviceDescription','');
           this.$emit('initInput');
-          this.eidtImg = null;
-          this.$nextTick(()=>{
-          this.$refs['upImg'].clearFiles();
-          })
+          this.eidtImg = [];
+          // this.$refs['upImg'].clearFiles();
         },
         // 保存项目
         saveProForm(){
@@ -208,7 +203,7 @@
               let data = res.data.data;
               this.currentNodeType = 'sub';
               this.proForm=_.cloneDeep(data);
-              this.eidtImg = [{name: data.imgName, url: this.proForm.iconCode, status: 'finished'}];
+
               this.$emit('loadFlag')
             }
           })
@@ -237,21 +232,12 @@
             }
           })
         },
-        uploadFile(){  //图片上传失败事件
-          this.$Message.warning('图片上传失败！')
-        },
-        uploadComplete(){
-          this.$Message.success('图片上传成功！')
-        },
-        changeInput(data){    //子组件上传的值
-          this.proForm.serviceDescription = data;
-        },
-        uploadUrl(data){     //子组件传过来的图片地址
-          this.proForm.iconCode = data.imageUrl
-        },
+
+
+
       },
       mounted() {
-        if(this.parentData){this.getDetail(this.parentData.id)}
+        if(this.parentData){this.getDetail(this.parentData.id)};
         this.getTypeList();
         this.getDetail(this.parentData.id)
       }
@@ -260,51 +246,7 @@
 
 <style lang="scss">
   .server-project{
-    .form-box{
-      width:400px;
-    }
-    .form-item{
-      width:400px;
-    }
-    .icon-lists{
-      width: 700px;
-      padding: 10px;
-      max-height: 400px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      .icon-wrap{
-        width:120px;
-        float: left;
-        cursor:pointer;
-        margin: 5px;
-        text-align: center;
-        &.active{
-          position: relative;
-          &::before{
-            content: '';
-            display: block;
-            width: 100%;
-            height: 100%;
-            border: 3px solid #57a3f3;
-            position: absolute;
-            left:0;
-            top:-3px;
-          }
-        }
-        img{
-          width:40px;
-          height: 40px;
-          display: block;
-          margin: 0 auto;
-        }
-      }
-    }
-    .inline-button{
-      display: inline-block;
-    }
-    .editor-item{
-      width: 100%;
-    }
+
     /*.form-item .ivu-input,.ivu-select{*/
     /*  width:30%*/
     /*}*/

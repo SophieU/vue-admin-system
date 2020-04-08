@@ -11,7 +11,8 @@
             </div>
           </div>
           <div class="table-wrapper">
-            <Table :loading="loading" :data="portLists" :columns="columns"></Table>
+            <Spin fix v-show="loading == true">加载中...</Spin>
+            <Table :data="portLists" :columns="columns"></Table>
             <div class="pagination">
               <Page :current.sync="pageNo" :page-size="pageSize" :total="totalCount"  show-elevator
                     @on-change="pageToggle"
@@ -20,7 +21,7 @@
             </div>
           </div>
       </Card>
-      <PortInfo v-show="page==='info'" ref="portInfo" :title="modalTitle+'服务网点'" :refresh="getLists" :viewPortInfo.sync="viewPortInfo" :page.sync="page"/>
+      <PortInfo v-show="page==='info'" ref="portInfo" :title="modalTitle+'服务网点'" :refresh="getLists" :loading.sync="loading" :viewPortInfo.sync="viewPortInfo" :page.sync="page"/>
     </div>
 </template>
 
@@ -37,17 +38,21 @@
             page:'list', //list-列表页，info-详情页
             viewPortInfo:false, //查看网点信息时，所有项 不可编辑
             modalTitle:'添加',
-            pageNo:1,
             loading:true,
+            pageNo:1,
             totalCount:0,
             pageSize:10,
             columns:[
               {title:'网点名称',key:'name',align:'center'},
-              {title:'备用网点',key:'isSlave',align:'center'},
+              {title:'是否自营',key:'isSelf',align:'center',render:(h,params)=>{
+                  let val;
+                  params.row.isSelf == 'Y'?val = '是': val = '否';
+                  return ('span',val)
+                }},
               {title:'网点地址',key:'address',align:'center'},
               {title:'联系电话',key:'phone',align:'center'},
               {title:'服务区域数量',key:'regionNum',align:'center'},
-              {title:'服务状态',key:'state',align:'center'},
+              {title:'服务状态',key:'stateName',align:'center'},
               {title:'操作',align:'center',render:(h,params)=>{
                   let _this = this;
                   return h('div',[
@@ -64,18 +69,19 @@
                             _this.$refs['portInfo'].getStation(id);
                             _this.$refs['portInfo'].getStationInfo(id);
                           })
-
+                          _this.loading = true;
                         }
                       }
                     },'查看'),
                     h('Button',{
-                      props:{type:'success',size:'small'},
+                      props:{type:'warning',size:'small'},
                       on:{
                         click:()=>{
                           let id=params.row.id;
                           _this.viewPortInfo=false;
                           _this.modalTitle='编辑';
                           _this.page='info';
+                          _this.loading = true;
                           _this.$nextTick(()=>{
                             _this.$refs['portInfo'].getStation(id);
                             _this.$refs['portInfo'].getStationInfo(id);
@@ -98,22 +104,23 @@
               .then(res=>{
                 let data = res.data;
                 if(data.code===0){
-                  this.loading=false;
                   this.portLists=data.data.list;
                   this.pageSize=data.data.pageSize;
                   this.totalCount = data.data.totalCount;
-
+                  this.loading = false;
                 }
 
               })
           },
         //页码变化
         pageToggle(page){
+          this.loading = true;
           this.pageNo=page;
           this.getLists();
         },
         //每页条数变化
         pageSizeToggle(size){
+          this.loading = true;
           this.pageSize=size;
           this.getLists();
         },

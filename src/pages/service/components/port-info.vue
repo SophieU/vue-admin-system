@@ -14,6 +14,7 @@
         </template>
       </div>
     </div>
+    <Spin fix v-show="loading == true">加载中...</Spin>
     <Form class="portForm" ref="portSet" :model="portSettingForm" :rules="portSettingRule" :label-width="120" label-position="right">
       <FormItem label="服务网点名称" prop="name">
         <Input placeholder="请输入服务网点名称" :disabled="viewInfo" v-model="portSettingForm.name" class="form-input"/>
@@ -23,6 +24,12 @@
       </FormItem>
       <FormItem label="服务网点电话" prop="phone">
         <Input :disabled="viewInfo" placeholder="请输入手机或座机号" @on-keydown="validateInputTel"  v-model="portSettingForm.phone" class="form-input"/>
+      </FormItem>
+      <FormItem label="请选择是否自营" prop="isSelf">
+        <RadioGroup v-model="portSettingForm.isSelf">
+          <Radio label="Y" :disabled="viewInfo">是</Radio>
+          <Radio label="N" :disabled="viewInfo">否</Radio>
+        </RadioGroup>
       </FormItem>
       <FormItem label="服务区域设置" prop="regionList">
         <Checkbox
@@ -61,8 +68,8 @@
   import util from '../../../libs/util'
   import _ from 'lodash'
     export default {
-        name: "port-info",
-      props:['viewPortInfo','page','title','refresh'],
+      name: "port-info",
+      props:['viewPortInfo','page','title','refresh','loading'],
       computed:{
         viewInfo:{
           get(){
@@ -194,7 +201,7 @@
             };
             util.getTreeLists((data)=>{
               this.repairTypes = this.formatDataTree(data,{disableCheckbox:this.viewInfo},[])
-            })
+            });
             this.getStation();
           },
         toggleSlave(val){
@@ -234,10 +241,10 @@
             name:formData.name,
             address:formData.address,
             phone:formData.phone,
-            isSlave:formData.isSlave?'Y':'N',
+            // isSlave:formData.isSlave?'Y':'N',
             stationAdmin:{
               loginName:formData.loginName,
-              // password:formData.password
+              password:formData.password
             },
             regionList:formData.regionList,
             categoryList:formData.categoryList,
@@ -304,9 +311,9 @@
                   isSelf:data.isSelf,
                 };
                 // 树形结构
-                this.repairTypes  = this.formatDataTree(this.repairTypes,{disableCheckbox:this.viewInfo},data.categoryList)
-                console.table(this.repairTypes)
+                this.repairTypes  = this.formatDataTree(this.repairTypes,{disableCheckbox:this.viewInfo},data.categoryList);
                 this.judgeCheckAll('regionList');
+                this.$emit('update:loading',false);
               }
             })
         },
@@ -341,7 +348,6 @@
             if(item.children&&item.children.length>0){
               item.children = this.formatDataTree(item.children,options,checkedList)
             }
-
             return item;
 
           })
@@ -361,7 +367,6 @@
           if(val==='list'){
             this.repairTypes = _.cloneDeep(this.initialRepairTypes)
           }
-          console.log(val)
         },
         viewInfo(val){
           this.repairTypes = this.formatDataTree(this.repairTypes,{disableCheckbox:val},[]);
