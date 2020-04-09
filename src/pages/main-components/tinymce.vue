@@ -170,15 +170,15 @@
       }
     },
     watch:{
-      // content:{
-      //   handler(newValue, oldValue){
-      //     if(this.flag){
-      //       tinyMCE.activeEditor.setContent(newValue);
-      //     }
-      //     this.flag=true;
-      //   },
-      //   deep:true
-      // },
+      content:{
+        handler(newValue, oldValue){
+          if(this.flag){
+            tinyMCE.activeEditor.setContent(newValue);
+          }
+          this.flag=true;
+        },
+        deep:true
+      },
       editProForm:{
         handler(newValue, oldValue){
          this.DefaultConfig.readonly = newValue

@@ -25,12 +25,14 @@
         <Col span="8">
           <Card>
             <p slot="title">服务分类树</p>
+            <Spin fix v-show="treeLoading == true">加载中...</Spin>
             <Tree :render="renderContent" ref="tree" :data="treeLists"></Tree>
           </Card>
         </Col>
         <Col span="16">
           <Card>
             <p slot="title">{{currentNodeType!=='sub'?'服务项目分类':'服务项目'}}</p>
+            <Spin fix v-show="loading == true">加载中...</Spin>
             <div v-show="currentNodeType!=='sub'">
               <Form ref="typeForm" class="form-box" :model="typeForm" :rules="typeRule" :label-width="150">
                 <FormItem class="must" label="名称" prop="name">
@@ -46,7 +48,7 @@
                   </RadioGroup>
                 </FormItem>
                 <FormItem    v-show="editTypeForm">
-                  <Button  @click="saveTypeForm" type="primary">保存</Button>
+                  <Button  @click="saveTypeForm" :loading="saveLoading" type="primary">保存</Button>
                   <Button  @click="cancelForm">取消</Button>
                 </FormItem>
               </Form>
@@ -114,7 +116,7 @@
                   <tinymce @input="changeInput" :editProForm="!editProForm"  @on-upload-complete="uploadComplete" :content="proForm.serviceDescription" @on-upload-fail="uploadFile" ref="editor"></tinymce>
                 </FormItem>
                 <FormItem v-show="editProForm">
-                  <Button  @click="saveProForm" type="primary">保存</Button>
+                  <Button  @click="saveProForm" :loading="btnLoading" type="primary">保存</Button>
                   <Button  @click="cancelForm">取消</Button>
                 </FormItem>
               </Form>
@@ -149,6 +151,10 @@
         qiniuToken:{
           key:''
         },
+        btnLoading:false,
+        saveLoading:false,
+        treeLoading:true,
+        loading:false,
         editTypeForm:false, // 可编辑分类关态
         editProForm:false, // 可编辑项目状态
         currentNodeType:'', // first-一级节点，sub-二级节点
@@ -243,8 +249,11 @@
                     _this.currentNode.id = data.id;
                     _this.currentNode.parentId = data.parentId;
                     data.parentId == '0'?this.currentNodeType = 'first':this.currentNodeType = 'sub';
-                    this.getDetail(data.id);
+                    _this.editTypeForm = false;
+                    _this.editProForm =false;
                     _this.loading = true;
+                    _this.getDetail(data.id);
+                    console.log(this.currentNode.id)
                   }
                 }
               }, data.title)
@@ -275,7 +284,7 @@
           sortIndex:null,
           isShow:'Y',
           id:'',
-        }
+        };
         this.proForm={
           id:'',
           name:'',  //服务项目名称
@@ -291,9 +300,9 @@
           sortIndex:'',
           description:'', //textarea描述信息
           serviceDescription:'',//富文本编辑器内的内容
-        }
+        };
         this.eidtImg = [];
-        this.$set(this.proForm,'serviceDescription','');
+        // this.$refs.editor.setContent("");
         this.editTypeForm=false;// 可编辑分类关态
         this.editProForm=false // 可编辑项目状态
       },
@@ -307,6 +316,8 @@
           }else{
             this.$Message.error(res.data.msg)
           }
+          this.btnLoading = false;
+          this.saveLoading = false;
         })
       },
       // 编辑节点（接口调用）
@@ -324,7 +335,7 @@
       // },
       // 编辑节点（交互通用）
       editNode(){
-        if(!this.currentNodeType){
+        if(!this.currentNode.id && this.currentNode.parentId != '0'){
           this.$Message.info('请先选择项目节点')
           return;
         }else{
@@ -333,12 +344,14 @@
             this.editTypeFormType='edit';
           }else{
             this.editProForm=true;
+            this.proForm.parentId = this.currentNode.parentId;
             this.editProFormType='edit';
           }
         }
       },
       // 保存项目分类
       saveTypeForm(){
+        this.saveLoading = true;
         let formData = this.typeForm;
         let params = {
           name:formData.name,
@@ -348,23 +361,26 @@
         }
         this.$refs['typeForm'].validate(res=>{
           if(res){
-            if(this.editTypeFormType==='add'){
-              // 新增项目分类
+            // if(this.editTypeFormType==='add'){
+            //   // 新增项目分类
               this.addNodeAPI(params)
-            }else{
+            // }else{
               // 编辑项目分类
-              this.editNodeAPI(params)
-            }
+              // this.editNodeAPI(params)
+            // }
+          }else{
+            this.saveLoading = false;
           }
         })
       },
       // 保存项目
       saveProForm(){
+        this.btnLoading = true;
         let formData = this.proForm;
         let params = {
           id:'',
           name:'',  //服务项目名称
-          parentId:'', //所属服务类型
+          parentId:this.currentNode.parentId, //所属服务类型
           serviceFee:'',//人工费不低于
           hasDtdServiceFee:'',//是否收取上门费
           dtdServiceFee:'',//上门费金额
@@ -380,13 +396,7 @@
         for(let key in formData){
           params[key] = formData[key];
         }
-        // if(this.editProFormType==='add'){
-          // 新增项目分类
-          // this.addNodeAPI(params)
-        // }else{
-          // 编辑项目分类
-          this.editNodeAPI(params)
-        // }
+          this.addNodeAPI(params)
       },
       // 取消当前编辑表单状态（类型，项目通用）
       cancelForm(){
@@ -414,6 +424,8 @@
             description:'', //textarea描述信息
             serviceDescription:'',//富文本编辑器内的内容
           };
+          this.eidtImg = null;
+          this.btnLoading = false;
           this.editProForm=false // 可编辑项目状态
         }
       },
@@ -432,7 +444,7 @@
       // 新增项目
       addNewProject(){
         // 未选中一级菜单时
-        if(!this.currentNode.id && !this.currentNode.parentId){
+        if(!this.currentNode.id || this.currentNode.parentId != '0'){
           this.$Message.info('请先选择要添加到的项目分类');
           return false;
         }
@@ -443,7 +455,7 @@
         this.proForm={
           id:'',
           name:'',  //服务项目名称
-          parentId:'', //所属服务类型
+          parentId:this.currentNode.id, //所属服务类型
           serviceFee:'',//人工费不低于
           hasDtdServiceFee:'',//是否收取上门费
           dtdServiceFee:'',//上门费金额
@@ -462,7 +474,7 @@
         let _this = this;
         let id = this.currentNode.id;
         this.$store.commit('setDeleteModal',{model:true,callback:function(){
-            _this.$http.delete(`🔲/yyht/v1/repair/category/delete?id=${id}`).then(res=>{
+            _this.$http.post(`/yyht/v1/repair/category/delete?id=${id}`).then(res=>{
               if(res.data.code===0){
                 _this.$Message.success('删除成功');
                 _this.$store.commit('setDeleteModal',{model:false});
@@ -488,9 +500,10 @@
             }else{
               // 二级节点
               this.currentNodeType = 'sub';
-              this.eidtImg = [{name: data.imgName, url: this.proForm.iconCode, status: 'finished'}];
+              this.eidtImg = [{name: data.imgName, url: data.iconCode, status: 'finished'}];
               this.proForm=_.cloneDeep(data);
             }
+            this.loading = false
           }
         })
       },
@@ -514,6 +527,7 @@
           if(res.data.code===0){
             let data = res.data.data;
             this.treeLists=this.formatDataTree(data);
+            this.treeLoading = false;
             this.getTypeList();
           }
         })
