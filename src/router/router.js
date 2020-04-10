@@ -61,7 +61,7 @@ export const otherRouter={
   component:Main,
   children:[
     {path:'advertiserDetail',title:'广告主管理',name:'advertiserDetail',component:()=>import('@/pages/platform/components/advertDetail.vue')},
-    {path:'staffDetail',title:'人员详情',name:'staffDetail',meta:{hideInMenu:true},component:()=>import('@/pages/staff/staff-detail'),
+    {path:'staffDetail',title:'人员详情',meta:{hideInMenu:true},component:()=>import('@/pages/staff/staff-detail'),
       children:[
         {path:'',name:'staffDetail',title:'基本信息',meta:{},component:()=>import('@/pages/staff/staff-component/staff-base')},
         {path:'inviteRecord',title:'邀请记录',meta:{hideInMenu:true},name:'inviteRecord',component:()=>import('@/pages/staff/staff-component/invite-record')},
@@ -117,7 +117,31 @@ export const appRouter=[
               {path:'tips',meta:{},title:'温馨提示',name:'tips',component:()=>import('@/pages/system/tips-admin.vue')},
             ]},
     ]
-  },{
+  },
+  {
+    path:'/platform',
+    icon:'md-aperture',
+    title:'平台管理',
+    name:'platform',
+    component:Main,
+    meta:{single:false},
+    children:[
+      {path:'broadcast',meta:{},name:'broadcast',title:'广告管理',component:()=>import('@/pages/main-components/parent-view.vue'),
+        children:[
+          {path:'advertiser',meta:{},title:'广告主管理',name:'advertiser',component:()=>import('@/pages/platform/advertiser')},
+          {path:'adOwnerDetail',meta:{hideInMenu:true},title:'广告主详情',name:'adOwnerDetail',component:()=>import('@/pages/platform/components/advertDetail.vue')},
+          {path:'banner',meta:{},title:'banner广告',name:'banner',component:()=>import('@/pages/platform/banner')},
+          {path:'repairRecommend',meta:{},title:'报修服务推荐管理',name:'repairRecommend',component:()=>import('@/pages/platform/repair-recommend.vue')},
+        ]},
+      {path:'service',meta:{},name:'service',title:'服务管理',component:()=>import('@/pages/main-components/parent-view.vue'),
+        children:[
+          {path:'servicePro',meta:{},title:'服务栏目管理',name:'servicePro',component:()=>import('@/pages/platform/homeService.vue')},
+          {path:'allService',meta:{},title:'全部服务管理',name:'allService',component:()=>import('@/pages/platform/allService.vue')},
+          {path:'functionSet',meta:{},title:'小程序功能区配置',name:'functionSet',component:()=>import('@/pages/platform/functionSet.vue')},
+        ]},
+    ]
+  },
+  {
     path:'/service',
     icon:'logo-codepen',
     title:'网点管理',
@@ -153,7 +177,7 @@ export const appRouter=[
       // {path:'distribute-order',meta:{},name:'distribute-order',icon:'ios-briefcase',title:'维修工单人工处理',component:()=>import('@/pages/order/distribute-station.vue')},
       // {path:'meal-order',meta:{},name:'meal-order',icon:'ios-briefcase',title:'套餐订单管理',component:()=>import('@/pages/order/meal-order.vue')},
       {
-        path:'order-detail',name:'orderDetailParent',meta:{hideInMenu:true},title:"工单详情",component:()=>import('@/pages/order/order-detail'),
+        path:'order-detail',meta:{hideInMenu:true},title:"工单详情",component:()=>import('@/pages/order/order-detail'), //name:'orderDetailParent'
         children:[
           {path:'',meta:{},name:'orderDetail',title:'处理流程',component:()=>import('@/pages/order/order-com/order-flow')},
           {path:'visited-info',meta:{hideInMenu:true},title:'回访信息',name:'visitedInfo',component:()=>import('@/pages/order/order-com/visited-info')},
@@ -182,28 +206,6 @@ export const appRouter=[
     meta:{single:true},
     children:[
       {path:'/',meta:{},icon:'ios-call',title:'提现管理',name:'withdraw',component:()=>import('@/pages/withdraw/withdraw.vue')},
-    ]
-  },{
-    path:'/platform',
-    icon:'md-aperture',
-    title:'平台管理',
-    name:'platform',
-    component:Main,
-    meta:{single:false},
-    children:[
-      {path:'service',meta:{},name:'service',title:'服务管理',component:()=>import('@/pages/main-components/parent-view.vue'),
-        children:[
-          {path:'servicePro',meta:{},title:'服务栏目管理',name:'servicePro',component:()=>import('@/pages/platform/homeService.vue')},
-          {path:'allService',meta:{},title:'全部服务管理',name:'allService',component:()=>import('@/pages/platform/allService.vue')},
-          {path:'functionSet',meta:{},title:'小程序功能区配置',name:'functionSet',component:()=>import('@/pages/platform/functionSet.vue')},
-        ]},
-      {path:'broadcast',meta:{},name:'broadcast',title:'广告管理',component:()=>import('@/pages/main-components/parent-view.vue'),
-        children:[
-          {path:'advertiser',meta:{},title:'广告主管理',name:'advertiser',component:()=>import('@/pages/platform/advertiser')},
-          {path:'advertiserDetail',meta:{hideInMenu:true},title:'广告主详情',name:'advertiserDetail',component:()=>import('@/pages/platform/components/advertDetail.vue')},
-          {path:'banner',meta:{},title:'banner广告',name:'banner',component:()=>import('@/pages/platform/banner')},
-          {path:'repairRecommend',meta:{},title:'报修服务推荐管理',name:'repairRecommend',component:()=>import('@/pages/platform/repair-recommend.vue')},
-        ]},
     ]
   },
   // {

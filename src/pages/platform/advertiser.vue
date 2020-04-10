@@ -19,7 +19,8 @@
             </div>
           </div>
             <!--表格-->
-            <Table  :columns="columns" :data="advertiserLists" :loading="loading">
+            <Spin fix v-show="tableLoading == true">加载中...</Spin>
+            <Table  :columns="columns" :data="advertiserLists">
 
             </Table>
             <div class="pagination">
@@ -76,7 +77,7 @@
         name: "advertiser",
         data(){
             return {
-              loading:true,
+              tableLoading:true,
                 searchForm: {
                     name: '',
                     phone: ''
@@ -188,7 +189,7 @@
                         this.advertiserLists = res.data.data.list;
                         this.pageConfig.current = res.data.data.pageNo;
                         this.pageConfig.total = res.data.data.totalCount;
-                        this.loading = false;
+                        this.tableLoading = false;
                     }else{
                       this.$Message.warning(res.data.msg)
                     }

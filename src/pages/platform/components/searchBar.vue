@@ -1,6 +1,5 @@
 <template>
     <div class="clearfix mb-15">
-        <Button class="pull-right mb-15" type="primary" icon="md-add" @click="showAdd" >新增广告</Button>
         <div style="clear:both;">
           <Form inline :label-width="100">
             <FormItem label="广告主：">
@@ -32,7 +31,7 @@
             <FormItem label="广告标题：">
             <Input v-model="searchForm.adTitle"  style="width:190px"></Input>
           </FormItem>
-            <FormItem label="状态：">
+            <FormItem label="广告主状态：">
             <Select :transfer="true" v-model="searchForm.adState" placeholder="请选择" style="width:190px">
               <Option
                 label="全部"
@@ -81,11 +80,10 @@
             <FormItem class="no-label-form-item">
               <Button type="primary" @click="onSearch"  >查询</Button>
               <Button class="mr-15"  @click="onReset"  >重置</Button>
-
             </FormItem>
           </Form>
         </div>
-
+      <Button class="pull-right mb-15" type="primary" icon="md-add" @click="showAdd" >新增广告</Button>
     </div>
 </template>
 

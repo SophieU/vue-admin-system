@@ -54,14 +54,12 @@
     <Upload
       ref="upload"
       :disabled="imgDisabled == true?true:false"
-      :data="qiniuToken"
       :show-upload-list="false"
       :format="['jpg','jpeg','png']"
       :on-success="handleSuccess"
       :default-file-list="defaultList"
       :max-size="2048"
       :on-exceeded-size="handleMaxSize"
-      :before-upload="handleBeforeUpload"
       type="drag"
       :action="uploadUrl"
       style="display: inline-block;width:58px;"
@@ -93,9 +91,9 @@
         type:Array,
         required: false,
       },
-      qiniuToken:{
-        type: Object
-      },
+      // qiniuToken:{
+      //   type: Object
+      // },
       domain:{
         type:String
       }
@@ -140,12 +138,12 @@
       handleMaxSize(){
         this.$Message.warning(`超出图片大小范围，请重新选择图片`)
       },
-      handleBeforeUpload(file){
-        let randomNum = Math.floor(Math.random() * 1000); //随机数
-        let name = Date.parse(new Date())+randomNum;
-        this.qiniuToken.key = name;
-        // this.qiniuToken.key = file.name;
-      },
+      // handleBeforeUpload(file){
+      //   let randomNum = Math.floor(Math.random() * 1000); //随机数
+      //   let name = Date.parse(new Date())+randomNum;
+      //   this.qiniuToken.key = name;
+      //   // this.qiniuToken.key = file.name;
+      // },
       handleRemove(file,list){
         this.uploadList = [];
         let res = {
@@ -153,15 +151,15 @@
         };
         this.$emit('onUpload',res)
       },
-      getToken(){
-        this.$http.get(`/base/qiniu/token`).then(res=>{
-          if (res.data.code === 0){
-            this.domain = res.data.data.domain;
-            sessionStorage.setItem('domain',res.data.data.domain);
-            this.qiniuToken.token = res.data.data.token;
-          }
-        })
-      }
+      // getToken(){
+      //   this.$http.get(`/base/qiniu/token`).then(res=>{
+      //     if (res.data.code === 0){
+      //       this.domain = res.data.data.domain;
+      //       sessionStorage.setItem('domain',res.data.data.domain);
+      //       this.qiniuToken.token = res.data.data.token;
+      //     }
+      //   })
+      // }
     },
     mounted () {
       //this.getToken()

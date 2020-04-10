@@ -79,9 +79,9 @@
         name: "appeal",
       data(){
           return{
-            loading:false,
             beforeLoading:true,
             afterLoading:true,
+            loading:false,
             before:[],
             after:[],
             afterSale:[],
@@ -138,7 +138,7 @@
           this.editingId='new';
         },
         saveThis(type,index){
-          this.loading = true;
+          type == 'before'?this.beforeLoading = true:this.afterLoading = true;
           let val = this[type][index];
           let content =val.statementName;
 
@@ -146,13 +146,13 @@
           if(this[type] instanceof Array){
             if(content.length<=0){
               this.$Message.info('请先填写申述原因再保存');
-              this.loading = false;
+              type == 'before'?this.beforeLoading = false:this.afterLoading = false;
               return;
             }
             let reg = /^[A-Za-z0-9\u4e00-\u9fa5]+$/;
             if(!reg.test(content)){
               this.$Message.info('申述原因不能含有特殊字符以及空格');
-              this.loading = false;
+              type == 'before'?this.beforeLoading = false:this.afterLoading = false;
               return;
             }
             //提交新原因
@@ -161,9 +161,8 @@
             this.$http.post(`/yyht/v1/repair/statement/reason/addOrUpdate`,val)
               .then(res=>{
                 if(res.data.code===0){
-                  this.$Message.success('保存成功');
                   this.getLists();
-                  this.loading = false;
+                  this.$Message.success('保存成功');
                 }else{
                   this.$Message.error(res.data.msg);
                 }

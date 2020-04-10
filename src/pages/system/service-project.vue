@@ -76,7 +76,12 @@
                 <!--                  </Select>-->
                 <!--                </FormItem>-->
                 <FormItem class="form-item" label="人工费不低于">
-                  <Input :disabled="!editProForm" v-model="proForm.serviceFee"/>
+                  <template v-if="!editProForm">
+                    <Input :disabled="!editProForm" v-model="proForm.serviceFee"/>
+                  </template>
+                  <template v-else>
+                    <InputNumber v-model="proForm.serviceFee" />
+                  </template>
                 </FormItem>
                 <FormItem class="form-item" label="是否收取上门费">
                   <Select :disabled="!editProForm" v-model="proForm.hasDtdServiceFee">
@@ -106,6 +111,14 @@
                     <Option value="N">否</Option>
                   </Select>
                 </FormItem>
+                <FormItem class="form-item" label="用户端排序">
+                  <template v-if="!editProForm">
+                    <Input :disabled="!editProForm" v-model="proForm.sortIndex"/>
+                  </template>
+                  <template v-else>
+                    <InputNumber v-model="proForm.sortIndex" />
+                  </template>
+                </FormItem>
                 <FormItem label="选择图标样式">
                   <UploadImage :eidtImg="eidtImg" ref="upImg" :qiniuToken="qiniuToken" :imgDisabled="!editProForm" @uploadCallback="uploadUrl"></UploadImage>
                 </FormItem>
@@ -113,7 +126,7 @@
                   <Input :disabled="!editProForm" type="textarea" v-model="proForm.description"/>
                 </FormItem>
                 <FormItem class="form-item editor-item" label="服务说明">
-                  <tinymce @input="changeInput" :editProForm="!editProForm"  @on-upload-complete="uploadComplete" :content="proForm.serviceDescription" @on-upload-fail="uploadFile" ref="editor"></tinymce>
+                  <tinymce @input="changeInput" :editProForm="!editProForm"  @on-upload-complete="uploadComplete" :content="{data:proForm.serviceDescription,index:0}" @on-upload-fail="uploadFile" ref="editor"></tinymce>
                 </FormItem>
                 <FormItem v-show="editProForm">
                   <Button  @click="saveProForm" :loading="btnLoading" type="primary">保存</Button>

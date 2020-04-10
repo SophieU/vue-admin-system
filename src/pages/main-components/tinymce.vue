@@ -1,13 +1,15 @@
 <template>
   <div>
-    <textarea :id="Id" :value="content"></textarea>
+    <textarea :id="Id" :value="content.data"></textarea>
   </div>
 </template>
 <script>
   require('../../../static/tinymce/zh_CN.js'); // 根据自己的组件路径修改
+  import Editor from '@tinymce/tinymce-vue';
   export default {
     name:'tinymce',
     data () {
+      const randomNum = Math.floor(Math.random() * 1000);
       const Id = Date.now();
       return {
         domain:'',
@@ -137,8 +139,8 @@
     },
     props: {
       content: {
-        default: '',
-        type: String
+        default: {data:'',index:0},
+        type: Object
       },
       config: {
         type: Object,
@@ -167,13 +169,18 @@
       },
       editProForm:{
         type:Boolean
-      }
+      },
     },
     watch:{
       content:{
         handler(newValue, oldValue){
           if(this.flag){
-            tinyMCE.activeEditor.setContent(newValue);
+            tinyMCE.editors.map((item,index)=>{
+              if(index===newValue.index){
+                item.setContent(newValue.data)
+              }
+            });
+            tinyMCE.activeEditor.setContent(newValue.data);
           }
           this.flag=true;
         },
@@ -245,11 +252,11 @@
           // 挂载的DOM对象
           selector: `#${this.Id}`,
           setup: (editor) => {
-            // 抛出 'on-ready' 事件钩子
+           // 抛出 'on-ready' 事件钩子
             editor.on(
               'init', () => {
                 self.$emit('on-ready');
-                editor.setContent(self.content)
+                editor.setContent(self.content.data)
               }
             );
             // 抛出 'input' 事件钩子，同步value数据
@@ -261,6 +268,7 @@
             )
           }
         })
+
       },
       getContent () {
         // console.log(9999,tinymce.editors[0].getContent())

@@ -1,15 +1,15 @@
 <template>
     <div class="start-app-body">
+      <Spin fix v-show="tabLoading == true">加载中...</Spin>
         <Table :columns="columns"
                 :data="advertLists"
-                :loading="loading"
                :draggable="true"
                @on-drag-drop="onDrag"
                 @on-sort-change="sortChange"
                 style="width: 100%">
         </Table>
         <div class="pagination">
-            <Page :current="pageConfig.current" :total="pageConfig.total" :page-size="pageConfig.size" show-sizer show-elevator
+            <Page transfer :current="pageConfig.current" :total="pageConfig.total" :page-size="pageConfig.size" show-sizer show-elevator
                   @on-change="handleCurrentChange"
                   @on-page-size-change="handleSizeChange"
                    >
@@ -32,27 +32,36 @@
           loading:{
             type:Boolean
           },
-            advertLists:{
-                type:Array
-            },
+          advertLists:{
+            type:Array
+          },
           pageConfig:{
             type:Object
           },
           domain:{
-              type:String
+            type:String
           }
         },
+      watch:{
+        loading:{
+          handler(newV,oldV){
+            this.tabLoading = newV
+            console.log(newV)
+          }
+        }
+      },
         data(){
             return{
+              tabLoading:false,
               adOwnerList:[],
               columns:[
                 {title:'编号',width:'80',key:'sortIndex',align:'center'},
                 {title:'广告主',key:'ownerName',align:'center'},
                 {title:'广告标题',key:'title',align:'center'},
                 {title:'图片',width:'118',align:'center',render:(h,params)=>{
-                  let domain = this.domain;
+                  // let domain = this.domain;
                     return h('img',{attrs:{
-                      src:domain+params.row.imgName,
+                      src:params.row.imgName,
                         'class':'advertImg',
                         'width':'100px',
                         'height':'63px'
@@ -89,6 +98,11 @@
                       text='已失效';
                       color='#f00'
                     }
+                    if(state==='NOT_EFFECTIVE'){
+                      text='未生效';
+                      color='blue'
+                    }
+
                     if (state==='IMMINENT_EXPIRY'){
                       text='即将过期';
                       color='#E6A23C'
@@ -113,6 +127,9 @@
                             type:'primary',
                             size:'small'
                           },
+                          style:{
+                            marginRight:'5px'
+                          },
                           on:{
                             click(){
                               _this.setTips(params.row)
@@ -123,6 +140,9 @@
                           props:{
                             type:'primary',
                             size:'small'
+                          },
+                          style:{
+                            marginRight:'5px'
                           },
                           on:{
                             click(){
@@ -149,6 +169,9 @@
                           type:'primary',
                           size:'small'
                         },
+                        style:{
+                          marginRight:'5px'
+                        },
                         on:{
                           click(){
                             _this.showEdit(params.row)
@@ -159,6 +182,9 @@
                         props:{
                           type:'error',
                           size:'small'
+                        },
+                        style:{
+                          marginRight:'5px'
                         },
                         on:{
                           click(){
@@ -189,11 +215,7 @@
             this.advertLists[index2] = tmp;
             let parmas = [];
             this.advertLists.forEach((item,index)=>{
-              let obj={
-                id:item.id,
-                sortIndex:index+1
-              };
-              parmas.push(obj)
+              parmas.push(item.id)
             });
             this.$emit('onDrag',parmas);
 
