@@ -16,7 +16,7 @@
                           <p>图片大小{{image.adviseSizeDes}}</p>
                           <p>图片比例{{image.adviseScaleDes}}</p>
                         </div>
-                        <img :src="'//'+image.url" v-if="image.targetImage && image.targetImage.length>0">
+                        <img :src="image.targetImage" v-if="image.targetImage && image.targetImage.length>0">
                         <input type="file" @change="uploadInputchange($event,index)" :id="'imgInput'+index" accept="image/png, image/jpeg, image/jpg" class="upload-hide-input" >
                         <!--<UploadImg ref="upImg" :eidtImg="eidtImg" :image="image" @onUpload="onUpload" class="setUpImg"></UploadImg>-->
                       </div>
@@ -56,12 +56,13 @@
                           <Row>
                             <Col span="9">
                               <Select :transfer="true" style="width: 100%;margin-left: 12%" v-model="image.adOwnerId" placeholder="请选择广告主" @change="chooseCategory(index)">
-                                <Option v-for="owner in advertiserList" :label="owner.ownerName" :value="owner.id" :key="owner.id"></Option>
+                                <Option v-for="owner in advertiserList" :label="owner.ownerName" :value="owner.id" :key="owner.id">{{owner.ownerName}}</Option>
                               </Select>
                             </Col>
                           </Row>
                         </FormItem>
-                         <FormItem prop="needLogin"  label="是否登录APP:" v-show="$route.name == 'eRecommend'">
+<!--                        v-show="$route.name == 'eRecommend'"-->
+                         <FormItem prop="needLogin"  label="是否登录APP:">
                             <RadioGroup v-model="image.needLogin">
                                  <Radio label="Y"  :disabled="image.isLogin">是</Radio>
                                  <Radio label="N"  :disabled="image.isLogin">否</Radio>
@@ -214,6 +215,7 @@
       },
         data(){
             return{
+              disabled:false,
               serverTitle:'请选择服务项目',
               targetCategories:[],
               advertiserList:[],
@@ -271,45 +273,49 @@
           chooseCategory(id,index){
             for (let i = 0; i < this.categoriList.length; i++) {
               if (this.categoriList[i].id == id) {
-                this.viewSetting.details[index].needLogin = 'Y';
-                this.viewSetting.details[index].isLogin = false;
+                // this.viewSetting.details[index].isLogin = false;  //判断是否可以编辑是否登录APP
                 this.chooseServeModal.searchForm.name = this.categoriList[i].name;
                 this.chooseServeModal.searchForm.code = this.categoriList[i].code;
                 this.viewSetting.details[index].recommendCategoryCode = this.categoriList[i].code;
                   switch (this.categoriList[i].code) {
-                   case 'MALL_PRODUCT':
-                       this.targetTypeName = '商品';
-                       this.viewSetting.details[index].showTargetBtn = 'Y';
-                       break;
-                   case 'MALL_STORE':
-                       this.targetTypeName = '店铺';
-                       this.viewSetting.details[index].showTargetBtn = 'Y';
-                       break;
-                   case 'MALL_PRODUCT_CATEGORY':
-                       this.targetTypeName = '商品分类';
-                       this.viewSetting.details[index].showTargetBtn = 'Y';
-                       break;
+                   // case 'MALL_PRODUCT':
+                   //     this.targetTypeName = '商品';
+                   //     this.viewSetting.details[index].showTargetBtn = 'Y';
+                   //     break;
+                   // case 'MALL_STORE':
+                   //     this.targetTypeName = '店铺';
+                   //     this.viewSetting.details[index].showTargetBtn = 'Y';
+                   //     break;
+                   // case 'MALL_PRODUCT_CATEGORY':
+                   //     this.targetTypeName = '商品分类';
+                   //     this.viewSetting.details[index].showTargetBtn = 'Y';
+                   //     break;
                    case 'APP_JUMP':
                        this.targetTypeName = 'APP内转链接';
                        this.viewSetting.details[index].recommendCategoryId = this.categoriList[i].id;
                        this.viewSetting.details[index].showTargetBtn = 'Y';
+                       this.viewSetting.details[index].needLogin = 'Y';
+                       this.viewSetting.details[index].isLogin = true;
                        break;
                    case 'H5':
                        this.viewSetting.details[index].recommendCategoryId = this.categoriList[i].id;
                        this.viewSetting.details[index].showTargetBtn = 'N';
+                     this.viewSetting.details[index].isLogin = false;
                        break;
                    case 'E_PROJECT':
                        this.targetTypeName = '服务项目';
                        this.viewSetting.details[index].recommendCategoryId = this.categoriList[i].id;
                        this.viewSetting.details[index].showTargetBtn = 'Y';
+                     this.viewSetting.details[index].isLogin = false;
                        break;
                    case 'E_SERVICE_CATEGORY':
                        this.targetTypeName = '服务分类';
                        this.viewSetting.details[index].recommendCategoryId = this.categoriList[i].id;
                        this.viewSetting.details[index].showTargetBtn = 'Y';
+                     this.viewSetting.details[index].isLogin = false;
                        break;
                    default:
-                       //this.viewSetting.details[index].showTargetBtn = 'N';
+                     // this.viewSetting.details[index].isLogin = false;
                   }
                   // this.viewSetting.details[index].needLogin = 'N';
                   /*重置数据*/
@@ -335,9 +341,9 @@
               }
           },
           getServerItem(){           //获取弹窗第二条数据
-              let formData = new FormData();
-              formData.append('categoryId',this.chooseServeModal.selectForm.serviceId)
-              this.$http.post('/ad/banner/get/repair/category',formData).then(res=>{
+              // let formData = new FormData();
+              // formData.append('categoryId',);
+              this.$http.get(`/yyht/v1/repair/category/select/next?parentId=${this.chooseServeModal.selectForm.serviceId}`).then(res=>{
                 if(res.data.code == 0){
                   this.secondList = res.data.data
                 }else{
@@ -348,7 +354,7 @@
           serveListRemote(query){    //获取弹窗第一条数据
             let code = this.chooseServeModal.searchForm.code;
             let name = query;
-            this.$http.get(`/service/getServiceByCategoryByCode?code=${code}&name=${name}`).then(res=>{
+            this.$http.get(`/yyht/v1/service/getServiceByCategoryByCode?code=${code}&name=${name}`).then(res=>{
               if (res.data.code === 0){
                 this.serveList = res.data.data;
               }else {
@@ -363,8 +369,8 @@
                 if(this.chooseServeModal.searchForm.code == 'APP_JUMP'){
                   this.chooseServeModal.selectForm.target = item.target;
                   this.viewSetting.details[this.detailIndex].needLogin = item.needLogin;
-                  this.viewSetting.details[this.detailIndex].isLogin = true;
-                  }else{this.viewSetting.details[this.detailIndex].isLogin = false;this.chooseServeModal.selectForm.target = item.serviceId}
+                  this.viewSetting.details[this.detailIndex].isLogin = item.needLogin;
+                  }else{this.viewSetting.details[this.detailIndex].needLogin = false;this.chooseServeModal.selectForm.target = item.serviceId}
                 if(this.chooseServeModal.searchForm.code == 'E_PROJECT'){this.chooseServeModal.selectForm.target = ''}
                 this.chooseServeModal.selectForm.title = item.title;
                 // this.chooseServeModal.selectForm.idServiceCategory = item.serviceId;
@@ -385,7 +391,7 @@
             let name = Date.parse(new Date())+randomNum;
             const axiosInstance = this.$http.create({withCredentials: true});    //withCredentials 禁止携带cookie，带cookie在七牛上有可能出现跨域问题
             let data = new FormData();
-            data.append('token', this.qiniuToken.token);     //七牛需要的token，叫后台给，是七牛账号密码等组成的hash
+            // data.append('token', this.qiniuToken.token);     //七牛需要的token，叫后台给，是七牛账号密码等组成的hash
             data.append('file', file);
             axiosInstance({
               method: 'POST',
@@ -393,28 +399,28 @@
               data: data,
               timeout:30000,      //超时时间，因为图片上传有可能需要很久
             }).then(res =>{
-              let data = res.data.data
-              this.$set(this.viewSetting.details[index],'targetImage',data.key);
-              this.viewSetting.details[index].targetImage = data.key;
-              this.viewSetting.details[index].url = data.imageUrl;
-              console.log(data)
+              let data = res.data.data;
+              this.$set(this.viewSetting.details[index],'targetImage',data.imageUrl);
+              // this.viewSetting.details[index].targetImage = data.imageUrl;
+              // this.viewSetting.details[index].url = data.imageUrl;
               document.getElementById("uploadFileInput").value = ''        //上传成功，把input的value设置为空，不然 无法两次选择同一张图片
               //上传成功...  (登录七牛账号，找到七牛给你的 URL地址) 和 data里面的key 拼接成图片下载地址
             }).catch(function(err) {
               //上传失败
             });
           },
-          getToken(){
-            this.$http.get(`/base/qiniu/token`).then(res=>{
-              if (res.data.code === 0){
-                this.qiniuToken.token = res.data.data.token;
-              }
-            })
-          },
+          // getToken(){
+          //   this.$http.get(`/base/qiniu/token`).then(res=>{
+          //     if (res.data.code === 0){
+          //       this.qiniuToken.token = res.data.data.token;
+          //     }
+          //   })
+          // },
           getAllOwner(){
             this.$http.get(`/yyht/v1/ad/owner/getOwnerList`).then(res=>{
               if (res.data.code === 0){
                 this.advertiserList = res.data.data
+                console.log(this.advertiserList)
               } else {
                 this.$Message.error(res.data.msg)
               }
@@ -438,11 +444,15 @@
             this.viewSetting.details[index].showTargetBtn = 'Y';
             this.viewSetting.details[index].target = this.chooseServeModal.selectForm.target;
             this.viewSetting.details[index].targetBtnName = this.chooseServeModal.selectForm.item?this.chooseServeModal.selectForm.title+'-'+this.chooseServeModal.selectForm.itemName:this.chooseServeModal.selectForm.title;
-            this.viewSetting.details[index].targetShowName = this.chooseServeModal.selectForm.title
+            this.viewSetting.details[index].targetShowName = this.chooseServeModal.selectForm.title;
             if(this.chooseServeModal.searchForm.code == 'E_PROJECT'){this.viewSetting.details[index].targetShowName = this.chooseServeModal.selectForm.itemName}
             this.chooseServeModal.show = false;
           },
           commitSet(){
+            this.viewSetting.details.forEach(v=>{
+              delete v.isLogin;
+              delete v.targetFullImage
+            });
             let parmas = _.cloneDeep(this.viewSetting)
             for (let i=0;i<parmas.details.length;i++){
               if (!parmas.details[i].targetImage || parmas.details[i].targetImage === ''){
@@ -458,10 +468,10 @@
                 return;
               }
               // if(parmas.details[i].recommendCategoryCode!=='E_PROJECT' && )
-              if ((!parmas.details[i].target|| parmas.details[i].target === '') && parmas.details[i].recommendCategoryCode==='H5') {
-                this.$Message.error("请设置推荐" + (i + 1) + "的H5链接地址");
-                return;
-              }
+              // if ((!parmas.details[i].target|| parmas.details[i].target === '') && parmas.details[i].recommendCategoryCode==='H5') {
+              //   this.$Message.error("请设置推荐" + (i + 1) + "的H5链接地址");
+              //   return;
+              // }
               if(!parmas.details[i].title|| parmas.details[i].title === ''){
                 this.$Message.error("请设置推荐" + (i + 1) + "的广告标题");
                 return;
@@ -481,10 +491,9 @@
             })
             delete parmas.end;
             this.$emit('onSave',parmas);
-          },
+          }
         },
       mounted() {
-        this.getToken();
         this.getAllOwner();
       }
     }

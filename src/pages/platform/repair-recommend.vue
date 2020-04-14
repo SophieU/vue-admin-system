@@ -100,7 +100,7 @@
                  data[i].details[j].targetBtnName = data[i].details[j].targetShowName;
                 }
                 data[i].details[j].adviseSizeDes = data[i].details[j].recommendFormatImgAdviceSizeDes;
-                data[i].details[j].targetFullImage = this.domain + data[i].details[j].targetImage;
+                data[i].details[j].targetImage = this.domain + data[i].details[j].targetImage;
                 data[i].details[j].recommendCategoryName = data[i].details[j].recommendCategoryCode;
                 switch (data[i].details[j].recommendCategoryCode) {
                   case 'MALL_PRODUCT':
@@ -204,9 +204,10 @@
         return;
       },
       selectView(view){
+        console.log(view)
         this.viewSetting = view;
         this.viewSetting.details.forEach((item,index)=>{
-          if(!item.needLogin){item.needLogin = 'Y'}
+          if(!item.needLogin){item.needLogin = 'N';item.isLogin = false}
           this.$set(item,'recommendCategoryName',item.recommendCategoryId);
         });
       },
@@ -219,14 +220,14 @@
           }
         })
       },
-      dragCommit(data){
+      dragCommit(data){  //拖拽事件
         this.phoneViewList = data.list;
         let sortIndex = data.event.newIndex;
         if (!this.phoneViewList[sortIndex].id) {
           return
         }
         let id = this.phoneViewList[sortIndex].id;
-        this.$http.get(`/server/recommend/config/sort?id=${id}&sortIndex=${sortIndex}`).then(res=>{
+        this.$http.get(`/yyht/v1/recommend/config/sort?id=${id}&sortIndex=${sortIndex}`).then(res=>{
           if (res.data.code === 0){
 
           } else {

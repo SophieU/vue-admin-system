@@ -222,11 +222,13 @@
             selectScreen(screen){
               screen.details.forEach(ele=>{
                 if(ele.recommendCategoryCode == 'APP_JUMP'){
+                  ele.needLogin = 'Y';
                   ele.isLogin = true
                 }else{
+                  ele.needLogin = 'N';
                   ele.isLogin = false
                 }
-              })
+              });
                 this.screenList.forEach(item=>{
                     this.$set(item,"screenActive",false);
                 });
