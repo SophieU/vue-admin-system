@@ -7,6 +7,8 @@
                   <span class="mr-15"><span class="text-blue">广告主名称：</span>{{advertiserMsg.ownerName}}</span>
                   <span class="mr-15"><span class="text-blue">联系电话：</span>{{advertiserMsg.ownerPhone}}</span>
                   <span class="mr-15"><span class="text-blue">联系地址：</span>{{advertiserMsg.ownerAddress}}</span>
+                  <span class="mr-15"><span class="text-blue">业务员姓名：</span>{{advertiserMsg.agentName}}</span>
+                  <span class="mr-15"><span class="text-blue">合作状态：</span>{{advertiserMsg.adState}}</span>
               </div>
               <div class="pull-right">
                 <Button type="primary" @click="showOwnerEdit">修改信息</Button>
@@ -14,8 +16,9 @@
             </div>
         </Card>
         <Card class="box-card">
-            <Tabs  @on-click="tabClick" value="inEffect">
-                <TabPane label="生效中广告" name="inEffect">
+          <Spin fix v-show="loading == true">加载中...</Spin>
+            <Tabs  @on-click="tabClick" :value="tabPaneValue">
+                <TabPane v-for="item in tabPane" :key="item.key" :label="item.label" :name="item.key">
                     <Table  :columns="adOn" :data="advertLists"></Table>
                     <div class="pagination">
                         <Page :current="pageConfig.current" :page-size="pageConfig.size" :total="pageConfig.total"
@@ -24,17 +27,6 @@
                               @on-page-size-change="handleSizeChange"
                          >
                         </Page>
-                    </div>
-                </TabPane>
-                <TabPane label="失效中广告" name="noEffect">
-                    <Table :data="advertLists" :columns="adOff"></Table>
-                    <div class="pagination">
-                      <Page :current="pageConfig.current" :page-size="pageConfig.size" :total="pageConfig.total"
-                            show-sizer show-elevator
-                            @on-change="handleCurrentChange"
-                            @on-page-size-change="handleSizeChange"
-                      >
-                      </Page>
                     </div>
                 </TabPane>
             </Tabs>
@@ -48,168 +40,48 @@
                     <FormItem label="联系电话" prop="ownerPhone">
                         <Input v-model="adOwnerEdit.from.ownerPhone"></Input>
                     </FormItem>
+                  <FormItem label="业务员姓名" prop="agentName">
+                    <Input v-model="adOwnerEdit.from.agentName" :maxlength="11"  style="width:250px"></Input>
+                  </FormItem>
                     <FormItem label="联系地址" prop="ownerAddress">
                         <Input v-model="adOwnerEdit.from.ownerAddress"></Input>
                     </FormItem>
+                  <FormItem label="合作状态：" prop="adState">
+                    <Select :transfer="true" v-model="adOwnerEdit.from.adState" placeholder="请选择" style="width:250px">
+                      <!--                      <Option-->
+                      <!--                        label="全部"-->
+                      <!--                        value="">-->
+                      <!--                      </Option>-->
+                      <Option
+                        label="合作中"
+                        value="IN_COOPERATION">
+                      </Option>
+                      <Option
+                        label="暂停中"
+                        value="PAUSE">
+                      </Option>
+                      <Option
+                        label="停止合作"
+                        value="STOP_COOPERATION">
+                      </Option>
+                    </Select>
+                  </FormItem>
                 </Form>
             </div>
             <div slot="footer" class="dialog-footer">
                 <Button @click="adOwnerEdit.show = false">取 消</Button>
-                <Button type="primary" :disabled="disabledBtn" @click="submitEdit">完成</Button>
+                <Button type="primary" @click="submitEdit">完成</Button>
             </div>
         </Modal>
         <Modal v-model="deleteModal.show" @close="deleteModal.adOwnerId = ''" width="30%">
             <div>
-                确定删除该广告主吗
+                确定删除该广告主吗?
             </div>
             <span slot="footer" class="dialog-footer">
                 <Button type="error" @click="submitDelete()">删除</Button>
                 <Button @click="deleteModal.show = false">取 消</Button>
             </span>
         </Modal>
-      <Modal
-        @on-visible-change="addModalOpen"
-        title="编辑广告"
-        v-model="addModal.show"
-        width="30%"
-        :modal-append-to-body="false"
-        :append-to-body="true"
-        :show-close="false"
-        center>
-        <div class="modal-form">
-          <Form :model="addModal.form" v-if="addModal.form.adTypeId === '4'" :rules="typeRules4" ref="addForm" :label-width="100" class="demo-ruleForm">
-            <FormItem label="广告主" prop="adOwnerId">
-              <Select v-model="addModal.form.adOwnerId" placeholder="请选择">
-                <Option
-                  v-for="item in adOwnerList"
-                  :key="item.id"
-                  :value="item.id"
-                  :label="item.ownerName"
-                >
-                  {{item.ownerName}}
-                </Option>
-              </Select>
-            </FormItem>
-            <FormItem label="URL" prop="target">
-              <Input v-model="addModal.form.target"></Input>
-            </FormItem>
-            <FormItem label="广告标题" prop="title">
-              <Input v-model="addModal.form.title" :maxlength="10"></Input>
-              <span style="color:red">最多10个字</span>
-            </FormItem>
-            <FormItem label="广告图片" prop="imgName">
-              <UploadImg ref="upImg" :eidtImg="eidtImg"  @onUpload="onUpload"></UploadImg>
-              <span style="color:red">推荐尺寸：1334*750；图片比例：1.78:1</span>
-            </FormItem>
-            <FormItem label="是否长期有效" prop="isLongValid">
-              <RadioGroup v-model="addModal.form.isLongValid">
-                <Radio label="Y">是</Radio>
-                <Radio label="N">否</Radio>
-              </RadioGroup>
-            </FormItem>
-            <FormItem label="开始时间" prop="startTime" v-if="addModal.form.isLongValid=== 'N'">
-              <DatePicker :editable="false"
-                v-model="addModal.form.startTime"
-                type="datetime"
-                placeholder="选择开始时间">
-              </DatePicker>
-            </FormItem>
-            <FormItem label="结束时间" prop="endTime" v-if="addModal.form.isLongValid=== 'N'">
-              <DatePicker :editable="false"
-                v-model="addModal.form.endTime"
-                type="datetime"
-                placeholder="选择结束时间">
-              </DatePicker>
-            </FormItem>
-          </Form>
-          <Form :model="addModal.form" v-else :rules="typeRulesX" ref="addFormB" :label-width="100" class="demo-ruleForm">
-            <FormItem label="广告主" prop="adOwnerId">
-              <Select v-model="addModal.form.adOwnerId" placeholder="请选择">
-                <Option
-                  v-for="item in adOwnerList"
-                  :key="item.id"
-                  :value="item.id"
-                  :label="item.ownerName"
-                >
-                  {{item.ownerName}}
-                </Option>
-              </Select>
-            </FormItem>
-            <FormItem label="类型" prop="serviceCategoryCode">
-              <Tree :data="typeTree" @on-select-change="selectType"></Tree>
-              <Button type="primary" v-if="isServeBtn.show" @click="initServeList">{{isServeBtn.targetName}}</Button>
-            </FormItem>
-            <FormItem label="URL" prop="target" v-if="addModal.form.serviceCategoryCode === 'H5'">
-              <Input v-model="addModal.form.target"></Input>
-            </FormItem>
-            <FormItem label="是否仅针对于新注册用户" prop="applyNewUser">
-              <RadioGroup v-model="addModal.form.applyNewUser">
-                <Radio label="Y">是</Radio>
-                <Radio label="N">否</Radio>
-              </RadioGroup>
-            </FormItem>
-            <FormItem label="广告标题" prop="title">
-              <Input v-model="addModal.form.title" :maxlength="10"></Input>
-              <span style="color:red">最多10个字</span>
-            </FormItem>
-            <FormItem label="广告图片" prop="imgName">
-              <UploadImg ref="upImg" :eidtImg="eidtImg"  @onUpload="onUpload"></UploadImg>
-              <span style="color:red">要求：图片大小 345*156 比例 3.45：1.56</span>
-            </FormItem>
-            <FormItem label="是否长期有效" prop="isLongValid">
-              <RadioGroup v-model="addModal.form.isLongValid">
-                <Radio label="Y">是</Radio>
-                <Radio label="N">否</Radio>
-              </RadioGroup>
-            </FormItem>
-            <FormItem label="开始时间" prop="startTime" v-if="addModal.form.isLongValid=== 'N'">
-              <DatePicker :editable="false"
-                v-model="addModal.form.startTime"
-                type="datetime"
-                placeholder="选择开始时间">
-              </DatePicker>
-            </FormItem>
-            <FormItem label="结束时间" prop="endTime" v-if="addModal.form.isLongValid=== 'N'">
-              <DatePicker :editable="false"
-                v-model="addModal.form.endTime"
-                type="datetime"
-                placeholder="选择结束时间">
-              </DatePicker>
-            </FormItem>
-            <FormItem label="是否到期提醒" prop="needExpireRemind">
-              <RadioGroup v-model="addModal.form.needExpireRemind">
-                <Radio label="Y">是</Radio>
-                <Radio label="N">否</Radio>
-              </RadioGroup>
-            </FormItem>
-          </Form>
-        </div>
-        <span slot="footer" class="dialog-footer">
-                <Button @click="addModal.show = false">取 消</Button>
-                <Button type="primary" :disabled="disabledBtn" @click="submitEditAdvert()">完成</Button>
-            </span>
-      </Modal>
-      <Modal
-        v-model="chooseServeModal.show"
-        @on-visible-change="onServeCh"
-        :mask-closable="false"
-        width="30%"
-      >
-        <Select
-          style="margin-top: 20px"
-          v-model="chooseServeModal.selectForm.target"
-          :filterable="true"
-          :remote="true"
-          :remote-method="serveListRemote"
-          @on-change="changeOnServe"
-          :loading="loadingServe">
-          <Option v-for="(serve, index) in serveList" :value="serve.target" :key="serve.serviceId">{{serve.title}}</Option>
-        </Select>
-        <span slot="footer" class="dialog-footer">
-                <Button @click="chooseServeModal.show = false">取 消</Button>
-                <Button type="primary" @click="selectServe">完成</Button>
-        </span>
-      </Modal>
     </div>
 </template>
 
@@ -230,88 +102,29 @@
       },
         data(){
             return{
-                adOwnerId:'',
+              loading:true,
+              tabPaneValue:'',
+              tabPane:[{label:'生效中',key:'IN_EFFECT'},{label:'已失效',key:'IS_INVALID'},{label:'即将过期',key:'IMMINENT_EXPIRY'},{label:'未生效',key:'NOT_EFFECTIVE'}],
+              adOwnerId:'',
               spinShow:false,
-              disabledBtn:false,
-                adOwnerEdit:{
+                adOwnerEdit:{  //修改框的数据
                   show:false,
                   from:{
                     id:'',
                     ownerAddress:'',
                     ownerName:'',
-                    ownerPhone:''
+                    ownerPhone:'',
+                    agentName:'',  //业务员姓名
+                    adState:''
                   }
                 },
-              serveList:[],
-              loadingServe:false,
-              chooseServeModal:{
-                show:false,
-                searchForm:{
-                  code:'',
-                  name:'',
-                },
-                selectForm:{
-                  target:'',
-                  title:'',
-                  idServiceCategory:''
-                }
-              },
-              adOwnerList:[],
-              typeTree:[],
-              addModal: {
-                show:false,
-                type:'add',
-                form:{
-                  adOwnerId:'',//所属广告主Id
-                  adTypeId:'',//广告位id,插屏广告默认传值 7，启动页广告默认传 4
-                  applyNewUser:'N',//是否仅针对于新注册用户,是：Y 否：N 没有选项默认传：N
-                  idServiceCategory:'',//所属服务分类Id,启动页广告默认传:5
-                  imgName:'',
-                  isLongValid:'N',//是否长期有效
-                  needLogin:'N',//是否需要登录,是：Y 否：N 默认为 N
-                  serviceCategoryCode:'',//服务分类编码 ,启动页广告默认传:H5
-                  target:'',//目标（具体的操作码/id/h5链接）
-                  title:'',//标题
-                  needExpireRemind:'N',// 是否到期提醒,当设置不是长期有效的，此值必填 是：Y 否：N
-                  startTime:'',
-                  endTime:''
-                }
-              },
-              typeRules4:{
-                adOwnerId: [
-                  { required: true, message: '请选择广告主', trigger: 'blur' },
-                ],
-                title:[
-                  { required: true, message: '请输入广告标题', trigger: 'blur' },
-                ],
-                imgName:[
-                  { required: true, message: '请选择广告图片', trigger: 'blur' },
-                ],
-                target:[
-                  { required: true, message: '请输入目标url', trigger: 'blur' }]
-              },//启动页App广告编辑页面表单验证规则
-              typeRulesX:{
-                adOwnerId: [
-                  { required: true, message: '请选择广告主', trigger: 'blur' },
-                ],
-                title:[
-                  { required: true, message: '请输入广告标题', trigger: 'blur' },
-                ],
-                imgName:[
-                  { required: true, message: '请选择广告图片', trigger: 'blur' },
-                ],
-                serviceCategoryCode:[
-                  { required: true, message: '请选择类型', trigger: 'blur' }
-                ],
-                target:[
-                  { required: true, message: '请输入目标url', trigger: 'blur' },
-                ]
-              },//其他类型广告编辑页面表单验证规则
                 advertiserMsg:{
                     id:'',
                     ownerAddress:'',
                     ownerName:'',
-                    ownerPhone:''
+                    ownerPhone:'',
+                    agentName:'',
+                    adState:''
                 },
                 searchAdState:"IN_EFFECT",//广告生效状态类型 生效中:IN_EFFECT 已失效:IS_INVALID 默认生效中
                 pageConfig:{
@@ -332,19 +145,25 @@
                     adTypeId:''
                 },
               eidtImg:null,
-                advertLists:[],//广告列表数据
-                rules: {
-                    ownerName: [
-                        { required: true, message: '请输入广告主', trigger: 'blur' },
-                    ],
-                    ownerPhone:[
-                        { required: true, message: '请输入联系电话', trigger: 'blur' },
-                        // {validator:validateTel,trigger:'blur'}
-                    ],
-                    ownerAddress:[
-                        { required: true, message: '请输入联系地址', trigger: 'blur' },
-                    ]
-                },
+              advertLists:[],//广告列表数据
+              rules: {
+                ownerName: [
+                  { required: true, message: '请输入广告主', trigger: 'blur' },
+                ],
+                ownerPhone:[
+                  { required: true, message: '请输入联系电话', trigger: 'blur' },
+                  // {validator:validateTel,trigger:'blur'}
+                ],
+                ownerAddress:[
+                  { required: true, message: '请输入联系地址', trigger: 'blur' },
+                ],
+                agentName:[
+                  { required: true, message: '请输入业务员姓名', trigger: 'blur' },
+                ],
+                adState:[
+                  { required: true, message: '请选择广告状态', trigger: 'blur' },
+                ],
+              },
               adOn:[
                 {title:'编号',type:'index',align:'center'},
                 {title:'广告主',key:'ownerName',align:'center'},
@@ -362,12 +181,12 @@
                 {title:'广告状态', align:'center',render:(h,params)=>{
                     let status = params.row.adState;
                     let text='';
-                    let color='#333'
+                    let color='#333';
                     if(status==='IN_EFFECT'){
                       text = '生效中'
                     }
                      if(status==='IS_INVALID'){
-                      text = '已失效'
+                      text = '已失效';
                        color='#f00'
                     }
                     return h('span',{style:{color}},text)
@@ -375,11 +194,11 @@
 
                 {title:'跳转类型',key:'type',align:'center'},
                 {title:'是否长期有效' ,align:'center',render:(h,params)=>{
-                    let valid = params.row.isLongValid==='Y'?'是':'否'
+                    let valid = params.row.isLongValid==='Y'?'是':'否';
                     return h('span',{},valid)
                   }},
                 {title:'开始时间',key:'index',align:'center',render:(h,params)=>{
-                    let time = params.row.startTime
+                    let time = params.row.startTime;
                     if (time) {
                       time = moment(time).format('YYYY-MM-DD hh:mm')
                     }else {
@@ -402,164 +221,38 @@
                     return h('div',[
                       h('Button',{
                         props:{
-                          type:'primary',
-                          size:'small'
-                        },
-                        on:{
-                          click(){
-                            _this.showEdit(id)
-                          }
-                        }
-                      },'编辑'),
-                      h('Button',{
-                        props:{
                           type:'error',
                           size:'small'
                         },
                         on:{
                           click(){
-                            _this.showDelete(id)
+                            _this.$store.commit('setDeleteModal',{model:true,callback:()=>{
+                                _this.submitDelete(id);
+                              }});
                           }
                         }
                       },'删除'),
-
                     ])
                   }},
-              ],
-              adOff:[
-                {title:'编号',type:'index',align:'center'},
-                {title:'广告主',key:'ownerName',align:'center'},
-                {title:'广告位置',key:'typeName',align:'center'},
-                {title:'图片',key:'index',align:'center',width:118,render:(h,params)=>{
-                    return h('img',{
-                      attrs:{
-                        src:params.row.imgName,
-                        'class':'advertImg',
-                        'width':'100px',
-                        'height':'63px'
-                      },
-                    })
-                  }},
-                {title:'广告状态', align:'center',render:(h,params)=>{
-                    let status = params.row.adState;
-                    let text='';
-                    let color='#333';
-                    if(status==='IN_EFFECT'){
-                      text = '生效中'
-                    }
-                    if(status==='IS_INVALID'){
-                      text = '已失效';
-                      color='#f00'
-                    }
-                    return h('span',{style:{color}},text)
-                  }},
-
-                {title:'跳转类型',key:'type',align:'center'},
-                {title:'是否长期有效' ,align:'center',render:(h,params)=>{
-                    let valid = params.row.isLongValid==='Y'?'是':'否'
-                    return h('span',{},valid)
-                  }},
-                {title:'开始时间',key:'index',align:'center',render:(h,params)=>{
-                    let time = params.row.startTime
-                    if (time) {
-                      time = moment(time).format('YYYY-MM-DD hh:mm')
-                    }else {
-                      time = ''
-                    }
-                    return h('span',{},time)
-                  }},
-                {title:'结束时间' ,align:'center',render:(h,params)=>{
-                    let time = params.row.endTime;
-                    if (time) {
-                      time = moment(time).format('YYYY-MM-DD hh:mm')
-                    }else {
-                      time = ''
-                    }
-                    return h('span',{},time)
-                  }},
-                {title:'操作',width:240,align:'center',render:(h,params)=>{
-                    let _this = this;
-                    let id = params.row.id;
-                    let adTypeId = params.row.adTypeId;
-                    return h('div',[
-                      h('Button',{
-                        props:{
-                          type:'primary',
-                          size:'small'
-                        },
-                        on:{
-                          click(){
-                            _this.showEdit(id)
-                          }
-                        }
-                      },'编辑'),
-                      h('Button',{
-                        props:{
-                          type:'error',
-                          size:'small'
-                        },
-                        on:{
-                          click(){
-                            _this.showDelete(id,adTypeId)
-                          }
-                        }
-                      },'删除'),
-
-                    ])
-
-                  }},
-              ],
+              ]
             }
         },
         methods:{
-            init(){
-                this.getAdList();
-                this.getOwnerDetail();
-                this.getTypeTree();
-            },
-          getTypeTree(){
-            this.$http.get(`/yyht/v1/service/category/getAllServiceCategory`).then(res=>{
-              if (res.data.code === 0){
-                let arr = [];
-                res.data.data.forEach(item=>{
-                  item.title = item.name;
-                  if (item.idParent === '0'){
-                    item.children = [];
-                    arr.push(item);
-                  }
-                });
-                arr.forEach(val=>{
-                  res.data.data.forEach(item=>{
-                    if (item.idParent === val.id){
-                      val.children.push(item)
-                    }
-                  })
-                });
-                this.typeTree = arr;
-              } else {
-                this.$Message.error(res.data.msg)
-              }
-            });
+          init(){
+              this.getAdList();
+              this.getOwnerDetail();
           },
-          showOwnerEdit(){
+          showOwnerEdit(){   //修改信息按钮的弹出框
               this.adOwnerEdit.from.id=this.advertiserMsg.id;
               this.adOwnerEdit.from.ownerName=this.advertiserMsg.ownerName;
               this.adOwnerEdit.from.ownerAddress=this.advertiserMsg.ownerAddress;
               this.adOwnerEdit.from.ownerPhone=this.advertiserMsg.ownerPhone;
+              this.adOwnerEdit.from.agentName=this.advertiserMsg.agentName;
               this.adOwnerEdit.show = true;
           },
             tabClick(name){
-              if (name === 'inEffect'){
-                    this.searchAdState = 'IN_EFFECT';
-                    this.pageConfig.current = 1;
-                    this.pageConfig.total = 0;
-                    this.pageConfig.size = 10;
-                } else if (name === 'noEffect') {
-                    this.searchAdState = 'IS_INVALID';
-                    this.pageConfig.current = 1;
-                    this.pageConfig.size = 10;
-                    this.pageConfig.total = 0;
-                }
+              this.loading = true;
+              this.searchAdState = name;
               this.getAdList();
             },
             getAdList(){
@@ -570,70 +263,72 @@
                     pageNo: this.pageConfig.current,
                     pageSize: this.pageConfig.size
                 };
-              this.$http.get(`/yyht/v1/ad/owner/getPageList`,parmas).then(res=>{
+              this.$http.get(`/yyht/v1/ad/owner/ad/getPageList?pageNo=${parmas.pageNo}&pageSize=${parmas.pageSize}&adState=${parmas.adState}&adOwnerId=${parmas.adOwnerId}`).then(res=>{
                     if (res.data.code === 0){
                         let data = res.data.data.list;
                         this.advertLists =data;
                         this.pageConfig.current = res.data.data.pageNo;
                         this.pageConfig.total = res.data.data.totalCount;
+                        this.loading = false;
                     }else {
                         this.$Message.error(res.data.msg);
                     }
                 })
             },
-            getOwnerDetail(){
+            getOwnerDetail(){  //上方长卡片显示的详细信息
                 let id = this.$route.query.id;
                 this.$http.get(`/yyht/v1/ad/owner/get/owner?adOwnerId=${id}`).then(res=>{
                     if (res.data.code === 0){
+                      let val;
+                      switch (res.data.data.ownerState) {
+                        case "IN_COOPERATION": val='合作中';
+                        break;
+                        case "PAUSE" :val = '暂停中';
+                        break;
+                        default: val = '未生效'
+                      }
                         this.advertiserMsg = {
                             id:res.data.data.id,
                             ownerAddress:res.data.data.ownerAddress,
                             ownerName:res.data.data.ownerName,
-                            ownerPhone:res.data.data.ownerPhone
+                            ownerPhone:res.data.data.ownerPhone,
+                            agentName:res.data.data.agentName,
+                            adState:val
                         };
+                      this.adOwnerEdit.from.adState = res.data.data.ownerState; //模态框合作状态赋值
                     } else {
                         this.$Message.error(res.data.msg);
                     }
                 })
             },
-            showDelete(id,adTypeId){
-                this.deleteModal.show = true;
-                this.deleteModal.adOwnerId = id;
-              this.deleteModal.adTypeId = adTypeId;
-            },
-            submitDelete(){
-                let id = this.deleteModal.adOwnerId;
-                let url = '';
-                if (this.deleteModal.adTypeId==='4'){
-                  url = '/ad/config/deleteAdById?id='+id;
-                } else if (this.deleteModal.adTypeId==='7'){
-                  url = '/ad/screen/deleteAdById?id='+id;
-                } else {
-                  url = '/ad/banner/deleteAdById?id='+id;
-                }
-                this.$http.delete(url).then(res=>{
+            // showDelete(id,adTypeId){
+            //     this.deleteModal.show = true;
+            //     this.deleteModal.adOwnerId = id;
+            //     this.deleteModal.adTypeId = adTypeId;
+            // },
+            submitDelete(id){   //
+                this.$http.post(`/yyht/v1/ad/config/deleteAdById?id=${id}`,).then(res=>{
                     if (res.data.code === 0){
                         this.$Message.success('删除成功');
-                        this.deleteModal.show = false;
+                        this.$store.commit('setDeleteModal',{model:false});
                         this.init();
                     } else {
                         this.$Message.error(res.data.msg);
                     }
                 })
             },
-            submitEdit(){
+            submitEdit(){ //修改框的确认按钮
                 this.$refs['editForm'].validate((valid) => {
                     if (valid) {
-                      this.disabledBtn = true;
                         let params = {
                             ownerAddress: this.adOwnerEdit.from.ownerAddress,
                             ownerName: this.adOwnerEdit.from.ownerName,
+                            agentName:this.adOwnerEdit.from.agentName,
                             ownerPhone: this.adOwnerEdit.from.ownerPhone,
-                            ownerState: "IN_COOPERATION",  //合作状态 合作中:IN_COOPERATION 暂停中:PAUSE 停止合作:STOP_COOPERATION 默认合作中
+                            ownerState: this.adOwnerEdit.from.adState,  //合作状态 合作中:IN_COOPERATION 暂停中:PAUSE 停止合作:STOP_COOPERATION 默认合作中
                             adOwnerId:this.adOwnerEdit.from.id
                         };
-                        this.$http.post(`/ad/owner/add/adOwner`,params).then(res=>{
-                          this.disabledBtn = false;
+                        this.$http.post(`/yyht/v1/ad/owner/addOrUpdate`,params).then(res=>{
                             if (res.data.code === 0){
                                 this.$Message.success('修改成功');
                                 this.adOwnerEdit.show = false;
@@ -646,8 +341,7 @@
                         this.$Message.error('表单填写错误');
                         return false;
                     }
-                });
-
+                })
             },
           onServeCh(flag){
             if (flag === false){
@@ -738,151 +432,17 @@
               this.isServeBtn.data = {};
             }
           },
-          serveListRemote(query){
-            let code = this.chooseServeModal.searchForm.code;
-            let name = query;
-            this.$http.get(`/service/getServiceByCategoryByCode?code=${code}&name=${name}`).then(res=>{
-              if (res.data.code === 0){
-                this.serveList = res.data.data;
-              }else {
-                this.$Message.error(res.data.msg)
-              }
-            })
-          },
-          initServeList(){
-            let code = this.chooseServeModal.searchForm.code;
-            let name = '';
-            this.$http.get(`/service/getServiceByCategoryByCode?code=${code}&name=${name}`).then(res=>{
-              if (res.data.code === 0){
-                this.serveList = res.data.data;
-                //this.chooseServeModal.searchForm.pageTotal = res.data.data.totalCount;
-                /*this.chooseServeModal.selectForm.target = this.addModal.form.target;
-                this.chooseServeModal.selectForm.title = this.addModal.form.title;
-                this.chooseServeModal.selectForm.idServiceCategory = this.addModal.form.idServiceCategory;*/
-                this.chooseServeModal.show = true
-              }else {
-                this.$Message.error(res.data.msg)
-              }
-            })
-          },
-          changeOnServe(code){
-            this.serveList.forEach(item=>{
-              if (item.target === code){
-                this.chooseServeModal.selectForm.target = item.target;
-                this.chooseServeModal.selectForm.title = item.title;
-                this.chooseServeModal.selectForm.idServiceCategory = item.serviceId;
-              }
-            });
-          },
-          selectServe(){
-            this.addModal.form.target = this.chooseServeModal.selectForm.target;
-            this.addModal.form.title = this.chooseServeModal.selectForm.title;
-            this.isServeBtn.targetName = this.chooseServeModal.selectForm.title;
-            this.addModal.form.idServiceCategory = this.chooseServeModal.selectForm.idServiceCategory;
-            this.chooseServeModal.show = false;
-          },
           onUpload(data){
             this.addModal.form.imgName = data.key
           },
-          submitEditAdvert(){
-              if (this.$refs['addForm'] !== undefined){
-                this.$refs['addForm'].validate((valid) => {
-                  if (valid) {
-                    this.disabledBtn = true;
-                    let parmas = this.addModal.form;
-                    if (parmas.startTime && parmas.startTime !== ''){
-                      parmas.startTime = new Date(parmas.startTime).Format('yyyy-MM-dd hh:mm:ss');
-                    }
-                    if (parmas.endTime && parmas.endTime !== ''){
-                      parmas.endTime = new Date(parmas.endTime).Format('yyyy-MM-dd hh:mm:ss');
-                    }
-                    this.$http.post(`/ad/config/addOrUpdateAd`,parmas).then(res=>{
-                      this.disabledBtn = false;
-                      if (res.data.code === 0){
-                        this.$Message.success('修改成功');
-                        this.pageConfig.current = 1;
-                        this.getAdList();
-                        this.addModal.show = false
-                      } else {
-                        this.$Message.error(res.data.msg)
-                      }
-                    })
-                  }else {
-                    this.$Message.error('表单填写错误');
-                    return false;
-                  }
-                })
-              };
-            if (this.$refs['addFormB'] !== undefined){
-              this.$refs['addFormB'].validate((valid) => {
-                if (valid) {
-                  this.disabledBtn = true;
-                  let parmas = this.addModal.form;
-                  if (parmas.startTime && parmas.startTime !== ''){
-                    parmas.startTime = new Date(parmas.startTime).Format('yyyy-MM-dd hh:mm:ss');
-                  }
-                  if (parmas.endTime && parmas.endTime !== ''){
-                    parmas.endTime = new Date(parmas.endTime).Format('yyyy-MM-dd hh:mm:ss');
-                  }
-                  let url='';
-                  if (parmas.adTypeId ==='7'){
-                    url='/ad/screen/addOrUpdateAd'
-                  } else {
-                    url='/ad/banner/addOrUpdateAd'
-                  }
-                  this.$http.post(url,parmas).then(res=>{
-                    this.disabledBtn = false;
-                    if (res.data.code === 0){
-                      this.$Message.success('修改成功');
-                      this.pageConfig.current = 1;
-                      this.getAdList();
-                      this.addModal.show = false
-                    } else {
-                      this.$Message.error(res.data.msg)
-                    }
-                  })
-                }else {
-                  this.$Message.error('表单填写错误');
-                  return false;
-                }
-              })
-            }
-          },
-          addModalOpen(flag){
-              if (flag === true){
-                this.$http.get(`/yyht/v1/ad/owner/getOwnerList`).then(res=>{
-                  if (res.data.code === 0){
-                    this.adOwnerList = res.data.data;
-                  } else {
-                    this.$Message.error(res.data.msg)
-                  }
-                })
-              }else {
-                if (this.$refs['addForm'] !== undefined){
-                  this.$refs['addForm'].resetFields();
-                }
-                if (this.$refs['addFormB'] !== undefined){
-                  this.$refs['addFormB'].resetFields();
-                }
-                this.typeTree.forEach(item=>{
-                  item.selected = false;
-                  if (item.children.length > 0){
-                    item.children.forEach(child=>{
-                      child.selected = false
-                    })
-                  }
-                });
-                this.isServeBtn.show = false;
-                this.isServeBtn.data = {};
-                this.eidtImg = null;
-              }
-          },
             handleSizeChange(size){
+                this.loading = true;
                 this.pageConfig.size = size;
                 this.pageConfig.current = 1;
                 this.getAdList();
             },
             handleCurrentChange(page){
+                this.loading = true;
                 this.pageConfig.current = page;
                 this.getAdList();
             }

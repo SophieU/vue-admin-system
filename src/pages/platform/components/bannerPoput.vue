@@ -35,7 +35,7 @@
                 <Button type="primary" v-else @click="initServeList">请选择{{isServeBtn.targetName}}</Button>
               </FormItem>
               <div v-else>
-                <FormItem  label="URL" prop="target">
+                <FormItem  label="URL">
                   <Input v-model="addModal.form.target"></Input>
                 </FormItem>
               </div>
@@ -92,7 +92,7 @@
         </div>
         <span slot="footer" class="dialog-footer">
         <Button @click="closeModal">取 消</Button>
-        <Button type="primary" :disabled="disabledBtn" @click="submitAdd()">完成</Button>
+        <Button type="primary" @click="loading = true;submitAdd()" :loading="loading">完成</Button>
       </span>
       </Modal>
       <Modal
@@ -172,6 +172,7 @@
             secondList:[],//服务分类第二个选择框
             serveList:[],//服务类型第一个选择框
             label:'',
+            loading:false,
             chooseServeModal:{ //第二个弹窗
               show:false,
               searchForm:{
@@ -200,7 +201,6 @@
               data:{
               }
             },
-            disabledBtn:false,
             domain:'',
             eidtImg:null,//编辑回显图片
             ifLogin:false,//是否登录APP
@@ -235,9 +235,9 @@
               imgName:[
                 { required: true, message: '请选择广告图片', trigger: 'change' },
               ],
-              target:[
-                { required: true, message: '请输入目标url', trigger: 'blur' },
-              ],
+              // target:[
+              //   { required: true, message: '请输入目标url', trigger: 'blur' },
+              // ],
               needLogin:[{ required: true, message: '请选择是否跳转APP', trigger: 'blur' }]
             },
             typeDes:'图片大小 345*156 比例 3.45：1.56'
@@ -336,7 +336,6 @@
               if(!this.addModal.form.needLogin){
                 this.$Message.warning('请选择是否登录APP');
                 return}
-              this.disabledBtn = true;
               this.addModal.form.idServiceCategory = this.poseObj.id;
               this.addModal.form.serviceCategoryCode = this.poseObj.code;
               if(this.poseObj.code == "E_PROJECT"){
@@ -351,7 +350,6 @@
                 parmas.endTime = new Date(parmas.endTime).Format('yyyy-MM-dd hh:mm:ss');
               }
               this.$http.post(`yyht/v1/ad/config/addOrUpdate`,parmas).then(res=>{
-                this.disabledBtn = false;
                 if(res.data.code === 0){
                   if(this.modalType === 'add'){
                     this.$Message.success('添加成功');
@@ -363,9 +361,11 @@
                   this.$Message.warning(res.data.msg);
                   this.$emit('completeModal',false)
                 }
+                this.loading = false;
               })
             }else{
               this.$Message.warning('表单填写不完整!');
+              this.loading = false;
               return false;
             }
           })

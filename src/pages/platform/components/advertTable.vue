@@ -1,6 +1,5 @@
 <template>
     <div class="start-app-body">
-      <Spin fix v-show="tabLoading == true">加载中...</Spin>
         <Table :columns="columns"
                 :data="advertLists"
                :draggable="true"
@@ -29,9 +28,6 @@
             }
         },
         props:{
-          loading:{
-            type:Boolean
-          },
           advertLists:{
             type:Array
           },
@@ -42,17 +38,8 @@
             type:String
           }
         },
-      watch:{
-        loading:{
-          handler(newV,oldV){
-            this.tabLoading = newV
-            console.log(newV)
-          }
-        }
-      },
         data(){
             return{
-              tabLoading:false,
               adOwnerList:[],
               columns:[
                 {title:'编号',width:'80',key:'sortIndex',align:'center'},
@@ -210,14 +197,14 @@
               this.$emit('sortChange',column)
             },
           onDrag(index1,index2){
-            let tmp = this.advertLists[index1];
-            this.advertLists[index1] = this.advertLists[index2];
-            this.advertLists[index2] = tmp;
-            let parmas = [];
-            this.advertLists.forEach((item,index)=>{
-              parmas.push(item.id)
-            });
-            this.$emit('onDrag',parmas);
+            // let tmp = this.advertLists[index1];
+            // this.advertLists[index1] = this.advertLists[index2];
+            // this.advertLists[index2] = tmp;
+            // let parmas = [];
+            // this.advertLists.forEach((item,index)=>{
+            //   parmas.push(item.id)
+            // });
+            this.$emit('onDrag',{sortIndex:this.advertLists[index2].sortIndex,id:this.advertLists[index1].id});
 
           },
           setTips(row){

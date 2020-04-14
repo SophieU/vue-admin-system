@@ -31,7 +31,7 @@
             <FormItem label="广告标题：">
             <Input v-model="searchForm.adTitle"  style="width:190px"></Input>
           </FormItem>
-            <FormItem label="广告主状态：">
+            <FormItem label="广告状态：">
             <Select :transfer="true" v-model="searchForm.adState" placeholder="请选择" style="width:190px">
               <Option
                 label="全部"
@@ -78,7 +78,7 @@
             </DatePicker>
           </FormItem>
             <FormItem class="no-label-form-item">
-              <Button type="primary" @click="onSearch"  >查询</Button>
+              <Button type="primary" @click="onSearch">查询</Button>
               <Button class="mr-15"  @click="onReset"  >重置</Button>
             </FormItem>
           </Form>
@@ -100,7 +100,7 @@
         },
         data:()=>{
             return{
-                advertiserList:[],
+              advertiserList:[],
               startTimeArr:[],
               endTimeArr:[]
             }

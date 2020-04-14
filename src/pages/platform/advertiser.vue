@@ -45,14 +45,37 @@
                     <FormItem label="联系电话" prop="ownerPhone">
                         <Input v-model="addModal.form.ownerPhone" :maxlength="11"  style="width:250px"></Input>
                     </FormItem>
+                  <FormItem label="业务员姓名" prop="agentName">
+                    <Input v-model="addModal.form.agentName" :maxlength="11"  style="width:250px"></Input>
+                  </FormItem>
                     <FormItem label="联系地址" prop="ownerAddress">
                         <Input v-model="addModal.form.ownerAddress"  style="width:250px"></Input>
                     </FormItem>
+                  <FormItem label="合作状态：" prop="adState">
+                    <Select :transfer="true" v-model="addModal.form.adState" placeholder="请选择" style="width:250px">
+<!--                      <Option-->
+<!--                        label="全部"-->
+<!--                        value="">-->
+<!--                      </Option>-->
+                      <Option
+                        label="合作中"
+                        value="IN_COOPERATION">
+                      </Option>
+                      <Option
+                        label="暂停中"
+                        value="PAUSE">
+                      </Option>
+                      <Option
+                        label="停止合作"
+                        value="STOP_COOPERATION">
+                      </Option>
+                    </Select>
+                  </FormItem>
                 </Form>
             </div>
             <span slot="footer" class="dialog-footer">
                 <Button @click="addModal.show = false">取 消</Button>
-                <Button type="primary" :disabled="disabledBtn" @click="submitAdd('addForm')">完成</Button>
+                <Button type="primary" @click="loading = true;submitAdd('addForm')" :loading="loading">完成</Button>
             </span>
         </Modal>
         <Modal
@@ -77,6 +100,7 @@
         name: "advertiser",
         data(){
             return {
+              loading:false,
               tableLoading:true,
                 searchForm: {
                     name: '',
@@ -98,6 +122,8 @@
                         ownerName: '',
                         ownerPhone: '',
                         ownerAddress: '',
+                        agentName:'',
+                        adState:'',
                         id:''
                     }
                 },
@@ -115,7 +141,13 @@
                     ],
                     ownerAddress:[
                         { required: true, message: '请输入联系地址', trigger: 'blur' },
-                    ]
+                    ],
+                    agentName:[
+                        { required: true, message: '请输入业务员姓名', trigger: 'blur' },
+                    ],
+                    adState:[
+                        { required: true, message: '请选择广告状态', trigger: 'blur' },
+                    ],
                 },
               columns:[
                 {title:'序号',align:'center',render:(h,params)=>{
@@ -125,6 +157,7 @@
                 {title:'联系地址',key:'ownerAddress',align:'center'},
                 {title:'联系电话',key:'ownerPhone',align:'center'},
                 {title:'正在投放广告数',key:'countNum',align:'center'},
+                {title:'广告状态',key:'ownerState',align:'center'},
                 {title:'操作',width:240,align:'center',render:(h,params)=>{
                     let _this = this;
                     let id = params.row.id;
@@ -164,11 +197,13 @@
                         },
                         on:{
                           click:()=>{
-                            _this.showDelete(params.row.id)
+                            let _this = this;
+                            _this.$store.commit('setDeleteModal',{model:true,callback:()=>{
+                                _this.submitDelete(params.row.id);
+                              }});
                           }
                         }
                       },'删除'),
-
                     ])
                   }},
               ]
@@ -177,14 +212,14 @@
         methods: {
             //搜索
             onSearch() {
-              this.loading = true;
-                let parms = {
-                    "ownerName": this.searchForm.ownerName,
-                    "ownerPhone": this.searchForm.phone,
+                let params = {
+                    "ownerName": this.searchForm.ownerName || '',
+                    "ownerPhone": this.searchForm.phone || '',
+                    // "ownerState": this.searchForm.ownerState,
                     "pageNo": this.pageConfig.current,
                     "pageSize": this.pageConfig.size
                 };
-                this.$http.post(`/yyht/v1/ad/owner/get/adOwner/show/pageList`,parms).then(res=>{
+                this.$http.post(`/yyht/v1/ad/owner/get/adOwner/show/pageList?pageNo=${params.pageNo}&pageSize=${params.pageSize}&ownerName=${params.ownerName}&ownerPhone=${params.ownerPhone}`).then(res=>{
                     if (res.data.code === 0){
                         this.advertiserLists = res.data.data.list;
                         this.pageConfig.current = res.data.data.pageNo;
@@ -214,6 +249,8 @@
                     ownerName: row.ownerName,
                     ownerPhone: row.ownerPhone,
                     ownerAddress: row.ownerAddress,
+                    agentName:row.agentName,
+                    adState:row.ownerState,
                     id:row.id
                 };
                 this.addModal.show = true;
@@ -223,10 +260,12 @@
                     if (valid) {
                       this.disabledBtn = true;
                         let params = {
+                            "adOwnerId":this.addModal.type === 'add'?'':this.addModal.form.id,//修改时提供的主键ID
+                            "agentName":this.addModal.form.agentName,
                             "ownerAddress": this.addModal.form.ownerAddress,
                             "ownerName": this.addModal.form.ownerName,
                             "ownerPhone": this.addModal.form.ownerPhone,
-                            "ownerState": "IN_COOPERATION"  //合作状态 合作中:IN_COOPERATION 暂停中:PAUSE 停止合作:STOP_COOPERATION 默认合作中
+                            "ownerState": this.addModal.form.adState //合作状态 合作中:IN_COOPERATION 暂停中:PAUSE 停止合作:STOP_COOPERATION 默认合作中
                         };
                         if (this.addModal.type === 'edit'){
                             params.adOwnerId= this.addModal.form.id;
@@ -237,12 +276,14 @@
                                 if (this.addModal.type === 'add'){
                                     this.$Message.success('添加成功');
                                 } else if (this.addModal.type === 'edit'){
+                                    this.addModal.form.id = '';
                                     this.$Message.success('修改成功');
                                 }
                                 this.addModal.show = false;
+                                this.loading = false;
                                 this.onSearch();
-
                             } else {
+                                this.loading = false;
                                 this.$Message.error(res.data.msg);
                             }
                         })
@@ -252,19 +293,16 @@
                     }
                 });
             },
-            showDelete(id){
-                this.deleteModal.show = true;
-                this.deleteModal.adOwnerId = id;
-            },
-            submitDelete(){
-              this.disabledBtn = true;
-              let id = this.deleteModal.adOwnerId;
+            // showDelete(id){
+            //     this.deleteModal.show = true;
+            //     this.deleteModal.adOwnerId = id;
+            // },
+            submitDelete(id){
               this.$http.post(`/yyht/v1/ad/owner/delete?adOwnerId=${id}`,{headers:{'Content-Type':'application/json'
                   }}).then(res=>{
-                this.disabledBtn = false;
                   if (res.data.code === 0){
                       this.$Message.success('删除成功');
-                      this.deleteModal.show = false;
+                      this.$store.commit('setDeleteModal',{model:false});
                       this.onSearch()
                   } else {
                       this.$Message.error(res.data.msg);
@@ -282,6 +320,7 @@
                     address: '',
                     id:''
                 };
+                this.loading = false
             },
           visibleChange(flag){
               if (flag === false){

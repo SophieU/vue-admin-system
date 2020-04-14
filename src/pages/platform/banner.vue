@@ -4,6 +4,7 @@
                 @on-add="showAdd" :typeId="adTypeId" @search="getAdLists" @onReset="resetSearch"
                 @dateChange="dateChange"
     ></search-bar>
+    <Spin fix v-show="loading == true" >加载中...</Spin>
     <Tabs type="card" @on-click="tabChange">
       <TabPane v-for="tab in AdTypeList" :label="tabLabel(tab)" :name="tab.id" :key="tab.id">
         <advert-table :domain="domain" :advertLists="advertLists" :pageConfig="pageConfig"
@@ -13,7 +14,6 @@
                       @onEdit="showEdit"
                       @onDelete="showDelete"
                       @setTips="commitTips"
-                      :loading="loading"
         ></advert-table>
       </TabPane>
     </Tabs>
@@ -120,6 +120,7 @@
       },
       // 列表
       getAdLists(flag,type){
+        this.loading = true;
         if (this.startTimeArr[0]) {
           this.searchForm.beginStartTime = new Date(this.startTimeArr[0]).Format('yyyy-MM-dd hh:mm:ss');
         }
@@ -180,8 +181,7 @@
         this.getAdLists(flag,type)
       },
       commitDrag(data){  //列表点击拖动
-        console.log(data)
-        this.$http.post(`/yyht/v1/ad/config/updateAdSort`,data).then(res=>{
+        this.$http.post(`/yyht/v1/ad/config/updateAdSort?id=${data.id}&sortIndex=${data.sortIndex}`).then(res=>{
           if (res.data.code !== 0){
             this.$Message.error(res.data.msg)
           }else {
@@ -220,6 +220,7 @@
         this.modalShow= true;
       },
       tabChange(name){   //table上方卡片切换
+        this.loading = true;
         this.adTypeId = Number(name);
         this.searchForm.adTypeId = Number(name);
         this.getAdLists();

@@ -41,6 +41,9 @@
                 <FormItem class="must" prop="sortIndex" label="用户端排序顺序">
                   <InputNumber :disabled="!editTypeForm" :min="1" :precision="0" v-model="typeForm.sortIndex"/>
                 </FormItem>
+                <FormItem class="must" label="选择图标样式">
+                <UploadImage :eidtImg="eidtImg" ref="upTypeImg" :qiniuToken="qiniuToken" :imgDisabled="!editTypeForm" @uploadCallback="uploadUrl"></UploadImage>
+                </FormItem>
                 <FormItem class="must" prop="isShow" label="状态">
                   <RadioGroup v-model="typeForm.isShow">
                     <Radio :disabled="!editTypeForm"  label="Y">正常</Radio>
@@ -177,6 +180,7 @@
         typeForm:{
           id:'',
           name:'',
+          iconCode:'',
           sortIndex:null,
           isShow:'Y'
         },
@@ -214,7 +218,7 @@
     },
     methods:{
       uploadUrl(data){     //子组件传过来的图片地址
-        this.proForm.iconCode = data.imageUrl
+        this.currentNodeType!=='sub'?this.typeForm.iconCode = data.imageUrl:this.proForm.iconCode = data.imageUrl
       },
       renderContent (h, { root, node, data }) {   //树的样式
         let _this = this;
@@ -265,6 +269,7 @@
                     _this.editTypeForm = false;
                     _this.editProForm =false;
                     _this.loading = true;
+                    _this.eidtImg = [];
                     _this.getDetail(data.id);
                     console.log(this.currentNode.id)
                   }
@@ -297,6 +302,7 @@
           sortIndex:null,
           isShow:'Y',
           id:'',
+          iconCode:'',
         };
         this.proForm={
           id:'',
@@ -369,6 +375,7 @@
         let params = {
           name:formData.name,
           sortIndex:formData.sortIndex,
+          iconCode:formData.iconCode,
           isShow:formData.isShow,
           id:formData.id,
         }
@@ -417,6 +424,7 @@
           this.typeForm = {
             name:'',
             sortIndex:null,
+            iconCode:'',//图片名称
             isShow:''
           };
           this.editTypeForm=false
@@ -451,6 +459,7 @@
           name:'',
           sortIndex:null,
           isShow:'',
+          iconCode:'',//图片名称
           id:'',
         }
       },
@@ -509,6 +518,7 @@
             if(this.currentNode.parentId == '0'){
               // 一级节点
               this.currentNodeType = 'first';
+              this.eidtImg = [{name: data.imgName, url: data.iconCode, status: 'finished'}];
               this.typeForm=_.cloneDeep(data);
             }else{
               // 二级节点
