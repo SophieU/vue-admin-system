@@ -369,8 +369,8 @@
                 if(this.chooseServeModal.searchForm.code == 'APP_JUMP'){
                   this.chooseServeModal.selectForm.target = item.target;
                   this.viewSetting.details[this.detailIndex].needLogin = item.needLogin;
-                  this.viewSetting.details[this.detailIndex].isLogin = item.needLogin;
-                  }else{this.viewSetting.details[this.detailIndex].needLogin = false;this.chooseServeModal.selectForm.target = item.serviceId}
+                  this.viewSetting.details[this.detailIndex].isLogin = true;
+                  }else{this.viewSetting.details[this.detailIndex].needLogin = item.needLogin;this.viewSetting.details[this.detailIndex].isLogin = false;this.chooseServeModal.selectForm.target = item.serviceId}
                 if(this.chooseServeModal.searchForm.code == 'E_PROJECT'){this.chooseServeModal.selectForm.target = ''}
                 this.chooseServeModal.selectForm.title = item.title;
                 // this.chooseServeModal.selectForm.idServiceCategory = item.serviceId;

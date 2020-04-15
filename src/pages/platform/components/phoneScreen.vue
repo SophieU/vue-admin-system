@@ -19,8 +19,8 @@
             </div>
             <div class="screen-layout-block type-1 type-2" v-if="item.recommendFormatCode === '2'">
               <div class="screen-layout-item item-2-1" v-for="(image,index) in item.details" :key="index">
-                <div class="screen-mask">
-                  <div class="mask-title" :class="{'gray-mask':item.id}">
+                <div class="screen-mask" :class="{'gray-mask':item.id}">
+                  <div class="mask-title">
                     <p>目标：{{image.targetShowName}}</p>
                     <p>尺寸：{{image.adviseSizeDes || image.recommendFormatImgAdviceSizeDes}}</p>
                   </div>

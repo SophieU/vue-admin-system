@@ -188,20 +188,23 @@
         })
       },
       deleteView(index){
+        let _this = this;
         if (!this.phoneViewList[index].id){
           this.phoneViewList.splice(index,1);
           return;
         }
-        let id = this.phoneViewList[index].id;
-        this.$http.post(`/yyht/v1/recommend/config/delete?id=${id}`).then(res=>{
-          if (res.data.code === 0){
-            this.$Message.success('删除成功');
-            this.phoneViewList.splice(index,1)
-          } else {
-            this.$Message.error(res.data.msg)
-          }
-        });
-        return;
+        _this.$store.commit('setDeleteModal',{model:true,callback:()=>{
+            let id = this.phoneViewList[index].id;
+            _this.$http.post(`/yyht/v1/recommend/config/delete?id=${id}`).then(res=>{
+              if (res.data.code === 0){
+                _this.$Message.success('删除成功');
+                _this.$store.commit('setDeleteModal',{model:false})
+                _this.phoneViewList.splice(index,1)
+              } else {
+                _this.$Message.error(res.data.msg)
+              }
+            });
+          }})
       },
       selectView(view){
         console.log(view)

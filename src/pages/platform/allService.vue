@@ -3,126 +3,42 @@
    <Card>
      <div class="clearfix mb-15">
        <div class="pull-right">
-         <Button icon="md-add" type="primary" @click="addAllServe = true">新增服务</Button>
+         <Button icon="md-add" type="primary" @click="addAllServe = true;this.modalType = 'add';this.modalShow= true;">新增服务</Button>
        </div>
      </div>
+     <Spin fix v-show="loading == true">加载中...</Spin>
      <Tabs type="card" @on-click="tabChange">
        <TabPane v-for="(item,index) in AdTypeList" :key="index" :label="item.typeName">
-         <Table :columns="columns" :data="lists" draggable @on-drag-drop="dragRow" @on-sort-change="sortChange" :loading="loading"></Table>
+         <Table :columns="columns" :data="lists" draggable @on-drag-drop="dragRow" @on-sort-change="sortChange"></Table>
        </TabPane>
      </Tabs>
      <div class="pagination mt-15">
         <Page :current.sync="pageConfig.current" :page-size="pageConfig.size" :total="pageConfig.totalCount" @on-change="changeCurrent" @on-page-size-change="changeSize" show-elevator show-sizer></Page>
       </div>
+     <bannerPoput :modalShow.sync="modalShow" :modalType="modalType" :adTypeId="adTypeId" @completeModal="completeModal" :editorData="editorData"/>
    </Card>
-
-     <Modal
-      :title="title"
-      v-model="addAllServe"
-      @on-visible-change="addModalChange"
-      :mask-closable="false"
-      :closable="false">
-      <Form  :label-width="100" ref="addAllServeRefs" :rules="addAllRules" :model="addAllForm">
-        <FormItem prop="belong" label="所属栏目:">
-         <Select v-model="addAllForm.belong">
-          <Option v-for="item in belongList" :value="item.id" :key="item.id">{{ item.typeName }}</Option>
-         </Select>
-        </FormItem>
-        <div class="labelBefore">
-        <FormItem label="类型:">
-          <div class="typeChoose"><Button v-for="(item,index) in serverType" :style="{background:item.color}" :key="item.code" type="default" @click="typeFn(item,index)">{{item.name}}</Button></div>
-        </FormItem>
-        </div>
-        <div v-show="btnShow == true">
-           <div class="labelBefore">
-            <FormItem label="URL:" prop="url" v-if="urlShow == true">
-              <Input v-model="addAllForm.url"></Input>
-            </FormItem>
-            <FormItem label="" v-else>
-             <Button v-if="btnFlag == true" @click="getOptionType" type="primary">{{btnTitle}}</Button>
-             <Button v-else type="primary" @click="getOptionType">选择{{showType}}</Button>
-            </FormItem>
-           </div>
-        </div>
-        <div class="labelBefore">
-        <FormItem prop="needLogin"  label="是否登录APP:">
-           <RadioGroup v-model="addAllForm.needLogin">
-                <Radio label="Y"  :disabled="disabled">是</Radio>
-                <Radio label="N"  :disabled="disabled">否</Radio>
-            </RadioGroup>
-        </FormItem>
-        </div>
-        <FormItem prop="name"  label="名称显示:">
-            <Input v-model="addAllForm.name" :maxlength="5"></Input><span>App分类显示最多5个字</span>
-        </FormItem>
-        <div class="labelBefore">
-        <FormItem label="图标设置:">
-          <UploadImg :qiniuToken="qiniuToken" :multiple="false" ref="upImg" :eidtImg="eidtImg"  @uploadCallback="uploadCallback"></UploadImg>
-        </FormItem>
-        </div>
-       </Form>
-       <div slot="footer">
-        <Button @click="cancel">取消</Button>
-        <Button type="primary" @click="saveAddAll('addAllServeRefs')">确认</Button>
-       </div>
-     </Modal>
-<!--   二级弹窗-->
-      <Modal
-        v-model="modalShow"
-        :title="showType"
-        @on-ok="okModal"
-        @on-cancel="modalShow = false">
-        <Form :model="addAllForm" :label-width="130">
-          <FormItem :label="label">
-           <Select
-              v-model="addAllForm.serverOption"
-              :remote="true"
-              :remote-method="serveListRemote"
-              :filterable="true"
-              @on-query-change="changeQuery"
-              @on-change="changeServer"
-              @on-open-change="openChange"
-              :loading="false"
-              >
-            <Option v-for="(item,index) in serverOptionList" :value="item.serviceId" :key="index">{{ item.title }}</Option>
-           </Select>
-          </FormItem>
-          <FormItem label="请选择服务项目:" v-show="poseObj.code == 'E_PROJECT'">
-           <Select v-model="addAllForm.second" @on-change="secondOnServe">
-             <Option v-for="(item,index) in secondList" :value="item.id" :key="index">{{ item.name }}</Option>
-           </Select>
-          </FormItem>
-          <FormItem label="">
-           <div style="color:#CD0000">
-             <p>*请输入搜索或点击选择</p><p v-show="poseObj.code == 'E_PROJECT'">*请先选择服务类型再选择服务项目</p>
-           </div>
-          </FormItem>
-      </Form>
-    </Modal>
 </div>
 </template>
 
 <script>
 import util from '../../libs/util'
+import bannerPoput from "./components/bannerPoput";
 // import {allSort} from '../../assets/request/apis/activities'
-import UploadImg from '../main-components/upload-img.vue'
+// import UploadImg from '../main-components/upload-img.vue'
 export default {
   name: "allService",
   components:{
-    UploadImg
+    // UploadImg,
+    bannerPoput
   },
   data(){
       return{
+        editorData:null,
         loading:true,
         disabled:false,//是否登录APP禁用控制
-        label:'',
-        secondList:[],
-        qiniuToken:{  //七牛token
-          key:'',
-          token:''
-        },
         editorId:'',  //编辑的Id
         serverType:[], //弹窗服务类型
+        modalType:'add',//区分弹窗的新增和编辑
         eidtImg:[],   //图片组件
         domain:'',//图片域名
         belongList:[],//服务栏目列表
@@ -132,28 +48,9 @@ export default {
          bigSize:100,
          totalCount:0
         },
-        showType:'',    //弹窗中选择类型后Button字的变化
-        urlShow:false,  //判断弹窗中是否选中H5分类
-        btnShow:false,  //判断是出现URL还是button
-        modalShow:false,//第二个弹窗的状态控制
+        modalShow:false,//弹窗控制
         btnFlag:false,
-        poseObj:{},     //传参的临时对象
         serverOptionList:[], //选择类型数组
-        btnTitle:'',         //按钮选择之后内容的改变
-        addAllForm:{    //新增或编辑弹出框数据
-          belong:'',
-          name:'',
-          serverOption:'',
-          imgKey:'',
-          second:'',
-          needLogin:'Y'
-        },
-        addAllRules:{  //弹出框校验
-          belong:[{required: true, message: '请选择所属栏目', trigger: 'blur' }],
-          url:[{required: true, message: '请输入内转链接', trigger: 'blur' }],
-          name:[{required: true, message: '请填写名称显示', trigger: 'blur' }],
-        },
-        title:'新增服务',
         addAllServe:false,
         AdTypeList:[],  //tab名称数组
         columns:[
@@ -165,7 +62,7 @@ export default {
             let src = params.row.iconUrl
             return h('img',{
               attrs:{
-                src:'//'+src
+                src:src
               },
               style:{
                 height:'40px',
@@ -191,10 +88,11 @@ export default {
                 },
                 on:{
                   click:()=>{
+                    console.log(params.row)
                    this.editorId = params.row.serviceId
                    this.idEditor(params.row.serviceId)
                    this.addAllServe = true
-                   this.title = '编辑服务'
+                    this.modalType = 'editor'//区分弹窗的新增和编辑
                   }
                 }
               },'编辑'),
@@ -219,6 +117,13 @@ export default {
       }
   },
   methods:{
+    completeModal(data){  //子组件弹窗完成按钮
+      this.modalShow = false;
+      if(data == true) {
+        this.pageConfig.current = 1;
+        this.getAdLists()
+      }
+    },
     secondOnServe(data){  //第二个模态框内容改变的方法
 
     },
@@ -279,168 +184,9 @@ export default {
       })
     },
     idEditor(id){    //编辑按钮
-     this.$http.get(`/yyht/v1/service/getServiceInfoById?id=${id}`).then(res=>{
-       if(res.data.code == 0){
-         let data = res.data.data
-         this.addAllForm.belong = data.idServiceType;
-         this.addAllForm.name = data.title;
-         this.addAllForm.needLogin = data.needLogin;
-         this.poseObj.id = data.idServiceCategory;
-         this.poseObj.code = data.serviceCategoryCode;
-         this.poseObj.name = data.serviceCategoryName;
-         this.showType = data.serviceCategoryName;
-         data.serviceCategoryCode == 'APP_JUMP'?this.disabled = true:this.disabled = false;
-         this.serverType.forEach((ele,index)=>{
-           if(data.serviceCategoryCode == ele.code){
-             this.serverType[index].color = '#d5e8fc'
-           }
-         })
-         if(data.serviceCategoryCode == 'H5'){
-           this.urlShow = true;
-           this.btnShow = true;
-           this.addAllForm.url = data.target
-         }else{
-            this.btnShow = true;
-            this.btnFlag = true;
-            if(data.parentName){
-             this.btnTitle =data.parentName + '-' + data.targetName;
-            }else{
-             this.btnTitle = data.targetName
-            }
-            switch(data.serviceCategoryCode){
-              case 'APP_JUMP' :
-              this.addAllForm.target = data.target;
-              break;
-              case 'E_SERVICE_CATEGORY' :
-              this.addAllForm.serverOption = data.target;
-              break;
-              default:
-              this.addAllForm.second =data.target;
-            }
-         }
-        if (data.imageUrl) {
-          this.eidtImg = [{name:'图标',url:'//'+data.iconUrl,status:'finished'}];
-          this.addAllForm.imgKey = data.imgKey;
-        }
-       }else{
-         this.$Message.warning(res.data.msg)}
-     })
-    },
-    okModal(){     //选择服务类型模态框确认按钮
-      let father;
-      this.serverOptionList.forEach(ele=>{
-        if(ele.serviceId == this.addAllForm.serverOption){
-           father = ele.title
-         }
-      })
-      if(!this.addAllForm.second){
-         this.btnTitle = father
-      }else{
-       this.secondList.forEach(v=>{
-         if(v.id == this.addAllForm.second){
-           this.btnTitle = father + '-' +v.name
-         }
-       })
-      }
-      this.btnFlag = true
-      this.modalShow = false
-    },
-    serveListRemote(query){
-      let name = query;
-      this.$http.get(`/yyht/v1/service/getServiceByCategoryByCode?code=${this.poseObj.code}&name=${name}`).then(res=>{
-        if(res.data.code == 0){
-          this.serverOptionList = res.data.data;
-        }else{
-          this.$Message.warning(res.data.msg)
-        }
-      })
-    },
-    getOptionType(){        //根据code查询不同类型
-      let query = '';
-      this.$http.get(`/yyht/v1/service/getServiceByCategoryByCode?code=${this.poseObj.code}&name=${query}`).then(res=>{
-        if(res.data.code == 0){
-          this.serverOptionList = res.data.data;
-          this.label = this.poseObj.code == 'E_PROJECT'?'请选择服务项目类型:': `请选择${this.poseObj.name}:`;
-          this.modalShow = true;
-        }else{
-          this.$Message.warning(res.data.msg)
-        }
-      })
-    },
-    typeFn(data,index){      //弹窗类型下的按钮
-      this.addAllForm.needLogin = 'Y',
-      this.disabled = false,
-      this.addAllForm.serverOption = '',
-      this.addAllForm.second = '',
-      this.serverType.forEach((item,ind)=>{
-        if(ind == index){
-          item.color = "#d5e8fc"
-        }else{
-          item.color = "white"
-        }
-      })
-      if(data.id){
-        this.poseObj.code = data.code;
-        this.poseObj.id = data.id;
-        this.poseObj.name = data.name;
-        this.btnShow = true;
-        this.btnFlag = false;
-        data.id == 5?this.urlShow = true:this.urlShow = false;
-        switch(data.id){
-          case '3' : this.showType = 'APP内转';
-          break;
-          case '14' : this.showType = '服务分类';
-          break;
-          default : this.showType = '服务项目';
-          break;
-        }
-      }else{
-        this.btnShow = false
-      }
-    },
-    addCategory(){        //点击新增按钮获取树形结构
-      this.$http.get('/yyht/v1/service/category/getAllServiceCategory').then(res=>{
-        if(res.data.code == 0){
-          res.data.data.forEach((item,index)=>{
-            item.color = 'white'
-          })
-          this.serverType = res.data.data
-        }else{
-          this.$Message.warning(res.data.msg)
-        }
-      })
-    },
-    // getToken(){        //获取七牛token
-    //   this.$http.get(`/base/qiniu/token`).then(res=>{
-    //     if (res.data.code === 0){
-    //       this.domain = res.data.data.domain;
-    //       this.qiniuToken.token = res.data.data.token;
-    //     }else{
-    //       this.$Message.warning(res.data.msg)
-    //     }
-    //   })
-    // },
-    addModalChange(data){      //模态框状态变化
-      if(data == false){
-        this.title = '新增服务';
-        this.eidtImg = [];
-        this.urlShow = false;
-        this.btnShow = false;
-        this.serverType.forEach(ele=>{
-          delete ele.color
-        })
-        this.$refs['addAllServeRefs'].resetFields();
-        this.addAllForm = {
-           belong:'',
-           name:'',
-           serverOption:'',
-           imgKey:'',
-           needLogin:'Y'
-        }
-        this.disabled = false;
-      }else{
-        this.belongList.length == 1? this.addAllForm.belong = this.belongList[0].id : this.addAllForm.belong = ''
-      }
+      this.modalShow = true;
+      this.modalType = 'editor';
+      this.editorData = data;
     },
     uploadCallback(data){      //上传图片的方法
       this.$set(this.addAllForm,'imgKey',data.key)
@@ -472,72 +218,11 @@ export default {
         if(res.data.code == 0){
           this.belongList = res.data.data
           this.defaultServeId = res.data.data[0].id
-          this.defaultName = res.data.data[0].typeName
           this.getCol()
           this.AdTypeList = res.data.data
         }else{
           this.$Message.warning(res.data.msg)
         }
-      })
-    },
-    saveAddAll(name){  //模态框确认按钮
-      this.$refs[name].validate((valid) => {
-        if(valid){
-          if(!this.poseObj.id){
-            this.$Message.warning('请选择服务分类!')
-            return
-          }
-          if(!this.addAllForm.serverOption && !this.addAllForm.url && !this.addAllForm.second && !this.addAllForm.target){
-            this.$Message.warning(`请选择${this.poseObj.name}`)
-            return
-          }
-          if(!this.addAllForm.imgKey){
-            this.$Message.warning('请上传图标设置!')
-            return
-          }
-          if(this.poseObj.code == 'E_PROJECT' && !this.addAllForm.second){
-            this.$Message.warning('请选择服务分类下的服务项目!')
-            return
-          }
-          if(!this.addAllForm.needLogin){
-            this.$Message.warning('请选择是否登录APP!')
-            return
-          }
-          let target;
-          switch(this.poseObj.code){
-            case 'H5' : target = this.addAllForm.url;
-            break;
-            case 'APP_JUMP' : target = this.addAllForm.target;
-            break;
-            case 'E_SERVICE_CATEGORY' : target = this.addAllForm.serverOption;
-            break;
-            default: target = this.addAllForm.second;
-          }
-          let data = {
-           "id": this.editorId,
-           "idServiceCategory":this.poseObj.id,
-           "idServiceType":this.addAllForm.belong,
-           "imageUrl":this.addAllForm.imgKey,
-           "needLogin":'N',
-           "serviceCategoryCode":this.poseObj.code,
-           "needLogin":this.addAllForm.needLogin,
-           "target": target,
-           "title": this.addAllForm.name
-          }
-          if(!this.editorId){
-            delete data.id
-          }
-          this.$http.post('/yyht/v1/service/addOrUpdate',data).then(res=>{
-            if(res.data.code == 0){
-               this.addAllServe = false;
-               this.getCol()
-               this.editorId = ''
-            }else{
-              this.$Message.warning(res.data.msg)
-            }
-          })
-        }
-
       })
     },
     cancel(){  //模态框取消按钮
@@ -546,8 +231,7 @@ export default {
     tabChange(e){  //tab改变按钮
       this.AdTypeList.forEach((ele,index)=>{
         if(e == index){
-          this.defaultServeId = ele.id
-          this.defaultName = ele.typeName
+          this.defaultServeId = ele.id;
           this.getCol()
         }
       })
@@ -556,7 +240,6 @@ export default {
   mounted(){
    this.getServeCol();
    // this.getToken();
-   this.addCategory();
   }
 }
 </script>

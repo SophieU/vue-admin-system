@@ -1,5 +1,6 @@
 <template>
     <Card>
+      <Spin fix v-show="loading == true">加载中...</Spin>
       <Table :columns="columns" :data="lists"></Table>
       <div class="pagination">
         <Page :current="pageNo" :total="totalCount"></Page>
@@ -14,18 +15,18 @@
     export default {
         data() {
             return {
+                loading:true,
                 showModal:false,
                 lists:[],
                 columns:[
                   {title:'登录账号',key:'username',align:'center'},
                   {title:'用户类型',key:'userType',align:'center',render:(h,params)=>{
-
                       let map={
                         ADMIN:'超级管理员',
                         USER:'普通用户',
                         SERVICE_USER:'系统用户',
                         MERCHANT:'商户类型',
-                      }
+                      };
                       let text=map[params.row.userType];
                       return h('span',text)
                     }},
@@ -49,10 +50,9 @@
                           },
                           on:{
                             click(){
-                              this.loadingDeal=true
                               let param = {
                                 "userWithdrawId":params.row.id,
-                                "payState":param.row.payState,
+                                "payState":params.row.payState,
                                 "thirdPaySn":params.row.withdrawSn,
                                 "withdrawRemark":params.row.withdrawRemark,
                               }
@@ -76,11 +76,12 @@
             let params = {
               pageNo:this.pageNo,
               pageSize:this.pageSize
-            }
+            };
             this.$http.get(`/yyht/v1/user/withdraw/findUserWithdrawListPage`,{params:params}).then(res=>{
               if(res.data.code===0){
                 let data = res.data.data;
-                this.lists = data.list
+                this.lists = data.list;
+                this.loading = false;
                 this.totalCount= data.totalCount
               }
             })

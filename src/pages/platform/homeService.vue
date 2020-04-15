@@ -6,13 +6,13 @@
           <Button icon="md-add" type="primary" @click="showModalHandle('add')">新增栏目</Button>
         </div>
       </div>
-      <Table :columns="columns" :data="lists" :draggable="true" @on-drag-drop="dragSort"></Table>
-
+      <Spin fix v-show="loading == true">加载中...</Spin>
+      <Table :columns="columns" :data="lists" :draggable="true"></Table>
     </Card>
     <Modal v-model="showModal" title="新增栏目">
-      <Form :label-width="100">
-        <FormItem class="must" label="栏目名称">
-          <Input v-model="modalForm.typeName"/>
+      <Form :label-width="100" :model="modalForm"  :rules="rules" ref="showModalRef">
+        <FormItem label="栏目名称" prop="typeName">
+          <Input v-model="modalForm.typeName" :maxlength="5"/>
           <p class="tips">（最多5个字）</p>
         </FormItem>
         <FormItem label="栏目描述">
@@ -20,8 +20,8 @@
         </FormItem>
       </Form>
       <div slot="footer">
-        <Button @click="cancelModal">取消</Button>
-        <Button type="primary" @click="saveModalForm">保存</Button>
+        <Button @click="cancelModal('showModalRef')">取消</Button>
+        <Button type="primary" :loading="saveLoading" @click="saveModalForm('showModalRef')">保存</Button>
       </div>
     </Modal>
   </div>
@@ -34,6 +34,7 @@ import _ from 'lodash'
     name: "functionSet",
     data(){
       return{
+        saveLoading:false,
         loading:true,
         showModal:false,
         modalTitle:'新增栏目',
@@ -79,26 +80,29 @@ import _ from 'lodash'
         modalForm:{
           typeName:'',
           typeDes:'',
+        },
+        rules:{
+          typeName:[{required:true,message:'请输入栏目名称',trigger:'blur'}]
         }
       }
     },
     methods:{
       // 拖拽排序
-      dragSort(index1,index2){
-        let param = [{id:this.lists[index1].id},{id:this.lists[index2].id}]
-        this.$http.post(`/yyht/v1/service/type/updateServiceTypeSort`,param).then(res=>{
-          if(res.data.code===0){
-            this.$Message.success('排序成功')
-            let lists = _.cloneDeep(this.lists)
-            let temp = _.cloneDeep(lists[index1])
-            lists[index1] = lists[index2]
-            lists[index2] = temp
-            this.lists = lists;
-          }else{
-            this.$Message.warning('排序失败')
-          }
-        })
-      },
+      // dragSort(index1,index2){
+      //   let param = [{id:this.lists[index1].id},{id:this.lists[index2].id}]
+      //   this.$http.post(`/yyht/v1/service/type/updateServiceTypeSort`,param).then(res=>{
+      //     if(res.data.code===0){
+      //       this.$Message.success('排序成功')
+      //       let lists = _.cloneDeep(this.lists)
+      //       let temp = _.cloneDeep(lists[index1])
+      //       lists[index1] = lists[index2]
+      //       lists[index2] = temp
+      //       this.lists = lists;
+      //     }else{
+      //       this.$Message.warning('排序失败')
+      //     }
+      //   })
+      // },
       showModalHandle(type,id){
         if(type==='add'){
           this.showModal=true;
@@ -117,12 +121,14 @@ import _ from 'lodash'
           }
         })
       },
-      cancelModal(){
+      cancelModal(name){
         this.showModal=false;
         this.modalForm={
           typeName:'',
           typeDes: '',
-        }
+        };
+        this.$refs[name].resetFields()
+        this.saveLoading = false;
       },
       deleteSingle(id){ //根据ID删除单条信息
         this.$http.post(`/yyht/v1/service/type/delete?id=${id}`).then(res=>{
@@ -146,18 +152,24 @@ import _ from 'lodash'
             }
           })
       },
-      saveModalForm(){
-        let params = this.modalForm;
-        if(!params.typeName){
-          this.$Message.warning('请输入栏目名称')
-          return;
-        }
-        this.$http.post(`/yyht/v1/service/type/saveOrUpdate`,params).then(res=>{
-          this.showModal=false;
-          if(res.data.code===0){
-            this.$Message.success('保存成功')
-          }else{
-            this.$Message.warning('保存失败')
+      saveModalForm(name){
+        this.saveLoading = true;
+        this.$refs[name].validate((valid) => {
+          if (valid) {
+            let params = this.modalForm;
+            this.$http.post(`/yyht/v1/service/type/saveOrUpdate`,params).then(res=>{
+              if(res.data.code===0){
+                this.$Message.success('保存成功');
+                this.getCol()
+              }else{
+                this.$Message.warning('保存失败')
+                this.saveLoading = false;
+              }
+              this.cancelModal('showModalRef')
+            })
+          } else {
+            this.$Message.error('表单填写错误！');
+            this.saveLoading = false;
           }
         })
       }
