@@ -7,7 +7,8 @@
         </div>
       </div>
       <Spin fix v-show="loading == true">加载中...</Spin>
-      <Table :columns="columns" :data="lists" :draggable="true"></Table>
+<!--      :draggable="true"-->
+      <Table :columns="columns" :data="lists"></Table>
     </Card>
     <Modal v-model="showModal" title="新增栏目">
       <Form :label-width="100" :model="modalForm"  :rules="rules" ref="showModalRef">

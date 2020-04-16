@@ -48,12 +48,12 @@
                 </RadioGroup>
               </FormItem>
             </div>
-            <FormItem label="是否仅针对于新注册用户" prop="applyNewUser">
-              <RadioGroup v-model="addModal.form.applyNewUser">
-                <Radio label="Y">是</Radio>
-                <Radio label="N">否</Radio>
-              </RadioGroup>
-            </FormItem>
+<!--            <FormItem label="是否仅针对于新注册用户" prop="applyNewUser" v-show="menu == 'banner'">-->
+<!--              <RadioGroup v-model="addModal.form.applyNewUser">-->
+<!--                <Radio label="Y">是</Radio>-->
+<!--                <Radio label="N">否</Radio>-->
+<!--              </RadioGroup>-->
+<!--            </FormItem>-->
             <FormItem label="广告标题" prop="title">
               <Input v-model="addModal.form.title" :maxlength="10"></Input>
               <span style="color:red">最多10个字</span>
@@ -62,27 +62,27 @@
               <UploadImg ref="upImg" :eidtImg="eidtImg"  @onUpload="onUpload" @uploadCallback="successImg"></UploadImg>
               <span style="color:red">{{typeDes}}</span>
             </FormItem>
-            <FormItem label="是否长期有效" prop="isLongValid">
+            <FormItem label="是否长期有效" prop="isLongValid" v-show="menu == 'banner'">
               <RadioGroup v-model="addModal.form.isLongValid">
                 <Radio label="Y">是</Radio>
                 <Radio label="N">否</Radio>
               </RadioGroup>
             </FormItem>
-            <FormItem label="开始时间" prop="startTime" v-if="addModal.form.isLongValid=== 'N'">
+            <FormItem label="开始时间" prop="startTime" v-show="addModal.form.isLongValid=== 'N' && menu == 'banner'">
               <DatePicker :editable="false"
                           v-model="addModal.form.startTime"
                           type="datetime"
                           placeholder="选择开始时间">
               </DatePicker>
             </FormItem>
-            <FormItem label="结束时间" prop="endTime" v-if="addModal.form.isLongValid=== 'N'">
+            <FormItem label="结束时间" prop="endTime" v-show="addModal.form.isLongValid=== 'N' && menu == 'banner' ">
               <DatePicker :editable="false"
                           v-model="addModal.form.endTime"
                           type="datetime"
                           placeholder="选择结束时间">
               </DatePicker>
             </FormItem>
-            <FormItem label="是否到期提醒" prop="needExpireRemind">
+            <FormItem label="是否到期提醒" prop="needExpireRemind" v-show="menu == 'banner'">
               <RadioGroup v-model="addModal.form.needExpireRemind">
                 <Radio label="Y">是</Radio>
                 <Radio label="N">否</Radio>
@@ -154,6 +154,12 @@
         },
         adTypeId:{
           type:Number
+        },
+        idServiceType:{
+          type:String
+        },
+        menu:{
+          type:String
         }
       },
       // watch:{
@@ -211,7 +217,7 @@
             addModal: {
               form:{
                 adOwnerId:'',//所属广告主Id
-                adTypeId:1,//广告位id,插屏广告默认传值 7，启动页广告默认传 4
+                adTypeId:'1',//广告位id,插屏广告默认传值 7，启动页广告默认传 4
                 applyNewUser:'N',//是否仅针对于新注册用户,是：Y 否：N 没有选项默认传：N
                 idServiceCategory:'',//所属服务分类Id,启动页广告默认传:5
                 imgName:'',
@@ -349,7 +355,21 @@
               if (parmas.endTime && parmas.endTime !== ''){
                 parmas.endTime = new Date(parmas.endTime).Format('yyyy-MM-dd hh:mm:ss');
               }
-              this.$http.post(`yyht/v1/ad/config/addOrUpdate`,parmas).then(res=>{
+              let url;
+              if(this.menu == 'allService'){
+                url='/yyht/v1/service/addOrUpdate';
+                parmas.idServiceType = this.idServiceType;
+                delete  parmas.adTypeId;
+                delete  parmas.applyNewUser;
+                delete  parmas.isLongValid;
+                delete  parmas.startTime;
+                delete  parmas.endTime;
+                delete  parmas.needExpireRemind
+              }else{
+                url = `yyht/v1/ad/config/addOrUpdate`;
+              }
+              // this.menu == 'allService'?url='/yyht/v1/service/addOrUpdate': url = `yyht/v1/ad/config/addOrUpdate`;
+              this.$http.post(url,parmas).then(res=>{
                 if(res.data.code === 0){
                   if(this.modalType === 'add'){
                     this.$Message.success('添加成功');
@@ -373,15 +393,15 @@
         onUpload(data){
           this.addModal.form.imgName = data.key
         },
-        getToken(){
-          this.$http.get(`/base/qiniu/token`).then(res=>{
-            if (res.data.code === 0){
-              this.domain = res.data.data.domain;
-              this.$emit('getListImage',this.domain)
-              this.qiniuToken.token = res.data.data.token;
-            }
-          })
-        },
+        // getToken(){
+        //   this.$http.get(`/base/qiniu/token`).then(res=>{
+        //     if (res.data.code === 0){
+        //       this.domain = res.data.data.domain;
+        //       this.$emit('getListImage',this.domain)
+        //       this.qiniuToken.token = res.data.data.token;
+        //     }
+        //   })
+        // },
         initServeList(){ //点击选择第二个弹窗的内容和方法
           let code = this.poseObj.code;
           let name = '';
@@ -530,7 +550,7 @@
       mounted() {
         this.getAdOwner();
         this.getTypeTree();
-        this.getToken();
+        // this.getToken();
       }
     }
 </script>

@@ -31,7 +31,7 @@
         <Button @click="deleteModal.show = false">取 消</Button>
       </span>
     </Modal>
-    <bannerPoput :modalShow.sync="modalShow" :modalType="modalType" :adTypeId="adTypeId" @getListImage="getListImage" @completeModal="completeModal" :editorData="editorData"/>
+    <bannerPoput :modalShow.sync="modalShow" :menu="menu" :modalType="modalType" :adTypeId="adTypeId" @getListImage="getListImage" @completeModal="completeModal" :editorData="editorData"/>
   </Card>
 </template>
 
@@ -49,6 +49,7 @@
     },
     data:()=>{
       return{
+        menu:'banner',
         editorData:null,
         modalShow:false,
         modalType:'add',//区分弹窗的新增和编辑
