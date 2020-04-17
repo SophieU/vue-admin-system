@@ -6,15 +6,16 @@
          :closable="false"
          @on-visible-change="statusChange">
          <Select v-model="addHomeInfo.col" style="width:200px" placeholder="请选择栏目">
-          <Option v-for="(item,index) in serverOption" :value="item.id" :key="index">{{ item.typeName }}</Option>
+           <Option v-for="(item,index) in serverOption" :value="item.id" :key="index">{{ item.typeName }}</Option>
          </Select>
-          <Input v-model="addHomeInfo.inputInfo" placeholder="" style="width: 200px"/>
-          <Button type="default" @click="getNotAdd">搜索</Button>
-          <div class="gap"></div>
-          <div class="limitTable">
-            <Table :columns="serverCol" :data="serverData" :show-header=false @on-row-click="rowClick" highlight-row></Table>
-          </div>
-          <div>
+           <Input v-model="addHomeInfo.inputInfo" placeholder="" style="width: 200px"/>
+           <Button type="default" @click="getNotAdd">搜索</Button>
+           <div class="gap"></div>
+           <div class="limitTable">
+<!--@on-row-click="rowClick"-->
+             <Table :columns="serverCol" :data="serverData" :show-header=false highlight-row @on-row-click="rowClick($event)"></Table>
+           </div>
+           <div>
              <Form :model="addHomeInfo.model" :label-width="100">
                 <FormItem label="是否限时:">
                    <RadioGroup v-model="addHomeInfo.model.limitTime" @on-change="radioChange">
@@ -29,11 +30,11 @@
                   <DatePicker type="datetime" format="yyyy-MM-dd HH:mm" v-model="addHomeInfo.model.endTime" @on-change="changeEndTime" style="width: 200px"></DatePicker>
                 </FormItem>
              </Form>
-          </div>
-          <div slot="footer">
+           </div>
+           <div slot="footer">
             <Button type="default" @click="cancleFn()">取消</Button>
-            <Button type="primary" @click="functionFlag == true?functionAdd():addOk()">确认</Button>
-        </div>
+            <Button type="primary" @click="functionAdd()">确认</Button>
+           </div>
        </Modal>
     </div>
 </template>
@@ -52,14 +53,13 @@
                width: 70,
                align: 'center',
                render: (h, params) => {
-                 let id = params.row.serviceId;
+                 let id = params.row.id;
                  let flag = false;
                  if (this.serverId == id) {
                    flag = true
                  } else {
                    flag = false
                  }
-                 let self = this
                  return h('div', [
                    h('Radio', {
                      props: {
@@ -69,7 +69,7 @@
                  ])
                }},
               {key:'iconName',render:(h,params)=>{
-                let src = params.row.iconName
+                let src = params.row.iconName;
                 return h('img',{
                   attrs:{
                     src:src
@@ -94,30 +94,30 @@
               }
             },
             serverOption:[],//服务栏目数组
-              }
+          }
       },
         props:{
             addService:{
                 type:Boolean
             },
-            current:{
-                type:Number
-            },
-            size:{
-                type:Number
-            },
+            // current:{
+            //     type:Number
+            // },
+            // size:{
+            //     type:Number
+            // },
             addTitle:{
                 type:String
             },
-            singleId:{   //全部服务传过来的ID
-                type:String
-            },
+            // singleId:{   //全部服务传过来的ID
+            //     type:String
+            // },
             functionId:{  //功能区传过来的ID
                 type:String
             },
-            functionFlag:{   //用于区分是功能区还是全部服务
-                type:Boolean
-            }
+            // functionFlag:{   //用于区分是功能区还是全部服务
+            //     type:Boolean
+            // }
         },
     methods:{
       changeStartTime(e){ //开始时间datepicker变化事件
@@ -130,15 +130,15 @@
         this.$emit('getStatus',false)
       },
       rowClick(data){ //模态框table数据选择(每一行)
-        this.serverId = data.serviceId
+        this.serverId = data.id
       },
       functionAdd(){  //功能区模态框确认按钮
         if(this.serverId == ''){
-          this.$Message.warning('请选择未添加的服务')
+          this.$Message.warning('请选择未添加的服务');
           return false
         }
         if(!this.addHomeInfo.model.limitTime){
-          this.$Message.warning('请选择是否限时')
+          this.$Message.warning('请选择是否限时');
           return false
         }
         let data ={
@@ -151,41 +151,13 @@
         if(!this.functionId){
             delete data.id
         }
-        this.$http.post('/eService/addOrUpdateServiceDefault',data).then(res=>{
+        this.$http.post('/yyht/v1/service/default/addOrUpdate',data).then(res=>{
             if(res.data.code == 0){
-                this.$emit('updateCol',true)
+                this.$emit('updateCol',true);
                 this.$emit('deleteId',true)
             }else{
                 this.$Message.warning(res.data.msg)
             }
-        })
-      },
-      addOk(){ //新增编辑服务模态框OK按钮
-        if(this.serverId == ''){
-           this.$Message.warning('请选择未添加的服务')
-           return false
-        }
-        if(!this.addHomeInfo.model.limitTime){
-          this.$Message.warning('请选择是否限时')
-          return false
-        }
-        let data ={
-        	"endTime":this.addHomeInfo.model.endTime,
-        	"id": this.singleId,
-        	"idService":this.serverId,
-        	"isLongValid":this.addHomeInfo.model.limitTime,
-        	"startTime":this.addHomeInfo.model.startTime
-        }
-        if(!this.singleId){
-            delete data.id
-        }
-        this.$http.post('/service/default/addOrUpdateServiceDefault',data).then(res=>{
-          if(res.data.code == 0){
-            this.$emit('updateCol',true)
-            this.$emit('deleteId',true)
-          }else{
-            this.$Message.warning(res.data.msg)
-          }
         })
       },
       radioChange(data){ //单选框状态变化
@@ -199,7 +171,6 @@
         if(data == false){
           this.addHomeInfo.col = '';
           this.addHomeInfo.inputInfo = '';
-          this.getNotAdd();
           this.serverId = '';
           this.radioFlag = false;
           this.addHomeInfo.model.limitTime = '';
@@ -207,35 +178,14 @@
           this.addHomeInfo.model.endTime = '';
         }else{
           this.addHomeInfo.model.limitTime = 'Y';
-          if(this.singleId){  //全部服务
-            this.getSingleInfo();
-          }
           if(this.functionId){  //功能区
             this.getFunctionSingle();
           }
           this.serverOption.length == 1? this.addHomeInfo.col = this.serverOption[0].id : this.addHomeInfo.col = '';
         }
       },
-      getSingleInfo(){  //根据id获取全部服务个人信息
-        this.$http.get(`/service/default/getServiceDefaultById?id=${this.singleId}`).then(res=>{
-         if(res.data.code == 0){
-             this.addHomeInfo.model.limitTime = res.data.data.isLongValid;
-             if(res.data.data.isLongValid == 'N'){
-                 this.radioFlag = true;
-                 this.addHomeInfo.model.startTime = res.data.data.startTime;
-                 this.addHomeInfo.model.endTime = res.data.data.endTime;
-             }else{
-                 this.radioFlag = false;
-                 this.addHomeInfo.model.startTime = '';
-                 this.addHomeInfo.model.endTime = '';
-             }
-         }else{
-           this.$Message.warning(res.data.msg)
-         }
-        })
-      },
       getFunctionSingle(){  //根据ID获取功能区个人信息
-        this.$http.get(`/eService/getServiceDefaultById?id=${this.functionId}`).then(res=>{
+        this.$http.get(`/yyht/v1/service/getServiceInfoById?id=${this.functionId}`).then(res=>{
             if(res.data.code == 0){
                 this.addHomeInfo.model.limitTime = res.data.data.isLongValid;
                 if(res.data.data.isLongValid == 'N'){
@@ -253,9 +203,9 @@
         })
       },
       getServerCol(){ //获取服务栏目列表
-        this.$http.get(`/service/type/getAllServiceType?pageNo=${this.current}&pageSize=${this.size}&flag=up`).then(res=>{
+        this.$http.get(`/yyht/v1/service/type/getAllServiceType`).then(res=>{
           if(res.data.code == 0){
-             this.serverOption = res.data.data.list
+             this.serverOption = res.data.data
           }else{
             this.$Message.warning(res.data.msg)
           }
@@ -264,7 +214,7 @@
       getNotAdd(){ //获取未添加的服务列表 ?serviceTypeId=${item}&serviceTypeName=${data}
         let serviceTypeId = this.addHomeInfo.col;
         let serviceTypeName = this.addHomeInfo.inputInfo;
-        this.$http.get(`/service/getAllServiceByInner?serviceTypeId=${serviceTypeId}&serviceTypeName=${serviceTypeName}`).then(res=>{
+        this.$http.get(`/yyht/v1/service/getAllServiceByInner?serviceTypeId=${serviceTypeId}&serviceTypeName=${serviceTypeName}`).then(res=>{
           if(res.data.code == 0){
             this.serverData = res.data.data
           }else{

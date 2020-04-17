@@ -1,124 +1,167 @@
 <template>
   <Card>
-    <Form class="normal-form" v-if="queryType==='normal'" :label-width="80">
-      <div class="normal-left">
-        <div class="normal-title">基本信息
-
-          <Button class="normal-btn" @click="generateQrCode">生成二维码</Button>
-        </div>
-        <div class="normal-table">
-          <div class="table-row">
-            <label>用户姓名：</label>
-            <span>{{normalUserInfo.trueName}}</span>
-          </div>
-           <div class="table-row">
-            <label>用户电话：</label>
-            <span>{{normalUserInfo.mobile}}</span>
-          </div>
-           <div class="table-row">
-            <label>用户昵称：</label>
-            <span>{{normalUserInfo.nickName}}</span>
-          </div>
-          <div class="table-row">
-            <label>微信Id：</label>
-            <span>{{normalUserInfo.wxXcxOpenId}}</span>
-          </div>
-        </div>
-
-      </div>
-      <div class="normal-right">
-        <div class="normal-title">
-          可变更信息
-          <Button @click="toggleNormal" class="normal-btn">{{disNormalUser?'编辑':'保存'}}</Button>
-        </div>
-        <FormItem label="用户类型：">
-          <Select :disabled="disNormalUser" v-model="normalUserInfo.userType">
-            <Option value="USER">普通用户</Option>
-            <Option value="ADMIN">超级管理员</Option>
-            <Option value="SERVICE_USER">系统用户</Option>
-            <Option value="MERCHANT">商户类型</Option>
-          </Select>
-        </FormItem>
-        <FormItem label="会员状态">
-          <i-switch size="large" :disabled="disNormalUser" v-model="normalUserInfo.UserStateEnum" true-value="OPEN" false-value="CLOSE">
-            <span slot="open">开启</span>
-            <span slot="close">关闭</span>
-          </i-switch>
-        </FormItem>
-        <FormItem label="分佣类型：">
-          <Select :disabled="disNormalUser" v-model="normalUserInfo.commissionType">
-            <Option value="FIXED">固定金额型</Option>
-            <Option value="PERCENT">按百分比型</Option>
-            <Option value="NONE">无</Option>
-          </Select>
-        </FormItem>
-        <template  v-show="normalUserInfo.commissionType!=='NONE'&&!!normalUserInfo.commissionType">
-          <FormItem label="分佣值：">
-            <div>
-              <InputNumber :disabled="disNormalUser" v-model="normalUserInfo.commissionValue"></InputNumber>
-              <span v-if="normalUserInfo.commissionType" >%</span>
-              <span v-else>元</span>
+    <Spin fix v-show="loading == true">加载中...</Spin>
+    <Form v-if="queryType==='normal'" :label-width="80">
+      <div class="normal-form">
+        <div class="normal-left">
+          <Divider type="vertical" style="width: 5px;height:18px;background: #2d8cf0"/>基本信息
+          <div class="normal-table">
+            <div style="height:20px"></div>
+            <div style="margin-left: 20px">
+              <Row>
+                <Col span="6"><label>用户姓名</label></Col>
+                <Col span="6"><span>{{normalUserInfo.trueName}}</span></Col>
+              </Row>
+              <Divider />
+              <Row>
+                <Col span="6"><label>用户电话</label></Col>
+                <Col span="6"><span>{{normalUserInfo.mobile}}</span></Col>
+              </Row>
+              <Divider />
+              <Row>
+                <Col span="6"><label>用户昵称</label></Col>
+                <Col span="6"><span>{{normalUserInfo.nickName}}</span></Col>
+              </Row>
+              <Divider />
+              <Row>
+                <Col span="6"><label>微信Id</label></Col>
+                <Col span="6"><span>{{normalUserInfo.wxXcxOpenId}}</span></Col>
+              </Row>
             </div>
+          </div>
+        </div>
+        <div class="normal-right">
+          <Divider type="vertical" style="width: 5px;height:18px;background: #2d8cf0"/>可变更信息
+          <div class="pull-right">
+            <Button @click="toggleNormal" class="normal-btn" type="primary">{{disNormalUser?'编辑':'保存'}}</Button>
+          </div>
+          <div style="height:18px"></div>
+          <FormItem label="用户类型：">
+            <Select :disabled="disNormalUser" v-model="normalUserInfo.userType">
+              <Option value="USER">普通用户</Option>
+              <Option value="ADMIN">超级管理员</Option>
+              <Option value="SERVICE_USER">系统用户</Option>
+              <Option value="MERCHANT">商户类型</Option>
+            </Select>
           </FormItem>
-        </template>
-      </div>
-
-    </Form>
-    <Form v-if="queryType==='service'" class="form-wrap">
-      <div class="info-block mb-15">
-        <p class="info-title">
-          <span>人员信息</span>
-        </p>
-        <div class="info-content">
-          <FormItem label="师傅姓名：" >
-            <Input readonly v-model="baseInfo.trueName"/>
+          <FormItem label="会员状态:">
+            <i-switch size="large" :disabled="disNormalUser" v-model="normalUserInfo.userState" true-value="OPEN" false-value="CLOSE">
+              <span slot="open">开启</span>
+              <span slot="close">关闭</span>
+            </i-switch>
           </FormItem>
-          <FormItem label="师傅电话：">
-            <Input readonly v-model="baseInfo.mobile"/>
+          <FormItem label="分佣类型：">
+            <Select :disabled="disNormalUser" v-model="normalUserInfo.commissionType">
+              <Option value="FIXED">固定金额型</Option>
+              <Option value="PERCENT">按百分比型</Option>
+              <Option value="NONE">无</Option>
+            </Select>
           </FormItem>
-          <FormItem label="服务网点：">
-            <Input readonly v-model="baseInfo.repairStationName"/>
-          </FormItem>
-
+          <template  v-show="normalUserInfo.commissionType!=='NONE'&&!!normalUserInfo.commissionType">
+            <FormItem label="分佣值：">
+              <div>
+                <InputNumber :disabled="disNormalUser" v-model="normalUserInfo.commissionValue"></InputNumber>
+                <span v-if="normalUserInfo.commissionType" >%</span>
+                <span v-else>元</span>
+              </div>
+            </FormItem>
+          </template>
         </div>
       </div>
-      <div class="info-block mb-15 ">
-        <p class="info-title">师傅状态</p>
-        <template v-if="applyState==0">
-          <div class="info-content">
-            <Alert show-icon>当前账号需要您先审核</Alert>
-            <FormItem label="是否通过审核：">
-              <Select class="form-control" v-model="accountInfo.applyState">
-                <Option value="1">是</Option>
-                <Option value="-1">否</Option>
-              </Select>
-            </FormItem>
-            <FormItem label="审核说明：">
-              <Input type="textarea" v-model="accountInfo.applyRemark" />
-            </FormItem>
-            <FormItem>
-              <Button class="pull-right" @click="saveChange('accountInfo')" type="primary">保存</Button>
-            </FormItem>
+      <div class="normal-form subox">
+        <div class="normal-left">
+          <Divider type="vertical" style="width: 5px;height:18px;background: #2d8cf0"/>钱包信息
+          <div class="normal-table">
+            <div style="height:20px"></div>
+            <div style="margin-left: 20px">
+              <Row>
+                <Col span="6"><label>用户钱包</label></Col>
+                <Col span="6"><span>{{normalUserInfo.userAccount.money}}</span></Col>
+              </Row>
+              <Divider />
+              <Row>
+                <Col span="6"><label>冻结金额</label></Col>
+                <Col span="6"><span>{{normalUserInfo.userAccount.frozenAmount}}</span></Col>
+              </Row>
+              <Divider />
+              <Row>
+                <Col span="6"><label>是否设置支付密码</label></Col>
+                <Col span="6"><span>{{normalUserInfo.userAccount.isSetPayPwd == 'N'?'否':'是'}}</span></Col>
+              </Row>
+            </div>
           </div>
-        </template>
-       <template v-else>
-         <div class="info-content">
-           <FormItem label="账号状态设置">
-             <i-switch size="large" v-model="accountInfo.accountsState" true-value="NORMAL" false-value="DISABLE" @on-change="saveChange('accountInfo','switch')">
-               <span slot="open">启用</span>
-               <span slot="close">停用</span>
-             </i-switch>
-           </FormItem>
-         </div>
-       </template>
+        </div>
+        <div class="normal-right">
+          <div class="pull-right">
+            <Button class="normal-btn" type="primary" :loading="btnLoading" @click="generateQrCode">{{RQsee}}</Button>
+          </div>
+          <div style="margin-top: 80px;padding-left: 300px" v-show="this.imgSrc">
+            <img :src="imgSrc" style="width: 200px;height:200px"/>
+          </div>
+        </div>
       </div>
-      <template v-if="applyState!==0">
-        <div class="info-block mb-15">
-          <p class="info-title">
-            <span>师傅扣点比例</span>
-            <Button @click="toggleService" :type="disService?'default':'primary'" size="small">{{disService?'编辑':'保存'}}</Button>
-          </p>
-          <div class="info-content">
+    </Form>
+    <Form v-if="queryType==='service'">
+      <div class="normal-form">
+        <div class="normal-left">
+          <Divider type="vertical" style="width: 5px;height:18px;background: #2d8cf0"/>基本信息
+          <div class="normal-table">
+            <div style="height:20px"></div>
+            <div style="margin-left: 20px">
+              <Row>
+                <Col span="6"><label>师傅姓名</label></Col>
+                <Col span="6"><span>{{baseInfo.trueName}}</span></Col>
+              </Row>
+              <Divider />
+              <Row>
+                <Col span="6"><label>师傅电话</label></Col>
+                <Col span="6"><span>{{baseInfo.mobile}}</span></Col>
+              </Row>
+              <Divider />
+              <Row>
+                <Col span="6"><label>服务网点</label></Col>
+                <Col span="6"><span>{{baseInfo.repairStationName}}</span></Col>
+              </Row>
+            </div>
+          </div>
+        </div>
+        <div class="normal-right">
+          <Divider type="vertical" style="width: 5px;height:18px;background: #2d8cf0"/>师傅状态
+          <template v-if="applyState==0">
+            <div style="margin-left: 20px">
+              <Alert show-icon>当前账号需要您先审核</Alert>
+              <FormItem label="是否通过审核：">
+                <Select class="form-control" v-model="accountInfo.applyState">
+                  <Option value="1">是</Option>
+                  <Option value="-1">否</Option>
+                </Select>
+              </FormItem>
+              <FormItem label="审核说明：">
+                <Input type="textarea" v-model="accountInfo.applyRemark" />
+              </FormItem>
+              <FormItem>
+                <Button class="pull-right" @click="saveChange('accountInfo')" type="primary">保存</Button>
+              </FormItem>
+            </div>
+          </template>
+          <template v-else>
+            <div style="margin-left: 20px">
+              <FormItem label="账号状态设置">
+                <i-switch size="large" v-model="accountInfo.accountsState" true-value="NORMAL" false-value="DISABLE" @on-change="saveChange('accountInfo','switch')">
+                  <span slot="open">启用</span>
+                  <span slot="close">停用</span>
+                </i-switch>
+              </FormItem>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div class="normal-form subox">
+        <div class="normal-left">
+          <Divider type="vertical" style="width: 5px;height:18px;background: #2d8cf0"/>师傅扣点比例
+          <Button class="pull-right" @click="toggleService" type="primary" size="small">{{this.disService == false?'保存':'编辑扣点比例'}}</Button>
+          <div style="height:20px"></div>
+          <div style="margin-left: 20px">
             <FormItem label="人工费扣点方式">
               <Select :disabled="disService" v-model="sysService.sysServiceProjectType" class="form-item" >
                 <Option value="FIXED">固定金额型</Option>
@@ -135,7 +178,6 @@
                 </div>
               </FormItem>
             </template>
-
             <FormItem label="材料费扣点方式">
               <Select :disabled="disService" v-model="sysService.sysMaterialProjectType" class="form-item" >
                 <Option value="FIXED">固定金额型</Option>
@@ -145,23 +187,20 @@
             </FormItem>
             <template v-show="sysService.sysMaterialProjectType!=='NONE'&&!!sysService.sysServiceProjectType">
               <FormItem label="材料费扣点值">
-               <div class="form-item">
-                 <InputNumber :disabled="disService" v-model="sysService.sysMaterialProjectValue" />
+<!--                <div class="form-item">-->
+                  <InputNumber :disabled="disService" v-model="sysService.sysMaterialProjectValue" />
 
-                 <span v-if="sysService.sysServiceProjectType==='PERCENT'" >%</span>
-                 <span v-else >元</span>
-               </div>
+                  <span v-if="sysService.sysServiceProjectType==='PERCENT'" >%</span>
+                  <span v-else >元</span>
+<!--                </div>-->
               </FormItem>
             </template>
-
           </div>
         </div>
-        <div class="info-block mb-15">
-          <p class="info-title">
-            <span>业务状态</span>
-            <Button size="small" :type="disBusiness?'default':'primary'" @click="toggleBusiness">{{disBusiness?'编辑':'保存'}}</Button>
-          </p>
-          <div class="info-content">
+        <div class="normal-right">
+          <Divider type="vertical" style="width: 5px;height:18px;background: #2d8cf0"/>业务状态
+          <Button class="pull-right" @click="toggleBusiness" type="primary" size="small">{{this.disBusiness == true?'编辑业务状态':'保存'}}</Button>
+          <div style="margin-left: 20px">
             <FormItem label="业务状态调整">
               <Select :disabled="disBusiness" v-model="businessState" class="form-item mb-15" >
                 <Option value="NORMAL">正常</Option>
@@ -171,9 +210,7 @@
             </FormItem>
           </div>
         </div>
-      </template>
-
-
+      </div>
     </Form>
   </Card>
 </template>
@@ -193,6 +230,10 @@
       },
       data(){
         return {
+          btnLoading:false,//生成二维码的buttonloading
+          RQsee:'生成二维码',
+          loading:true,
+          imgSrc:'',
           userId:'',
           queryType:'', //页面类型： service-服务师傅，normal-普通用户
           disNormalUser:true,
@@ -228,9 +269,13 @@
       methods:{
           // 普通用户-生成二维码
         generateQrCode(){
-          this.$http.get(`/api/v1/user/makeInviteQr?userId=${this.userId}`).then(res=>{
+          this.RQsee = '正在生成二维码.....';
+          this.btnLoading = true;
+          this.$http.post(`/yyht/v1/user/makeInviteQr?userId=${this.userId}`).then(res=>{
             if(res.data.code===0){
-              console.log(res.data.data)
+             this.imgSrc = res.data.data.inviteQrImgUrl;
+             this.RQsee = '生成二维码';
+             this.btnLoading = false;
             }
           })
         },
@@ -285,9 +330,10 @@
                 for(let key in this.accountInfo){
                   this.accountInfo[key] = data[key]
                 }
-                this.businessState = data.businessState
-                this.applyState = data.applyState   //防止表单state变动影响
+                this.businessState = data.businessState;
+                this.applyState = data.applyState;  //防止表单state变动影响
                 console.log(res.data.data)
+                this.loading = false;
               }
             })
           },
@@ -315,7 +361,7 @@
               })
             }
         },
-        // 师傅
+        // 设置师傅扣点比例
         saveChange(changeKey,from){
           let params
           if(changeKey==='accountInfo'){
@@ -327,9 +373,9 @@
             }
           }
           if(changeKey==='sysService'){
-            params = this.sysService
             this.sysService.serviceUserId = this.userId
-            if(!parseFloat(this.sysService.sysServiceProjectType)||!parseFloat(this.sysService.sysServiceProjectType)){
+            params = this.sysService
+            if(!parseFloat(this.sysService.sysServiceProjectValue)||!parseFloat(this.sysService.sysMaterialProjectValue)){
               this.$Message.error('扣点值格式不正确，请重新输入数字')
             }
           }
@@ -353,7 +399,8 @@
           if(this.queryType==='service'){
             this.getDetail(this.userId)
           }else{
-            this.getUserDetail(this.userId)
+            this.getUserDetail(this.userId);
+            this.loading = false;
           }
       }
     }
@@ -372,7 +419,7 @@
       margin-bottom: 15px;
       position: relative;
       padding-left: 15px;
-      &:before{
+      /*&:before{
         content: "";
         display: inline-block;
         width: 8px;
@@ -382,7 +429,7 @@
         left: 0;
         top:50%;
         transform: translateY(-50%);
-      }
+      }*/
     }
     .info-content{
       width: 250px;
@@ -398,7 +445,9 @@
   /deep/ .ivu-input-number{
     width:200px;
   }
-
+.subox{
+  margin-top: 80px;
+}
   .normal-form{
     display: flex;
     .normal-title{
@@ -407,7 +456,7 @@
       margin-bottom: 10px;
       position: relative;
       padding-left: 10px;
-      &:before{
+      /*&:before{
         content: "";
         display: block;
         width: 5px;
@@ -417,7 +466,7 @@
         left: 0;
         top: 50%;
         transform: translateY(-8px);
-      }
+      }*/
       .normal-btn{
         position: absolute;
         right: 0;
@@ -425,7 +474,7 @@
       }
     }
     .normal-left{
-      flex: 1 0 0;
+      flex: 1 1 0;
       margin-right: 30px;
     }
     .normal-right{

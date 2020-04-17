@@ -6,17 +6,18 @@
           <Button icon="md-add" type="primary" @click="functionFn">新增</Button>
         </div>
       </div>
-      <Table :columns="columns" :data="lists" draggable @on-drag-drop="dragRow" :loading="loading"></Table>
-       <div class="pagination mt-15">
-        <Page :current.sync="pageConfig.current" :page-size="pageConfig.size" :total="pageConfig.totalCount" @on-change="changeCurrent" @on-page-size-change="changeSize" show-elevator show-sizer></Page>
-      </div>
+      <Spin fix v-show="loading == true">加载中...</Spin>
+<!--       draggable @on-drag-drop="dragRow"-->
+      <Table :columns="columns" :data="lists"></Table>
+<!--       <div class="pagination mt-15">-->
+<!--        <Page :current.sync="pageConfig.current" :page-size="pageConfig.size" :total="pageConfig.totalCount" @on-change="changeCurrent" @on-page-size-change="changeSize" show-elevator show-sizer></Page>-->
+<!--      </div>-->
     </Card>
      <Model :addService="addService"
              :current="pageConfig.current"
              :size="pageConfig.bigSize"
              :addTitle="addTitle"
              :functionId="functionId"
-             :functionFlag='functionFlag'
              @updateCol="updateList"
              @getStatus="modelStatus"
              @deleteId="deleteSingleId"
@@ -39,7 +40,6 @@ import Model from './components/model.vue'
                bigSize:100,
                totalCount:0,
             },
-            functionFlag:false,
             functionId:'',//用于编辑时的id
             addTitle:'新增服务',//模态框title
             addService:false,
@@ -71,9 +71,11 @@ import Model from './components/model.vue'
                       type:'primary',
                       size:'small'
                     },
+                    style:{
+                      marginRight:"5px"
+                    },
                     on:{
                       click:()=>{
-                        this.functionFlag = true
                         this.functionId = params.row.id
                         this.addService = true
                         this.addTitle = '编辑服务'
@@ -104,22 +106,21 @@ import Model from './components/model.vue'
         Model
       },
       methods:{
-        dragRow(a,b){       //拖拽行序列
-          let data = util.sortTableRow(a,b,this.lists)
-          this.lists = data
-          // functionSort(this.lists)
-        },
-        changeSize(e){    //分页size的改变
-          this.pageConfig.size = e
-          this.getCols()
-        },
-        changeCurrent(e){ //分页页码的改变
-          this.pageConfig.current = e
-          this.getCols()
-        },
+        // dragRow(a,b){       //拖拽行序列
+        //   let data = util.sortTableRow(a,b,this.lists)
+        //   this.lists = data
+        //   // functionSort(this.lists)
+        // },
+        // changeSize(e){    //分页size的改变
+        //   this.pageConfig.size = e
+        //   this.getCols()
+        // },
+        // changeCurrent(e){ //分页页码的改变
+        //   this.pageConfig.current = e
+        //   this.getCols()
+        // },
         functionFn(){  //新增按钮
-          this.addService = true
-          this.functionFlag = true
+          this.addService = true;
         },
         deleteSingleId(data){ //删除singleID
           if(data == true){
@@ -139,23 +140,23 @@ import Model from './components/model.vue'
             this. addTitle = '新增服务';
           }
          },
-        deleteSingle(data){
-         this.$http.delete(`/eService/deleteServiceDefaultById?id=${data}`).then(res=>{
+        deleteSingle(data){  //删除
+         this.$http.post(`/yyht/v1/service/default/delete?id=${data}`).then(res=>{
           if(res.data.code == 0){
              this.$Message.success('删除成功');
              this.$store.commit('setDeleteModal',{model:false})
              this.getCols();
           }else{
             this.$Message.warning(res.data.msg)
+            this.$store.commit('setDeleteModal',{model:false})
           }
         })
         },
         getCols(){ //获取页面table数据
         this.loading = true;
-          this.$http.get(`/eService/getAllServiceDefault?PageSize=${this.pageConfig.size}&pageNo=${this.pageConfig.current}`).then(res=>{
+          this.$http.get(`/yyht/v1/service/default/getAllServiceDefault`).then(res=>{
             if(res.data.code == 0){
-              this.lists = res.data.data.list;
-              this.pageConfig.totalCount = res.data.totalCount;
+              this.lists = res.data.data;
               this.loading = false;
             }else{
               this.$Message.warning(res.data.msg)

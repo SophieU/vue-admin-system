@@ -1,10 +1,10 @@
 <template>
   <div>
     <Card class="mb-15">
-
-      <Table :loading="loading" :columns="columns" :data="lists"></Table>
+      <Spin fix v-show="loading == true">加载中...</Spin>
+      <Table :columns="columns" :data="lists"></Table>
       <div class="pagination">
-        <Page :total="totalCount" :current.sync="pageNo" :on-change="(page)=>getLists(page)"></Page>
+        <Page :total="totalCount" :current.sync="pageNo" @on-change="(page)=>getLists(page)"></Page>
       </div>
     </Card>
   </div>

@@ -106,7 +106,7 @@
             let id = this.id;
             let query = `pageNo=${this.pageNo}&pageSize=${this.pageSize}&id=${id}`;
             let param =util.formatterParams(filter);
-            this.$http.post(`/yyht/v1/service/user/order/pageList?${query}&${param}`).then(res=>{
+            this.$http.get(`/yyht/v1/service/user/order/pageList?${query}&${param}`).then(res=>{
                 if(res.data.code===0){
                   let data = res.data.data;
                   this.lists=data.list;

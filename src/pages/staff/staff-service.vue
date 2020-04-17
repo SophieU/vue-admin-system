@@ -126,7 +126,7 @@
         toggleStation(stationId){
           if(stationId){
             this.showFilterGroup=true;
-            this.getGroup(stationId)
+            // this.getGroup(stationId)
           }else{
             this.showFilterGroup=false;
             this.groupLists=[];

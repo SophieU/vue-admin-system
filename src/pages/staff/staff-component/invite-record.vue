@@ -5,9 +5,10 @@
         <Input style="width: 250px" clearable v-model="userMobile" @on-clear="getLists(1 )" placeholder="被邀请人电话"/>
         <Button type="primary" @click="getLists(1)">搜索</Button>
       </div>
-      <Table :loading="loading" style="clear:both;" :columns="columns" :data="lists"></Table>
+      <Spin fix v-show="loading == true">加载中...</Spin>
+      <Table style="clear:both;" :columns="columns" :data="lists"></Table>
       <div class="pagination">
-        <Page :total="totalCount" :current.sync="pageNo" :on-change="(page)=>getLists(page)"></Page>
+        <Page :total="totalCount" :current.sync="pageNo" @on-change="(page)=>getLists(page)"></Page>
       </div>
     </Card>
   </div>
@@ -51,11 +52,10 @@ export default {
         this.loading=false;
         if(res.data.code===0){
           let data = res.data.data;
-          this.lists=data.list
+          this.lists=data.list;
           this.totalCount=data.totalCount;
-          console.log(data)
         }else{
-          console.log(res.data.msg)
+          this.$Message.warning(res.data.msg)
         }
       })
    }
