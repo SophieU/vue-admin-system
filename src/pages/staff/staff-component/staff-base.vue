@@ -9,6 +9,11 @@
             <div style="height:20px"></div>
             <div style="margin-left: 20px">
               <Row>
+                <Col span="6"><label>用户类型</label></Col>
+                <Col span="6"><span>{{normalUserInfo.userTypeName}}</span></Col>
+              </Row>
+              <Divider />
+              <Row>
                 <Col span="6"><label>用户姓名</label></Col>
                 <Col span="6"><span>{{normalUserInfo.trueName}}</span></Col>
               </Row>
@@ -24,9 +29,15 @@
               </Row>
               <Divider />
               <Row>
+                <Col span="6"><label>用户注册时间</label></Col>
+                <Col span="6"><span>{{normalUserInfo.regTime}}</span></Col>
+              </Row>
+              <Divider />
+              <Row>
                 <Col span="6"><label>微信Id</label></Col>
                 <Col span="6"><span>{{normalUserInfo.wxXcxOpenId}}</span></Col>
               </Row>
+              <Divider />
             </div>
           </div>
         </div>
@@ -88,6 +99,7 @@
                 <Col span="6"><label>是否设置支付密码</label></Col>
                 <Col span="6"><span>{{normalUserInfo.userAccount.isSetPayPwd == 'N'?'否':'是'}}</span></Col>
               </Row>
+              <Divider />
             </div>
           </div>
         </div>

@@ -32,8 +32,13 @@
       </div>
       <i-form ref="filterForm" :model="filterForm" label-position="top">
         <form-item label="服务分类">
-          <Select v-model="filterForm.repairCategoryId">
+          <Select v-model="filterForm.repairCategoryParentId" @on-change="changeItem">
             <Option v-for="repair in repairTypeLists" :key="repair.id" :value="repair.id">{{repair.name}}</Option>
+          </Select>
+        </form-item>
+        <form-item label="服务项目">
+          <Select v-model="filterForm.repairCategoryId">
+            <Option v-for="repair in repairSonLists" :key="repair.id" :value="repair.id">{{repair.name}}</Option>
           </Select>
         </form-item>
         <form-item label="工单时间">
@@ -83,7 +88,9 @@
             pageSize:10,
             totalCount:0,
             repairTypeLists:[], //报修分类列表
+            repairSonLists:[],//报修分类项目列表
             filterForm:{
+              repairCategoryParentId:'',
               repairCategoryId:'',
               dateRange:[],
               startDate:'',
@@ -93,6 +100,20 @@
           }
       },
       methods:{
+        changeItem(data){
+          this.$http.get(`/yyht/v1/repair/category/select/next?parentId=${data}`).then(res=>{
+            if(res.data.code == 0){
+              this.repairSonLists = res.data.data
+            }
+          })
+        },
+        getFirst(){
+         this.$http.get(`/yyht/v1/repair/category/select/first`).then(res=>{
+           if(res.data.code == 0){
+             this.repairTypeLists = res.data.data
+           }
+         })
+        },
         dateRangeChange(val){
           this.filterForm.startDate=val[0];
           this.filterForm.endDate=val[1];
@@ -143,7 +164,6 @@
                 param[key]=filterForm[key];
               }
             }
-            console.log(filterForm)
             this.getLists(filterForm);
         },
         pageChange(val){
@@ -157,7 +177,8 @@
 
       },
       mounted(){
-          this.id=this.$route.query.id;
+        this.id=this.$route.query.id;
+        this.getFirst();
         this.getLists();
         this.getRepairType();
       }

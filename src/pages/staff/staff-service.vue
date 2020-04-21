@@ -1,6 +1,7 @@
 <template>
     <Card>
       <div class="mb-15">
+        <Button type="primary" @click="teachModal = true">新增</Button>
         <Button @click="filter=true">筛选</Button>
       </div>
       <div class="table-wrapper">
@@ -64,15 +65,90 @@
           </form-item>
         </i-form>
       </Drawer>
+      <Modal
+        width="800"
+        v-model="teachModal"
+        :mask-closable="false"
+        title="新增服务师傅"
+        @on-visible-change="modalHide"
+      >
+          <i-form ref="teachForm" :rules="teachRule" :model="teachForm" :label-width="100">
+                <form-item label="服务网点：" prop="repairStationId">
+                  <Select v-model="teachForm.repairStationId" @on-change="changeStation">
+                    <Option v-for="item in modalStation" :key="item.id" :value="item.id">{{item.name}}</Option>
+                  </Select>
+                </form-item>
+                <form-item label="员工姓名：" prop="trueName">
+                  <Input v-model="teachForm.trueName"/>
+                </form-item>
+
+                <form-item label="手机号码：" prop="mobile">
+                  <Input v-model="teachForm.mobile"/>
+                </form-item>
+                <form-item label="工号：" prop="workNumber">
+                  <Input  v-model="teachForm.workNumber"/>
+                </form-item>
+                <form-item label="上班状态：" prop="accountsState">
+                  <Select v-model="teachForm.accountsState">
+                    <Option value="NORMAL">正常</Option>
+                    <Option value="DISABLE">停用</Option>
+                  </Select>
+                </form-item>
+                <form-item label="服务区域列表" class="must" prop="repairRegionIds">
+                  <Select v-model="teachForm.repairRegionIds" multiple @on-change="changeArea">
+                    <Option v-for="item in teachArea" :key="item.id" :value="item.id">{{item.name}}</Option>
+                  </Select>
+                </form-item>
+                <form-item label="网点服务类：" class="must" prop="repairCategoryIds">
+                  <Tree :data="repairTree" show-checkbox @on-check-change="changeCheck"></Tree>
+                </form-item>
+                <form-item label="头像：" class="must" prop="showFaceImage">
+                  <UploadImage :eidtImg="eidtImg" ref="upImg" @uploadCallback="uploadUrl"></UploadImage>
+                </form-item>
+          </i-form>
+        <div slot="footer">
+          <Button @click="teachModal=false">取消</Button>
+          <Button :loading="loadingSend" @click="saveTeach('teachForm')" type="primary">保存</Button>
+        </div>
+      </Modal>
     </Card>
 </template>
 
 <script>
+  import UploadImage from '../main-components/upload-img'
   import util from '../../libs/util'
     export default {
         name: "staff-admin",
+      components: {UploadImage},
       data(){
           return {
+            eidtImg:null,
+            teachModal:false, //弹窗状态
+            loadingSend:false, //弹窗保存状态
+            teachForm:{ //弹窗modal
+              id:'',
+              repairStationId:'',//网点ID
+              trueName:'',//员工姓名
+              mobile:'',//手机号码
+              workNumber:'',//工号
+              accountsState:'',//上班状态
+              showFaceImage:'',//头像
+              repairCategoryIds:[],//报修分类
+              repairRegionIds:[]//服务区域
+            },
+            teachRule:{  //模态框规则
+              repairStationId:[{required:true,message:'请选择服务网点',trigger:'change'}],
+              trueName:[{required:true,message:'请填写员工姓名',trigger:'blur'}],
+              mobile:[{required:true,message:'请填写手机号码',trigger:'blur'}],
+              workNumber:[{required:true,message:'请填写工号',trigger:'blur'}],
+              accountsState:[{required:true,message:'请选择上班状态',trigger:'change'}],
+              // repairRegionIds:[{required:true,message:'请选择服务区域列表',trigger:'change'}],
+              // repairCategoryIds:[{required:true,message:'请选择服务网点分类',trigger:'blur'}],
+              // showFaceImage:[{required:true,message:'请上传头像',trigger:'blur'}],
+            },
+            modalStation:[], //网点下拉数组
+            repairTree:[],//报修分类数组
+            teachArea:[],//服务区域数组
             filter:false,
             columns:[
               {title:'姓名',key:'trueName',align:'center'},
@@ -87,22 +163,64 @@
                   let rate = params.row.goodCommentRate;
                   return h('span',`${rate}%`)
                 }},
-              {title:'操作',align:'center',render:(h,param)=>{
+              {title:'操作',align:'center',render:(h,param)=> {
                   let _this = this;
-                  return h('Button',{
-                    props:{
-                      type:'primary',
-                      size:'small'
-                    },
-                    on:{
-                      click:()=>{
-                        let id = param.row.id;
-                        _this.$router.push({name:'staffDetail',query:{id:id,queryType:'service'}})
+                  return h('div', [
+                    h('Button', {
+                      props: {
+                        type: 'default',
+                        size: 'small'
+                      },
+                      style:{
+                        marginRight:'5px'
+                      },
+                      on: {
+                        click: () => {
+                          let id = param.row.id;
+                          _this.$router.push({name: 'staffDetail', query: {id: id, queryType: 'service'}})
+                        }
                       }
-                    }
-                  },'查看')
-                }}
-            ],
+                    }, '查看'),
+                    h('Button', {
+                      props: {
+                        type: 'primary',
+                        size: 'small'
+                      },
+                      on: {
+                        click: () => {
+                          this.$http.get(`/yyht/v1/service/user/detail?id=${param.row.id}`).then(res=>{
+                            if(res.data.code == 0){
+                              let data = res.data.data;
+                              this.getArea(data.repairStationId);
+                              this.teachForm = { //弹窗modal
+                                  id:data.id,
+                                  repairStationId:data.repairStationId,//网点ID
+                                  trueName:data.trueName,//员工姓名
+                                  mobile:data.mobile,//手机号码
+                                  workNumber:data.workNumber,//工号
+                                  accountsState:data.accountsState,//上班状态
+                                  showFaceImage:data.showFaceImage,//头像
+                                  repairCategoryIds:data.repairCategoryTree,//报修分类
+                                  repairRegionIds:data.regionList//服务区域
+                              };
+                              data.repairCategoryTree.forEach(ele=>{
+                                ele.title = ele.name;
+                                ele.checked = true;
+                                if(ele.children.length != 0){
+                                  ele.title = ele.name;
+                                  ele.checked = true;
+                                }
+                              });
+                              this.eidtImg = [{name: '', url: data.showFaceImage, status: 'finished'}];
+                              this.repairTree = data.repairCategoryTree;
+                              this.teachModal = true;
+                            }
+                          })
+                        }
+                      }
+                    }, '编辑')
+                  ])
+                }}],
             lists:[],
             pageNo:1,
             pageSize:10,
@@ -123,6 +241,35 @@
           }
       },
       methods:{
+        changeArea(arr){  //区域改变触发
+          arr.forEach(ele=>{
+            this.teachForm.repairRegionIds.push(ele.id)
+          })
+        },
+        changeCheck(arr){ //改变树节点
+          this.teachForm.repairCategoryIds = [];
+          arr.forEach(ele=>{
+           this.teachForm.repairCategoryIds.push(ele.id)
+         })
+          // console.log(this.teachForm.repairCategoryIds)
+        },
+        uploadUrl(data){ //子组件传过来的URL
+          this.teachForm.showFaceImage = data.imageUrl
+        },
+        modalHide(data){ //新增师傅模态框的显示和隐藏
+          if(data == false){
+            this.teachForm = { //弹窗modal
+              repairStationId:'',//网点ID
+                trueName:'',//员工姓名
+                mobile:'',//手机号码
+                workNumber:'',//工号
+                accountsState:'',//上班状态
+                showFaceImage:'',//头像
+                repairCategoryIds:[],//报修分类
+                repairRegionIds:''//服务区域
+            }
+          }
+        },
         toggleStation(stationId){
           if(stationId){
             this.showFilterGroup=true;
@@ -131,6 +278,34 @@
             this.showFilterGroup=false;
             this.groupLists=[];
           }
+        },
+        saveTeach(name){ //增加师傅弹窗保存
+          this.$refs[name].validate((valid) => {
+            if (valid) {
+              if(this.teachForm.repairCategoryIds.length == 0){
+                this.$Message.error('请选择网点服务类');
+                return
+              }
+              if(!this.teachForm.showFaceImage){
+                this.$Message.error('请上传头像');
+                return
+              }
+              if(this.teachForm.repairRegionIds.length == 0){
+                this.$Message.error('请选择服务区域列表')
+              }
+              if(this.teachForm.id == ''){
+                delete this.teachForm.id;
+              }
+              this.$http.post(`/yyht/v1/service/user/saveOrUpdate`,this.teachForm).then(res=>{
+                if(res.data.code == 0){
+                  this.teachModal = false;
+                  this.getLists();
+                }
+              })
+            } else {
+              this.$Message.error('表单填写不完整！');
+            }
+          })
         },
         pageChange(val){
           this.pageNo=val;
@@ -142,17 +317,42 @@
           let filter=this.filterForm;
           this.getLists(filter);
         },
-          getStation(){
+          getStation(){ //获取弹窗网点下拉列表
             this.$http.get(`/yyht/v1/repair/station/select/list`)
               .then(res=>{
                 if(res.data.code===0){
                   this.stationLists=res.data.data;
+                  this.modalStation = res.data.data;
                 }else{
-                  console.log('员工列表网点下拉'+res.data.msg);
+                  console.log('网点下拉'+res.data.msg);
                 }
               })
           },
-
+        changeStation(data){ //服务网点下拉选择改变，获取报修分类和网点关联服务区域
+          this.$http.get(`/yyht/v1/repair/category/getStationCategoryTree?repairStationId=${data}`).then(res=>{
+            if(res.data.code == 0){
+              res.data.data.forEach(ele=>{
+                if(ele.children.length != 0){
+                   ele.children.forEach(v=>{
+                     v.title = v.name
+                   })
+                }
+                ele.title = ele.name
+              });
+              this.repairTree = res.data.data;
+            }else{
+              this.$Message.warning(res.data.msg)
+            }
+          })
+          this.getArea(data)
+        },
+        getArea(data){
+          this.$http.get(`/yyht/v1/repair/category/findRegionList?repairStationId=${data}`).then(res=>{
+            if(res.data.code == 0){
+              this.teachArea = res.data.data
+            }
+          })
+        },
         getLists(filter){
           let param = `pageNo=${this.pageNo}&pageSize=${this.pageSize}`;
           if(filter){
