@@ -66,7 +66,6 @@
         </i-form>
       </Drawer>
       <Modal
-        width="800"
         v-model="teachModal"
         :mask-closable="false"
         title="新增服务师傅"
@@ -74,32 +73,32 @@
       >
           <i-form ref="teachForm" :rules="teachRule" :model="teachForm" :label-width="100">
                 <form-item label="服务网点：" prop="repairStationId">
-                  <Select v-model="teachForm.repairStationId" @on-change="changeStation">
+                  <Select v-model="teachForm.repairStationId" @on-change="changeStation" style="width: 200px">
                     <Option v-for="item in modalStation" :key="item.id" :value="item.id">{{item.name}}</Option>
                   </Select>
                 </form-item>
                 <form-item label="员工姓名：" prop="trueName">
-                  <Input v-model="teachForm.trueName"/>
+                  <Input v-model="teachForm.trueName" style="width: 200px"/>
                 </form-item>
 
                 <form-item label="手机号码：" prop="mobile">
-                  <Input v-model="teachForm.mobile"/>
+                  <Input v-model="teachForm.mobile" style="width: 200px"/>
                 </form-item>
                 <form-item label="工号：" prop="workNumber">
-                  <Input  v-model="teachForm.workNumber"/>
+                  <Input  v-model="teachForm.workNumber" style="width: 200px"/>
                 </form-item>
                 <form-item label="上班状态：" prop="accountsState">
-                  <Select v-model="teachForm.accountsState">
+                  <Select v-model="teachForm.accountsState" style="width: 200px">
                     <Option value="NORMAL">正常</Option>
                     <Option value="DISABLE">停用</Option>
                   </Select>
                 </form-item>
                 <form-item label="服务区域列表" class="must" prop="repairRegionIds">
-                  <Select v-model="teachForm.repairRegionIds" multiple @on-change="changeArea">
+                  <Select v-model="teachForm.repairRegionIds" multiple @on-change="changeArea" style="width: 200px">
                     <Option v-for="item in teachArea" :key="item.id" :value="item.id">{{item.name}}</Option>
                   </Select>
                 </form-item>
-                <form-item label="网点服务类：" class="must" prop="repairCategoryIds">
+                <form-item label="服务类型：" class="must" prop="repairCategoryIds">
                   <Tree :data="repairTree" show-checkbox @on-check-change="changeCheck"></Tree>
                 </form-item>
                 <form-item label="头像：" class="must" prop="showFaceImage">
@@ -181,44 +180,44 @@
                         }
                       }
                     }, '查看'),
-                    h('Button', {
-                      props: {
-                        type: 'primary',
-                        size: 'small'
-                      },
-                      on: {
-                        click: () => {
-                          this.$http.get(`/yyht/v1/service/user/detail?id=${param.row.id}`).then(res=>{
-                            if(res.data.code == 0){
-                              let data = res.data.data;
-                              this.getArea(data.repairStationId);
-                              this.teachForm = { //弹窗modal
-                                  id:data.id,
-                                  repairStationId:data.repairStationId,//网点ID
-                                  trueName:data.trueName,//员工姓名
-                                  mobile:data.mobile,//手机号码
-                                  workNumber:data.workNumber,//工号
-                                  accountsState:data.accountsState,//上班状态
-                                  showFaceImage:data.showFaceImage,//头像
-                                  repairCategoryIds:data.repairCategoryTree,//报修分类
-                                  repairRegionIds:data.regionList//服务区域
-                              };
-                              data.repairCategoryTree.forEach(ele=>{
-                                ele.title = ele.name;
-                                ele.checked = true;
-                                if(ele.children.length != 0){
-                                  ele.title = ele.name;
-                                  ele.checked = true;
-                                }
-                              });
-                              this.eidtImg = [{name: '', url: data.showFaceImage, status: 'finished'}];
-                              this.repairTree = data.repairCategoryTree;
-                              this.teachModal = true;
-                            }
-                          })
-                        }
-                      }
-                    }, '编辑')
+                    // h('Button', {
+                    //   props: {
+                    //     type: 'primary',
+                    //     size: 'small'
+                    //   },
+                    //   on: {
+                    //     click: () => {
+                    //       this.$http.get(`/yyht/v1/service/user/detail?id=${param.row.id}`).then(res=>{
+                    //         if(res.data.code == 0){
+                    //           let data = res.data.data;
+                    //           this.getArea(data.repairStationId);
+                    //           this.teachForm = { //弹窗modal
+                    //               id:data.id,
+                    //               repairStationId:data.repairStationId,//网点ID
+                    //               trueName:data.trueName,//员工姓名
+                    //               mobile:data.mobile,//手机号码
+                    //               workNumber:data.workNumber,//工号
+                    //               accountsState:data.accountsState,//上班状态
+                    //               showFaceImage:data.showFaceImage,//头像
+                    //               repairCategoryIds:data.repairCategoryTree,//报修分类
+                    //               repairRegionIds:data.regionList//服务区域
+                    //           };
+                    //           data.repairCategoryTree.forEach(ele=>{
+                    //             ele.title = ele.name;
+                    //             ele.checked = true;
+                    //             if(ele.children.length != 0){
+                    //               ele.title = ele.name;
+                    //               ele.checked = true;
+                    //             }
+                    //           });
+                    //           this.eidtImg = [{name: '', url: data.showFaceImage, status: 'finished'}];
+                    //           this.repairTree = data.repairCategoryTree;
+                    //           this.teachModal = true;
+                    //         }
+                    //       })
+                    //     }
+                    //   }
+                    // }, '编辑')
                   ])
                 }}],
             lists:[],

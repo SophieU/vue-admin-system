@@ -2,9 +2,15 @@
   <div>
     <Card class="mb-15">
       <Spin fix v-show="loading == true">加载中...</Spin>
-      <div style="margin-bottom: 8px">
-        <Button type="primary" @click="feeModal = true">业务结算</Button>
+      <div class="top-discribe">
+        <div><span>用户钱包:</span>&nbsp;&nbsp;&nbsp;<span class="num-color">{{this.normalUserInfo.userAccount.money}}</span></div>
+        <div><span>冻结金额:</span>&nbsp;&nbsp;&nbsp;<span class="num-color">{{this.normalUserInfo.userAccount.frozenAmount}}</span></div>
+        <div><span>是否设置支付密码:</span>&nbsp;&nbsp;&nbsp;<span :style="{color:normalUserInfo.userAccount.isSetPayPwd == 'N'?'red':'rgb(45, 140, 240)'}">{{normalUserInfo.userAccount.isSetPayPwd == 'N'?'否':'是'}}</span></div>
+        <div class="pull-right">
+          <Button type="primary" @click="feeModal = true">业务结算</Button>
+        </div>
       </div>
+      <div class="gap"></div>
       <Table :columns="columns" :data="lists"></Table>
       <div class="pagination">
         <Page :total="totalCount" :current.sync="pageNo" @on-change="(page)=>getLists(page)"></Page>
@@ -12,13 +18,14 @@
       <Modal
         v-model="feeModal"
         :mask-closable="false"
+        @on-visible-change="changeModal"
         title="业务结算">
         <Form ref="formFee" :model="feeModel" :rules="feeRule" :label-width="100" inline>
           <FormItem label="系统结算" prop="amount">
-            <Input v-model="feeModel.amount"></Input>
+            <Input v-model="feeModel.amount"  style="width: 200px"></Input>
           </FormItem>
           <FormItem label="操作的业务ID" prop="businessId">
-            <Input v-model="feeModel.businessId"></Input>
+            <Input v-model="feeModel.businessId"  style="width: 200px"></Input>
           </FormItem>
         </Form>
         <div slot="footer">
@@ -31,12 +38,15 @@
 </template>
 
 <script>
+  // import InputNumber from "../../main-components/input-money";
   export default {
     name: "staff-control",
+    // components:{InputNumber},
     data(){
       return{
         loadingSend:false,
         feeModal:false,//弹窗的状态控制
+        normalUserInfo:{}, //详细用户信息
         feeModel:{ //弹窗数据
           userId:'',
           amount:'',
@@ -76,10 +86,34 @@
     mounted(){
       this.feeModel.userId= this.$route.query.id;
       this.getLists();
+      this.getUserDetail(this.$route.query.id)
     },
     methods:{
+      changeModal(data){  //模态框状态切换
+        if(data == false){
+          this.feeModel = {
+            userId:this.$route.query.id,
+            amount:'',
+            businessId:'',
+            userAccountChangeType:"SYSTEM_SETTLE",
+            userActionType:"BUSINESS_INCOME"
+          };
+          this.$refs['formFee'].resetFields();
+        }
+      },
+      //普通用户详情
+      getUserDetail(id){
+        this.$http.get(`/yyht/v1/user/detail?userId=${id}`).then(res=>{
+          if(res.data.code===0){
+            this.normalUserInfo = res.data.data;
+          }else{
+            console.log(res.data.msg)
+          }
+        })
+      },
       cancle(name){
         this.feeModal = false;
+        this.loadingSend = false;
         this.feeModel = {
           userId:this.$route.query.id,
           amount:'',
@@ -90,16 +124,26 @@
         this.$refs[name].resetFields();
       },
       saveFee(name){  //弹窗保存
+        this.loadingSend = true;
         this.$refs[name].validate((valid)=>{
           if(valid){
+            console.log(this.feeModal.amount)
+            if(!this.feeModal.amount){
+              this.$Message.warning('请输入系统结算金额！');
+              this.loadingSend = false;
+              return
+            }
              this.$http.post(`/yyht/v1/user/changeUserAccount`,this.feeModel).then(res=>{
                if(res.data.code == 0){
                  this.getLists();
+                 this.getUserDetail(this.feeModel.userId);
                  this.cancle();
+                 this.loadingSend = false;
                  this.$Message.success('保存成功！')
                }
              })
           }else{
+            this.loadingSend = false;
             this.$Message.error('表单未填写完整！')
           }
         })
@@ -127,5 +171,13 @@
 </script>
 
 <style scoped>
-
+  .gap{height: 20px}
+  .top-discribe .num-color{
+    color:rgb(45, 140, 240);
+  }
+.top-discribe div{
+  display: inline-block;
+  margin: 8px;
+  padding: 8px;
+}
 </style>

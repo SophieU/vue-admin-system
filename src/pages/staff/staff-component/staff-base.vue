@@ -35,7 +35,7 @@
               <Divider />
               <Row>
                 <Col span="6"><label>微信Id</label></Col>
-                <Col span="6"><span>{{normalUserInfo.wxXcxOpenId}}</span></Col>
+                <Col span="12"><span>{{normalUserInfo.wxXcxOpenId}}</span></Col>
               </Row>
               <Divider />
             </div>
@@ -44,7 +44,7 @@
         <div class="normal-right">
           <Divider type="vertical" style="width: 5px;height:18px;background: #2d8cf0"/>可变更信息
           <div class="pull-right">
-            <Button @click="toggleNormal" class="normal-btn" type="primary">{{disNormalUser?'编辑':'保存'}}</Button>
+            <Button @click="toggleNormal" class="normal-btn" type="primary" :loading="updateLoading">{{disNormalUser?'编辑':'保存'}}</Button>
           </div>
           <div style="height:18px"></div>
           <FormItem label="用户类型：">
@@ -71,9 +71,7 @@
           <template  v-show="normalUserInfo.commissionType!=='NONE'&&!!normalUserInfo.commissionType">
             <FormItem label="分佣值：">
               <div>
-                <InputNumber :disabled="disNormalUser" v-model="normalUserInfo.commissionValue"></InputNumber>
-                <span v-if="normalUserInfo.commissionType" >%</span>
-                <span v-else>元</span>
+                <InputNumber :disabled="disNormalUser" v-model="normalUserInfo.commissionValue"></InputNumber>&nbsp;<span style="color:red">(选择按百分比型时，输入框请输入0-1之间的数。例如：0.5表示50%，1表示100%)</span>
               </div>
             </FormItem>
           </template>
@@ -87,27 +85,33 @@
             <div style="margin-left: 20px">
               <Row>
                 <Col span="6"><label>用户钱包</label></Col>
-                <Col span="6"><span>{{normalUserInfo.userAccount.money}}</span></Col>
+                <Col span="6"><span style="color:rgb(45, 140, 240)">{{normalUserInfo.userAccount.money}}</span></Col>
               </Row>
               <Divider />
               <Row>
                 <Col span="6"><label>冻结金额</label></Col>
-                <Col span="6"><span>{{normalUserInfo.userAccount.frozenAmount}}</span></Col>
+                <Col span="6"><span style="color:rgb(45, 140, 240)">{{normalUserInfo.userAccount.frozenAmount}}</span></Col>
               </Row>
               <Divider />
               <Row>
                 <Col span="6"><label>是否设置支付密码</label></Col>
-                <Col span="6"><span>{{normalUserInfo.userAccount.isSetPayPwd == 'N'?'否':'是'}}</span></Col>
+                <Col span="6"><span style="color:rgb(45, 140, 240)">{{normalUserInfo.userAccount.isSetPayPwd == 'N'?'否':'是'}}</span></Col>
               </Row>
               <Divider />
             </div>
           </div>
         </div>
         <div class="normal-right">
+          <div class="normal-left">
+            <Divider type="vertical" style="width: 5px;height:18px;background: #2d8cf0"/>邀请二维码
+          </div>
           <div class="pull-right">
             <Button class="normal-btn" type="primary" :loading="btnLoading" @click="generateQrCode">{{RQsee}}</Button>
           </div>
-          <div style="margin-top: 80px;padding-left: 300px" v-show="this.imgSrc">
+          <div style="margin-top: 80px;padding-left: 300px" v-show="normalUserInfo.inviteQrImgUrl">
+            <img :src="normalUserInfo.inviteQrImgUrl"  style="width: 200px;height:200px"/>
+          </div>
+          <div style="margin-top: 80px;padding-left: 300px" v-show="!normalUserInfo.inviteQrImgUrl && this.imgSrc">
             <img :src="imgSrc" style="width: 200px;height:200px"/>
           </div>
         </div>
@@ -242,6 +246,7 @@
       },
       data(){
         return {
+          updateLoading:false,
           btnLoading:false,//生成二维码的buttonloading
           RQsee:'生成二维码',
           loading:true,
@@ -288,6 +293,9 @@
              this.imgSrc = res.data.data.inviteQrImgUrl;
              this.RQsee = '生成二维码';
              this.btnLoading = false;
+             this.$Message.success('生成成功！')
+            }else{
+              this.$Message.warning(res.data.msg)
             }
           })
         },
@@ -306,8 +314,8 @@
           if(this.disNormalUser){
             this.disNormalUser = false
           }else{
+            this.updateLoading = true;
             let params = {
-              userId:this.userId,
               userType:'',
               trueName:'',
               userState:'',
@@ -317,6 +325,7 @@
             for(let key in params){
               params[key] = this.normalUserInfo[key]
             }
+            params.userId = this.userId;
             this.$http.post(`/yyht/v1/user/changeUserMsg`,params).then(res=>{
               if(res.data.code===0){
                 this.disNormalUser=true;
@@ -324,6 +333,7 @@
               }else{
                 this.$Message.error('保存失败')
               }
+              this.updateLoading = false;
             })
           }
         },
