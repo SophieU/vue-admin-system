@@ -127,12 +127,6 @@
         this.loadingSend = true;
         this.$refs[name].validate((valid)=>{
           if(valid){
-            console.log(this.feeModal.amount)
-            if(!this.feeModal.amount){
-              this.$Message.warning('请输入系统结算金额！');
-              this.loadingSend = false;
-              return
-            }
              this.$http.post(`/yyht/v1/user/changeUserAccount`,this.feeModel).then(res=>{
                if(res.data.code == 0){
                  this.getLists();
