@@ -29,7 +29,6 @@
             <p class="tips">Tips：绘制完成后，点击鼠标右击自动完成绘制</p>
             <div id="map">
               <div class="map-mask" v-show="!candraw" @contextmenu="e=>e.preventDefault()" @click="mapTip"></div>
-
               <div id="container"></div>
             </div>
         </FormItem>
@@ -45,7 +44,7 @@
   import _ from 'lodash'
   import E from 'wangeditor';
     export default {
-        name: "area-edit",
+      name: "area-edit",
       props:['pageType','detailId'],
       data(){
           return {
@@ -65,7 +64,7 @@
               rangeGd:[],
             },
             mouseTool:null,
-            candraw:true,
+            candraw:true, //能否绘制区域
             polyEditor:null,
           }
       },
@@ -126,60 +125,56 @@
             resizeEnable: true,
             zoom: 14
           });
-          this.map=map
+          this.map=map;
           // 输入联想
           AMap.plugin(['AMap.Autocomplete','AMap.PlaceSearch'],function(){
             var autoOptions = {
               // 使用联想输入的input的id
               input: "searchPoint"
             }
-            var autocomplete= new AMap.Autocomplete(autoOptions)
-
+            var autocomplete= new AMap.Autocomplete(autoOptions);
             var placeSearch = new AMap.PlaceSearch({
               city:'全国',
               map:map
-            })
+            });
             AMap.event.addListener(autocomplete, 'select', function(e){
               //TODO 针对选中的poi实现自己的功能
               placeSearch.search(e.poi.name)
             })
-          })
+          });
 
           this.map.on('click',()=>{
-            var overlays = this.map.getAllOverlays('polygon')
+            // var overlays = this.map.getAllOverlays('polygon');
             if(!this.candraw){
               this.map.remove(this.overlay)
             }
           })
         },
         drawPolygon(path){
-            var _this = this
+            var _this = this;
           // 新增 - 绘制区域
           if(this.pageType=='add'){
             this.$Message.info({
               content:'点击地图开始绘制，右键结束绘制',
               duration:3
-            })
-            this.mouseTool = new AMap.MouseTool(this.map)
-
+            });
+            this.mouseTool = new AMap.MouseTool(this.map);
             this.mouseTool.polygon({
               strokeColor: "#FF33FF",
-              strokeOpacity: 1,
               strokeWeight: 6,
               strokeOpacity: 0.2,
               fillColor: '#1791fc',
               fillOpacity: 0.4,
               strokeStyle: "solid",
-            })
+            });
             this.mouseTool.on('draw', function(event) {
               _this.$Message.success({
                 content:'覆盖物对象绘制完成',
                 top:300
-              })
-              _this.candraw = false
-              _this.overlay = event.obj
+              });
+              _this.candraw = false;
+              _this.overlay = event.obj;               // event.obj 为绘制出来的覆盖物对象
               _this.searchDistrict(_this.overlay.getPath())
-              // event.obj 为绘制出来的覆盖物对象
             })
           }else{
             var polygon = new AMap.Polygon({
@@ -192,21 +187,18 @@
               fillColor: '#1791fc',
               zIndex: 50,
             })
-
-            this.map.add(polygon)
+            this.map.add(polygon);
             // 缩放地图到合适的视野级别
-            this.map.setFitView()
+            this.map.setFitView();
             this.polyEditor = new AMap.PolyEditor(this.map, polygon)
           }
-
-
         },
-        startEdit(){
+        startEdit(){     //开始编辑
           this.polyEditor.open()
           this.form.rangeGd=[]
           this.form.geoDistrict=[]
         },
-        finishEdit(){
+        finishEdit(){    //编辑完成
           this.polyEditor.close()
           let path = this.polyEditor.Yt[0]?this.polyEditor.Yt[0]:[]
          if(path){
@@ -221,7 +213,7 @@
            this.overlay = null
           this.candraw=true
         },
-       async searchDistrict(path){
+       async searchDistrict(path){     //设置数据
           var geocoder;
           let _this = this;
           path.map(async item=>{
@@ -288,19 +280,19 @@
             this.$Message.info('区域只能绘制一个，请先清除再重新绘制区域')
         },
         getDetail(id){
-            this.loading = true
+            this.loading = true;
             this.$http.post(`/yyht/v1/repair/region/getRegionInfo?repairRegionId=${id}`).then(res=>{
               if(res.data.code===0){
                 this.loading=false;
                 let data = res.data.data;
-                let rangeGd = data.rangeGd.split(';')
-                this.form=data
-                this.form.rangeGd = rangeGd
-                this.form.geoDistrict = data.geoDistrict.split(',')
+                let rangeGd = data.rangeGd.split(';');
+                this.form=data;
+                this.form.rangeGd = rangeGd;
+                this.form.geoDistrict = data.geoDistrict.split(',');
 
                 // this.editor1.txt.html=data.fullDescribe
-                this.renderRichText(data.fullDescribe)
-                let path = rangeGd.map(item=>item.split(','))
+                this.renderRichText(data.fullDescribe);
+                let path = rangeGd.map(item=>item.split(','));
                 this.drawPolygon(path)
               }
             })
