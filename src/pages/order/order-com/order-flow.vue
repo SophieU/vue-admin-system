@@ -40,7 +40,7 @@
       },
       methods:{
           getFlow(id){
-            this.$http.get(`/yyht/v1/repair/order/schedule?id=${id}`)
+            this.$http.get(`/yyht/v1/repair/order/schedule?repairOrderId=${id}`)
               .then(res=>{
                 if(res.data.code===0){
                   this.flowLists=res.data.data;

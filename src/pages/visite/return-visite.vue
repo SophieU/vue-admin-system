@@ -1,6 +1,10 @@
 <template>
     <Card style="padding-bottom: 30px;">
+      <Spin fix v-show="loading == true">加载中...</Spin>
       <Tabs v-model="tabActive" :animated="false">
+        <TabPane :label="waiting" name="waiting">
+          <!--<Table :columns="waitColumns" :data="lists"></Table>-->
+        </TabPane>
         <TabPane :label="visited" name="visited">
           <div class="mb-15 clearfix">
             <div class="pull-right">
@@ -8,9 +12,6 @@
             </div>
           </div>
           <!--<Table :columns="visitedColumns" :data="lists"></Table>-->
-        </TabPane>
-        <TabPane :label="waiting" name="waiting">
-          <!--<Table :columns="waitColumns" :data="lists"></Table>-->
         </TabPane>
       </Tabs>
       <table class="native-table">
@@ -29,7 +30,7 @@
         </thead>
         <tbody>
         <tr v-for="item in lists" :key="item.id">
-           <td>{{item.createTime}}</td>
+          <td>{{item.createTime}}</td>
           <td>{{item.orderStateName}}</td>
           <td>{{item.repairCategoryName}}</td>
           <td>{{item.repairStationName}}</td>
@@ -124,7 +125,7 @@
               ])
             },
             filter:false,
-            tabActive:'visited',
+            tabActive:'waiting',
            /* waitColumns:[
               {title:'工单编号',key:'id',align:'center'},
               {title:'售后回访',key:'id',align:'center'},
@@ -159,6 +160,7 @@
                     },'查看')
                 }},
             ],*/
+            loading:true,
             lists:[],
             stationLists:[], //服务网点下拉
             stateCount:{
@@ -168,8 +170,16 @@
             pageNo:1,
             pageSize:10,
             totalCount:0,
-            filterForm:{},
-            isReturnVisit:'Y'
+            filterForm:{   //筛选框
+              returnVisitResult:'',//回访结果
+              orderSn:'',//工单编号
+              startTime:'',
+              endTime:'',
+              repairStationId:'',//服务网点
+              afterSaleVisit:'',//售后回访
+              isReturnVisit:'N'
+            },
+
           }
         },
       methods:{
@@ -177,18 +187,18 @@
         goCenterVisite(id,orderId,linkVisitResult){
           this.$router.push({name:'centerVisite',query:{id,orderId,linkVisitResult}})
         },
-        getLists(filter){
-          let query = `pageNo=${this.pageNo}&pageSize=${this.pageSize}&isReturnVisit=${this.isReturnVisit}`;
-          let param=util.formatterParams(filter);
-          this.$http.post(`/yyht/v1/repair/return/visit/pageList?${query}&${param}`)
+        getLists(filter){     //进入页面获取列表
+          this.loading = true;
+          delete filter.dateRange;
+          this.$http.post(`/yyht/v1/repair/return/visit/pageList?pageNo=${this.pageNo}&pageSize=${this.pageSize}`,filter)
             .then(res=>{
               if(res.data.code===0){
                 let data= res.data.data;
                 this.pageSize=data.pageSize;
                 this.totalCount= data.totalCount;
                 this.lists=data.list;
-               this.filter=false;
-
+                this.filter=false;
+                this.loading = false;
               }else{
                 console.log('回访列表获取失败：'+res.data.msg);
               }
@@ -260,7 +270,7 @@
         }
       },
       mounted(){
-        this.getLists();
+        this.getLists({...this.filterForm});
         this.getCount();
         util.getStationLists(data=>{
           this.stationLists=data;
@@ -268,17 +278,15 @@
       },
       watch:{
           tabActive(newVal){
-            this.filterForm={};
-            // let isReturnVisit='Y';
             if(newVal==='waiting'){
-              this.isReturnVisit='N';
+              this.filterForm.isReturnVisit='N';
             }else{
-              this.isReturnVisit='Y';
+              this.filterForm.isReturnVisit='Y';
             }
             this.pageNo=1;
             this.pageSize=10;
             this.lists=[];
-            this.getLists();
+            this.getLists(this.filterForm);
           }
       }
     }

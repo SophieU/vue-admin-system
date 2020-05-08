@@ -3,12 +3,13 @@
 </style>
 <template>
     <div class="order-detail">
+      <Spin fix v-show="loading == true">加载中...</Spin>
       <Row :gutter="15">
         <Col :lg="8" :sm="24">
           <Card>
             <div class="order-title" style="border-bottom: 1px solid #ddd;margin-bottom: 10px;">
               <h4><Icon color="#57a3f3" type="ios-list" size="28"/>{{baseInfo.orderSn}}</h4>
-              <span class="status">{{baseInfo.orderState}}</span>
+              <span class="status">{{baseInfo.orderStateName}}</span>
             </div>
             <div class="order-item">
               <span class="label">服务项目：</span>
@@ -35,10 +36,6 @@
               <span class="label">联系人姓名：</span>
               <span class="item-info">{{baseInfo.username}}</span>
             </div>
-            <div class="order-item">
-              <span class="label">联系电话：</span>
-              <span class="item-info">{{baseInfo.userPhone}}</span>
-            </div>
 
             <!--接单师傅等-->
             <Divider />
@@ -46,7 +43,7 @@
               <span class="label">接单师傅：</span>
               <span class="item-info">
                 <span>{{dispatchInfo.masterName}}</span>
-                <span v-if="dispatchInfo.id" @click="viewStaff(dispatchInfo.id)" class="text-blue" style="margin-left:10px;cursor:pointer;">查看</span>
+<!--                <span v-if="dispatchInfo.id" @click="viewStaff(dispatchInfo.id)" class="text-blue" style="margin-left:10px;cursor:pointer;">查看</span>-->
               </span>
             </div>
             <div class="order-item">
@@ -54,18 +51,18 @@
               <span class="item-info">{{dispatchInfo.masterPhone}}</span>
 
             </div>
-            <Divider />
+<!--            <Divider />-->
             <!--协助人员-->
-            <div class="order-item">
-              <span class="label">协作人员：</span>
-              <div style="display: inline-block;" v-if="inviteStaffVoList&&inviteStaffVoList.length>0">
-                <span class="item-info" v-for="(item,index) in inviteStaffVoList" :key="index">
-                  <span>{{item.name}}</span>
-                  <span class="text-blue" @click="$router.push({name:'staffDetail',query:{id:item.id}})" style="margin-left:10px;cursor:pointer;">查看</span>
-                </span>
-              </div>
-              <span v-else>无</span>
-            </div>
+<!--            <div class="order-item">-->
+<!--              <span class="label">协作人员：</span>-->
+<!--              <div style="display: inline-block;" v-if="inviteStaffVoList&&inviteStaffVoList.length>0">-->
+<!--                <span class="item-info" v-for="(item,index) in inviteStaffVoList" :key="index">-->
+<!--                  <span>{{item.name}}</span>-->
+<!--                  <span class="text-blue" @click="$router.push({name:'staffDetail',query:{id:item.id}})" style="margin-left:10px;cursor:pointer;">查看</span>-->
+<!--                </span>-->
+<!--              </div>-->
+<!--              <span v-else>无</span>-->
+<!--            </div>-->
             <!--费用等-->
 <!--            <Divider />-->
 <!--            <div class="order-item">-->
@@ -92,7 +89,8 @@
               <div class="order-sub-item">
                 <p class="sub-item-text" v-for="item in repairOrderOfferPlanVoList" :key="item.type">
                   <span class="label">{{item.planName}}：</span>
-                  <span>{{item.amount}}</span>
+                  <span>{{item.amount}}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <span>{{item.isPay == 'Y'? '已支付' : '未支付'}}</span>
                 </p>
               </div>
             </div>
@@ -113,6 +111,10 @@
             <div class="order-item">
               <span class="label">服务网点：</span>
               <span class="item-info">{{baseInfo.stationName}}</span>
+            </div>
+            <div class="order-item">
+              <span class="label">服务网点电话：</span>&nbsp;&nbsp;&nbsp;&nbsp;
+              <span class="item-info">{{baseInfo.stationPhone}}</span>
             </div>
             <div class="order-item">
               <span class="label">创建时间：</span>
@@ -145,6 +147,7 @@
         name: "order-detail",
       data(){
           return {
+            loading:true,
             id:'',
             baseInfo:{},
             dispatchInfo:{}, //派单信息
@@ -168,7 +171,7 @@
       methods:{
         getBaseInfo(){
           let id = this.id;
-          this.$http.get(`/yyht/v1/repair/order/baseInfo?id=${id}`)
+          this.$http.get(`/yyht/v1/repair/order/baseInfo?repairOrderId=${id}`)
             .then(res=>{
               if(res.data.code===0){
                 let data = res.data.data;
@@ -183,6 +186,7 @@
                 this.dispatchInfo=res.data.data.dispatchInfo;
                 this.repairOrderAmountVos=res.data.data.repairOrderAmountVos;
                 this.repairOrderOfferPlanVoList=res.data.data.repairOrderOfferPlanVoList;
+                this.loading = false;
               }else{
                 console.log('工单基础信息获取失败：'+res.data.msg);
               }

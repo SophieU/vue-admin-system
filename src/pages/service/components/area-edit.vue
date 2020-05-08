@@ -158,24 +158,24 @@
               content:'点击地图开始绘制，右键结束绘制',
               duration:3
             });
-            this.mouseTool = new AMap.MouseTool(this.map);
-            this.mouseTool.polygon({
-              strokeColor: "#FF33FF",
-              strokeWeight: 6,
-              strokeOpacity: 0.2,
-              fillColor: '#1791fc',
-              fillOpacity: 0.4,
-              strokeStyle: "solid",
-            });
-            this.mouseTool.on('draw', function(event) {
-              _this.$Message.success({
-                content:'覆盖物对象绘制完成',
-                top:300
+              this.mouseTool = new AMap.MouseTool(this.map);
+              this.mouseTool.polygon({
+                strokeColor: "#FF33FF",
+                strokeWeight: 6,
+                strokeOpacity: 0.2,
+                fillColor: '#1791fc',
+                fillOpacity: 0.4,
+                strokeStyle: "solid",
               });
-              _this.candraw = false;
-              _this.overlay = event.obj;               // event.obj 为绘制出来的覆盖物对象
-              _this.searchDistrict(_this.overlay.getPath())
-            })
+              this.mouseTool.on('draw', function(event) {
+                _this.$Message.success({
+                  content:'覆盖物对象绘制完成',
+                  top:300
+                });
+                _this.candraw = false;
+                _this.overlay = event.obj;               // event.obj 为绘制出来的覆盖物对象
+                _this.searchDistrict(_this.overlay.getPath())
+              })
           }else{
             var polygon = new AMap.Polygon({
               map: _this.map,
@@ -209,17 +209,17 @@
         },
 
         clearPolygon(){
-            this.map.remove(this.overlay)
-           this.overlay = null
+          this.map.remove(this.overlay);
+          this.overlay = null;
           this.candraw=true
         },
        async searchDistrict(path){     //设置数据
           var geocoder;
           let _this = this;
           path.map(async item=>{
-            let lng = item.lng
-            let lat = item.lat
-            var lnglats = [lng,lat]
+            let lng = item.lng;
+            let lat = item.lat;
+            var lnglats = [lng,lat];
             if (!geocoder) {
               geocoder = new AMap.Geocoder({
                 // city: "010", //城市设为北京，默认：“全国”
@@ -228,10 +228,10 @@
             }
            await geocoder.getAddress(lnglats, function (status, result) {
               if(status==='complete'){
-                let data = result.regeocode.addressComponent
-                if(!_this.form.geoProvinceName ) _this.form.geoProvinceName = data.province
-                if(!_this.form.geoCityName) _this.form.geoCityName = data.city
-                if(!_this.form.areaInfo) _this.form.areaInfo = data.district
+                let data = result.regeocode.addressComponent;
+                if(!_this.form.geoProvinceName ) _this.form.geoProvinceName = data.province;
+                if(!_this.form.geoCityName) _this.form.geoCityName = data.city;
+                if(!_this.form.areaInfo) _this.form.areaInfo = data.district;
                 if(!_this.form.geoDistrict.includes(data.adcode)){
                   _this.form.geoDistrict.push(data.adcode)
                 }
@@ -242,7 +242,6 @@
         },
         async saveForm(){
             let param = _.cloneDeep(this.form)
-          console.log(param)
             if(!this.form.name) {
               this.$Message.info('请填写区域名称')
               return
@@ -285,6 +284,7 @@
               if(res.data.code===0){
                 this.loading=false;
                 let data = res.data.data;
+                this.overlay = data;
                 let rangeGd = data.rangeGd.split(';');
                 this.form=data;
                 this.form.rangeGd = rangeGd;

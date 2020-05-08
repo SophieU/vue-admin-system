@@ -182,7 +182,7 @@ export const appRouter=[
           {path:'',meta:{},name:'orderDetail',title:'处理流程',component:()=>import('@/pages/order/order-com/order-flow')},
           {path:'visited-info',meta:{hideInMenu:true},title:'回访信息',name:'visitedInfo',component:()=>import('@/pages/order/order-com/visited-info')},
           // {path:'order-prove',meta:{hideInMenu:true},title:'证据证明',name:'orderProve',component:()=>import('@/pages/order/order-com/order-prove')},
-          // {path:'order-control',meta:{hideInMenu:true},title:'订单操作',name:'orderControl',component:()=>import('@/pages/order/order-com/order-control')},
+          {path:'order-control',meta:{hideInMenu:true},title:'订单操作',name:'orderControl',component:()=>import('@/pages/order/order-com/order-control')},
           // {path:'customer-evaluation',meta:{hideInMenu:true},title:'客户评价',name:'customEva',component:()=>import('@/pages/order/order-com/custom-evaluation')},
           // {path:'order-log',meta:{hideInMenu:true},title:'工单日志',name:'orderLog',component:()=>import('@/pages/order/order-com/order-log')},
         ]
@@ -198,6 +198,9 @@ export const appRouter=[
     meta:{single:true},
     children:[
       {path:'visit-admin',meta:{},icon:'ios-call',title:'回访管理',name:'visit-admin',component:()=>import('@/pages/visite/return-visite.vue')},
+      {
+        path:'center-visite',meta:{hideInMenu:true},title:"工单详情",name:'centerVisite',component:()=>import('@/pages/visite/center-visite'),
+      }
     ]
   },{
     path:'/withdraw',

@@ -1,5 +1,6 @@
 <template>
   <div class="visitCheck">
+    <Spin fix v-show="loading == true">加载中...</Spin>
     <div class="leftBox">
       <div class="order">
         <span style="font-size:12px;font-weight: bold;">{{workOrderInfo.orderSn}}</span>
@@ -14,57 +15,72 @@
       <table class='table'>
         <tr>
           <td class="left">报修地点：</td>
-          <td class="right">{{workOrderInfo.regionName}}</td>
+          <td class="right">{{workOrderInfo.repairRegionName}}</td>
         </tr>
         <tr>
           <td class="left">详细地址：</td>
           <td class="right">{{workOrderInfo.address}}</td>
         </tr>
         <tr>
-          <td class="left">用户手机：</td>
-          <td class="right">{{workOrderInfo.ysyUserPhone}}</td>
+          <td class="left">用户姓名：</td>
+          <td class="right">{{workOrderInfo.username}}</td>
         </tr>
         <tr>
-          <td class="left">联系电话：</td>
+          <td class="left">用户手机：</td>
           <td class="right">{{workOrderInfo.userPhone}}</td>
         </tr>
       </table>
       <table class='table'>
         <tr>
           <td class="left">接单师傅：</td>
-          <td class="right">{{workOrderInfo.receiveUserName}}<span v-if="workOrderInfo.receiveUserId" class="checkShiFu" @click="checkShiFu(workOrderInfo.receiveUserId)">查看</span></td>
+          <td class="right">{{masterInfo.masterName}}<span v-if="workOrderInfo.receiveUserId" class="checkShiFu" @click="checkShiFu(workOrderInfo.receiveUserId)">查看</span></td>
         </tr>
         <tr>
           <td class="left">师傅电话：</td>
-          <td class="right">{{workOrderInfo.receiveUserPhone}}</td>
+          <td class="right">{{masterInfo.masterPhone}}</td>
         </tr>
       </table>
       <table class='table'>
-        <tr>
-          <td class="left">工单费用：</td>
-          <td class="right">{{workOrderInfo.amount}}</td>
+        <tr class="trBorder">
+          <td class="left levelTop">工单费用：</td>
+          <div class="order-sub-item">
+            <p class="sub-item-text" v-for="item in repairOrderAmountVos" :key="item.type">
+              <span class="label">{{item.name}}：</span>
+              <span>{{item.amount}}</span>
+            </p>
+          </div>
         </tr>
-        <tr>
-          <td class="left">工单渠道：</td>
-          <td class="right">{{workOrderInfo.orderSource}}</td>
+        <tr class="trBorder">
+          <td class="left levelTop">工单渠道：</td>
+          <div class="order-sub-item">
+            <p class="sub-item-text" v-for="item in repairOrderOfferPlanVoList" :key="item.type">
+              <span class="label">{{item.planName}}：</span>
+              <span>{{item.amount}}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <span>{{item.isPay == 'Y'? '已支付' : '未支付'}}</span>
+            </p>
+          </div>
         </tr>
       </table>
       <table class='table' style="border:none">
-        <tr>
-          <td class="left">质保中：</td>
-          <td class="right">{{workOrderInfo.isWarranty}}</td>
-        </tr>
-        <tr>
-          <td class="left">售后记录：</td>
-          <td class="right">{{workOrderInfo.afterSalesServiceCount}}</td>
-        </tr>
-        <tr>
-          <td class="left">故障原因：</td>
-          <td class="right">{{workOrderInfo.faultReason}}</td>
-        </tr>
+<!--        <tr>-->
+<!--          <td class="left">质保中：</td>-->
+<!--          <td class="right">{{workOrderInfo.isWarranty}}</td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--          <td class="left">售后记录：</td>-->
+<!--          <td class="right">{{workOrderInfo.afterSalesServiceCount}}</td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--          <td class="left">故障原因：</td>-->
+<!--          <td class="right">{{workOrderInfo.faultReason}}</td>-->
+<!--        </tr>-->
         <tr>
           <td class="left">服务网点：</td>
           <td class="right">{{workOrderInfo.stationName}}</td>
+        </tr>
+        <tr>
+          <td class="left">网点电话：</td>
+          <td class="right">{{workOrderInfo.stationPhone}}</td>
         </tr>
         <tr>
           <td class="left">创建时间：</td>
@@ -80,10 +96,10 @@
             <td class="left">售后回访</td>
             <td class="right" colspan="2">否</td>
           </tr>
-          <tr>
-            <td class="left">材料更换</td>
-            <td class="right" colspan="2">{{materialChange}}</td>
-          </tr>
+<!--          <tr>-->
+<!--            <td class="left">材料更换</td>-->
+<!--            <td class="right" colspan="2">{{materialChange}}</td>-->
+<!--          </tr>-->
           <tr>
             <td class="left">网点回访结果</td>
             <td class="right" colspan="2">{{$route.query.linkVisitResult || '未回访'}}</td>
@@ -175,7 +191,7 @@
         </table>
         <div>
           <Button icon="ios-arrow-back" style="margin-top:20px;" @click="backBtn">返回上一页</Button>
-          <Button type="primary" style="margin-top:20px;" @click="subBtn('formValidate')">提交</Button>
+          <Button type="primary" style="margin-top:20px;" @click="subBtn('formValidate')" :loading="btnLoading">提交</Button>
         </div>
       </Form>
     </div>
@@ -208,8 +224,13 @@ export default {
       }
     };
     return {
+      btnLoading:false,
+      loading:true,
       materialChange:'',//材料更换信息
-      workOrderInfo:'',
+      workOrderInfo:{},
+      masterInfo:{},
+      repairOrderAmountVos:[],
+      repairOrderOfferPlanVoList:[],
       //表单内容
       visitForm: {
         satisfaction: {
@@ -333,22 +354,8 @@ export default {
   },
   mounted() {
     this.getOrderData();
-    this.getMaterialChange();
   },
   methods: {
-    // 获取材料更换信息
-    getMaterialChange(){
-      this.$http({
-        method: "get",
-        url: `/repair/return/visit/findMaterialChange?id=${this.$route.query.id}`,
-      }).then(res => {
-        if (res.data.code === 0) {
-          this.materialChange = res.data.data;
-        } else {
-          this.$Message.error(res.data.msg);
-        }
-      });
-    },
     backBtn() {
       this.$router.push({name:'visit-admin'});
     },
@@ -360,10 +367,14 @@ export default {
     getOrderData() {
       this.$http({
         method: "get",
-        url: `/repair/order/baseInfo?id=${this.$route.query.orderId}`,
+        url: `/yyht/v1/repair/order/baseInfo?repairOrderId=${this.$route.query.orderId}`,
       }).then(res => {
         if (res.data.code === 0) {
-          this.workOrderInfo = res.data.data;
+          this.workOrderInfo = res.data.data.baseInfo;
+          this.masterInfo = res.data.data.dispatchInfo;
+          this.repairOrderOfferPlanVoList = res.data.data.repairOrderOfferPlanVoList;
+          this.repairOrderAmountVos = res.data.data.repairOrderAmountVos;
+          this.loading = false;
         } else {
           this.$Message.error(res.data.msg);
         }
@@ -371,6 +382,7 @@ export default {
     },
     // 提交
     subBtn(name){
+      this.btnLoading = true;
       this.$refs[name].validate(valid => {
         if (valid) {
           let data = {
@@ -390,7 +402,7 @@ export default {
           }
           this.$http({
             method: "post",
-            url: `/repair/return/visit`,
+            url: `/yyht/v1/repair/return/visit/doVisit`,
             data: data,
           }).then(res => {
             if (res.data.code === 0) {
@@ -403,7 +415,11 @@ export default {
             } else {
               this.$Message.error(res.data.msg);
             }
+            this.btnLoading = false
           });
+        }else{
+          this.$Message.error('表单未填写完整！')
+          this.btnLoading = false
         }
       });
     }
@@ -412,6 +428,12 @@ export default {
 </script>
 
 <style lang='scss' scoped>
+  .trBorder{
+    height: 80px;
+  }
+  .levelTop{
+    vertical-align: top;
+  }
   .visitCheck {
     overflow: hidden;
     padding: 15px;
