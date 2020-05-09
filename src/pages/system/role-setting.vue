@@ -126,7 +126,7 @@
                  transformRes = this.iteratorTree(data,function(item){
                    item.title=item.title;
                    item.expand=true;
-                     item.disabled=_this.viewInfo;
+                   item.disabled=_this.viewInfo;
                    checkedLists.forEach(check=>{
                      if(item.id===check){
                        item.checked=true;

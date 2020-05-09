@@ -227,6 +227,27 @@
           </div>
         </div>
       </div>
+      <div class="normal-form subox">
+        <div class="normal-left">
+          <Divider type="vertical" style="width: 5px;height:18px;background: #2d8cf0"/>服务区域列表
+          <Button class="pull-right" @click="toggleArea" type="primary" size="small">{{this.checkDisabled == false?'保存':'编辑服务区域'}}</Button>
+          <div class="content-div">
+            <CheckboxGroup v-model="areaList">
+              <Checkbox class="check-content" :disabled="checkDisabled" v-for="(item,index) in teachArea" :key="index" :label="item.id">{{item.name}}</Checkbox>
+            </CheckboxGroup>
+          </div>
+        </div>
+        <div class="normal-right">
+          <Divider type="vertical" style="width: 5px;height:18px;background: #2d8cf0"/>服务类型
+          <Button class="pull-right" @click="toggleType" type="primary" size="small">{{this.typeDisabled == false?'保存':'编辑服务类型'}}</Button>
+          <div class="content-div">
+            <Tree :data="repairTree" class="column_3" show-checkbox @on-check-change="changeCheck"></Tree>
+<!--            <CheckboxGroup v-model="typeList">-->
+<!--              <Checkbox class="check-content" v-for="(item,index) in repairTree" :label="item.id">{{item.name}}</Checkbox>-->
+<!--            </CheckboxGroup>-->
+          </div>
+        </div>
+      </div>
     </Form>
   </Card>
 </template>
@@ -243,9 +264,28 @@
             return '';
           }
         },
+        // typeDisabled:{
+        //   get(){
+        //     return this.typeDisabled;
+        //   }
+        // }
+      },
+      watch:{
+        typeDisabled:{
+          handler(newV,oldV){
+            this.getType(this.pointId)
+          }
+        }
       },
       data(){
         return {
+          pointId:'',//网点ID
+          typeDisabled:true,
+          checkDisabled:true,
+          repairTree:[],//服务类型列表
+          typeList:[],//服务类型列表传值用
+          areaList:[],//服务区域列表已选中传值用
+          teachArea:[],//服务区域列表
           updateLoading:false,
           btnLoading:false,//生成二维码的buttonloading
           RQsee:'生成二维码',
@@ -284,7 +324,55 @@
         }
       },
       methods:{
-          // 普通用户-生成二维码
+        toggleType(){  //切换服务状态
+          const _this = this;
+          if(this.typeDisabled){
+            this.typeDisabled = false
+          }else{
+            let data = {
+              serviceUserId:this.userId,
+              repairCategoryIds:this.typeList
+            };
+            _this.$http.post('/yyht/v1/service/user/saveUserRepairCategoryRef',data).then(res=>{
+              if(res.data.code == 0){
+                _this.$Message.success('保存成功！');
+                _this.getType(_this.pointId);
+                _this.typeDisabled = true;
+              }else{
+                _this.$Message.error(res.data.msg)
+              }
+            })
+          }
+        },
+        changeCheck(data){
+          this.typeList = [];
+          data.forEach(ele=>{
+            if(ele.parentId !== '0' && !this.typeList.includes(ele.parentId)){
+              this.typeList.push(ele.parentId)
+            }
+            this.typeList.push(ele.id)
+          })
+        },
+        toggleArea(){   //切换服务网点下的区域
+          const _this = this;
+          if(_this.checkDisabled){
+            _this.checkDisabled = false;
+          }else{
+            let data = {
+              serviceUserId:this.userId,
+              repairRegionIds:this.areaList
+            }
+            _this.$http.post('/yyht/v1/service/user/saveUserRegionRef',data).then(res=>{
+              if(res.data.code == 0){
+                _this.$Message.success('保存成功！');
+                _this.checkDisabled = true;
+              }else{
+                _this.$Message.error(res.data.msg)
+              }
+            })
+          }
+        },
+        // 普通用户-生成二维码
         generateQrCode(){
           this.RQsee = '正在生成二维码.....';
           this.btnLoading = true;
@@ -299,13 +387,64 @@
             }
           })
         },
+        getArea(data){   //获取服务区域
+          this.$http.get(`/yyht/v1/repair/category/findRegionList?repairStationId=${data}`).then(res=>{
+            if(res.data.code == 0){
+              this.teachArea = res.data.data
+            }
+          })
+        },
+        getType(data){
+          this.$http.get(`/yyht/v1/repair/category/getStationCategoryTree?repairStationId=${data}`).then(res=>{
+            if(res.data.code == 0){
+              let data = res.data.data;
+              let transformRes = {};
+              let _this = this;
+              if(_this.typeList.length>0){
+                  transformRes = this.iteratorTree(data,function(item){
+                  item.title=item.name;
+                  item.expand=true;
+                  item.disabled=_this.typeDisabled;
+                  _this.typeList.forEach(check=>{
+                    if(item.id==check && item.parentId !== '0'){
+                      item.checked=true;
+                    }
+                  })
+                })
+              }else{
+                transformRes = this.iteratorTree(data,(item)=>{
+                  item.title=item.name;
+                  item.expand=true;
+                  item.disabled=_this.typeDisabled;
+                });
+              }
+              _this.repairTree = transformRes
+            }else{
+              this.$Message.warning(res.data.msg)
+            }
+          })
+        },
+        //深度遍历
+        iteratorTree(obj,cb){
+          let result = [];
+          let _this = this;
+          if(obj instanceof Array){
+            result= obj.map(item=>{
+              typeof cb==='function'&&cb(item);
+              item.disabled=_this.typeDisabled;
+              if(item.children&&item.children.length>0){
+                this.iteratorTree(item.children,cb)
+              }
+              return item;
+            })
+          }
+          return result;
+        },
         //普通用户详情
         getUserDetail(id){
           this.$http.get(`/yyht/v1/user/detail?userId=${id}`).then(res=>{
             if(res.data.code===0){
               this.normalUserInfo = res.data.data;
-            }else{
-              console.log(res.data.msg)
             }
           })
         },
@@ -321,7 +460,7 @@
               userState:'',
               commissionType:'',
               commissionValue:'',
-            }
+            };
             for(let key in params){
               params[key] = this.normalUserInfo[key]
             }
@@ -354,7 +493,13 @@
                 }
                 this.businessState = data.businessState;
                 this.applyState = data.applyState;  //防止表单state变动影响
-                console.log(res.data.data)
+                this.areaList = data.regionList;
+                this.pointId = data.repairStationId;
+                this.typeList = data.repairCategory.map(ele=>{
+                  return ele.id
+                });
+                this.getArea(data.repairStationId);
+                this.getType(data.repairStationId);
                 this.loading = false;
               }
             })
@@ -413,7 +558,6 @@
               }
             })
         },
-
       },
       mounted(){
           this.userId = this.$route.query.id;
@@ -429,6 +573,22 @@
 </script>
 
 <style scoped lang="scss">
+  .column_3{
+    display: flex;
+    flex-wrap: wrap;
+    li{
+      flex: 33.3% 0 0;
+    }
+  }
+  .content-div{
+    width: 600px;
+    height: 300px;
+    padding-top: 20px;
+    padding-left: 20px;
+    .check-content{
+      margin-right: 20px;
+    }
+  }
 .form-item{
   width: 250px;
 }

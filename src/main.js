@@ -8,7 +8,7 @@ import {appRouter} from './router/router'
 import axios from './libs/api';
 import 'default-passive-events';
 Vue.config.productionTip = false
-
+Vue.config.silent = true;
 Vue.prototype.$http = axios;
 
 //重写iview InputNumber浮点方法
