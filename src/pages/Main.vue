@@ -141,22 +141,24 @@
 
         //退出
         handleUserDropdown(name){
+           const msg = this.$Message.loading({
+              content:'正在退出登录，页面即将跳转...',
+              duration:0
+            });
             if (name === 'logOut') {
             // 退出登录
             this.$store.commit('logout', this);
             this.$http.post('/sys/v1/user/login/out').then(res=>{
-
               if(res.data.code!==0){
                 console.log(res.data.msg);
               }
+              setTimeout(msg,500);
               this.$router.push({
                 name: 'login'
               });
               this.$store.commit('clearOpenSubmenu');
             })
-
             // this.$store.commit('clearOpenedSubmenu');
-
           }
         },
         checkTag (name) {

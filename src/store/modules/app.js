@@ -77,7 +77,7 @@ const app = {
     updateMenulist(state){
       let menuList = [];
       state.menuList=appRouter;
-      return;
+      // return;
       axios.get(`/sys/v1/user/basicInfo`).then(res=>{
         if(res.data.code===0){
           Cookies.set('username',res.data.data.loginName);

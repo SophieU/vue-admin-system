@@ -124,7 +124,7 @@
                 case 'WX_XCX' : val = '微信小程序';
                       break;
                 case 'WX_QR'  : val = '微信扫码';
-                break;
+                      break;
                 default:val = ''
               }
               return h('span',val)
