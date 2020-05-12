@@ -4,13 +4,13 @@
 <template>
     <div class="tags-outer-scroll-con"  ref="scrollCon" @DOMMouseScroll="handleScroll" @mousewheel="handleScroll">
       <div class="close-all-tag-on">
-        <Dropdown transfer >
+        <Dropdown transfer  @on-click="handleTagsOption">
           <Button size="small" type="primary">
             <!--标签选项-->
             <Icon type="ios-arrow-down"></Icon>
           </Button>
           <DropdownMenu slot="list">
-            <DropdownItem name="clearAll">关闭所有</DropdownItem>
+            <DropdownItem name="clearAll" >关闭所有</DropdownItem>
             <DropdownItem name="clearOthers">关闭其他</DropdownItem>
           </DropdownMenu>
         </Dropdown>
@@ -144,7 +144,7 @@
           if (type === 'clearAll') {
             this.$store.commit('clearAllTags');
             this.$router.push({
-              name: 'home_index'
+              name: 'home'
             });
           } else {
             this.$store.commit('clearOtherTags', this);

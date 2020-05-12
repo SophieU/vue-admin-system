@@ -120,7 +120,7 @@ export const appRouter=[
   },
   {
     path:'/platform',
-    icon:'md-aperture',
+    icon:'ios-card-outline',
     title:'平台管理',
     name:'platform',
     component:Main,
@@ -154,7 +154,7 @@ export const appRouter=[
     ]
   },{
     path:'/user-admin',
-    icon:'logo-codepen',
+    icon:'md-person',
     title:'用户管理',
     name:'user-admin',
     component:Main,
@@ -164,7 +164,19 @@ export const appRouter=[
       {path:'worker',meta:{},icon:'ios-compass',title:'服务师傅',name:'worker',component:()=>import('@/pages/staff/staff-service.vue')},
 
     ]
-  },{
+  },
+  {
+    path:'/preOrder',
+    icon:'logo-codepen',
+    title:'预约工单',
+    name:'preOrder',
+    component:Main,
+    meta:{single:true},
+    children:[
+      {path:'preOrder',meta:{},icon:'md-locate',title:'预约工单管理',name:'preOrder',component:()=>import('@/pages/order/pre-order.vue')},
+    ]
+  },
+  {
     path:'/order',
     title:'工单管理',
     name:'order',
@@ -208,7 +220,7 @@ export const appRouter=[
     component:Main,
     meta:{single:true},
     children:[
-      {path:'/',meta:{},icon:'ios-call',title:'提现管理',name:'withdraw',component:()=>import('@/pages/withdraw/withdraw.vue')},
+      {path:'/',meta:{},icon:'logo-tumblr',title:'提现管理',name:'withdraw',component:()=>import('@/pages/withdraw/withdraw.vue')},
     ]
   },
   // {

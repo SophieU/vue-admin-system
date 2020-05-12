@@ -186,7 +186,7 @@
 
       watch:{
           '$route'(to){
-            this.$store.commit('setCurrentPageName',to.name);
+            this.$store.commit('setCurrentPageName',to.name);      //设置当前路由的名称
             // this.$store.commit('increateTag',to);
 
             let pathArr = util.setCurrentPath(this,this.$route.name);
@@ -197,10 +197,8 @@
             }else if(pathArr.length>=2){
               this.$store.commit('addOpenSubmenu',pathArr[0].name); //展开子菜单
             }
-
             this.checkTag(to.name);
             localStorage.currentPageName = to.name;
-
           },
         uploadProgressVisible(val){
           if(val){

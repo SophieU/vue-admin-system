@@ -33,7 +33,7 @@
             </div>
         </FormItem>
         <FormItem>
-          <Button @click="saveForm" type="primary">保存</Button>
+          <Button @click="saveForm" type="primary" :loading="btnLoading">保存</Button>
           <Button @click="cancel">取消</Button>
         </FormItem>
       </Form>
@@ -48,6 +48,7 @@
       props:['pageType','detailId'],
       data(){
           return {
+            btnLoading:false,
             loading:false,
             map:null, // 地图实例
             searchPoint:'',
@@ -241,23 +242,28 @@
           })
         },
         async saveForm(){
+            this.btnLoading = true;
             let param = _.cloneDeep(this.form)
             if(!this.form.name) {
               this.$Message.info('请填写区域名称')
+              this.btnLoading = false;
               return
             }
             let fullDescribe = this.editor1.txt.html();
             if(fullDescribe.length<0){
               this.$Message.info('请填写区域服务说明')
+              this.btnLoading = false;
               return
             }
             if(!this.form.remark) {
               this.$Message.info('请填写区域名称')
+              this.btnLoading = false;
               return
             }
             param.fullDescribe = fullDescribe
             if(!this.overlay){
               this.$Message.info('请绘制服务区域')
+              this.btnLoading = false;
               return
             }
            //  var paths = this.overlay.getPath()
@@ -273,6 +279,7 @@
               }else{
                 this.$Message.error('保存失败')
               }
+              this.btnLoading = false;
             })
         },
         mapTip(){

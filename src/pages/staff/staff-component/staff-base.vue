@@ -436,7 +436,7 @@
                 this.iteratorTree(item.children,cb)
               }
               return item;
-            })
+            });
           }
           return result;
         },

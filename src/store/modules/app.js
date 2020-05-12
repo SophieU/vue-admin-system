@@ -85,20 +85,18 @@ const app = {
           let menu= res.data.data.menuList.map(item=>{
             return item.path;
           });
-
           //筛选
           let menuHasAdd = []; //用于存放已添加的菜单项name（外层）
           let appRouterTemp=JSON.stringify(appRouter);
           let appRouterArr = JSON.parse(appRouterTemp);
           menuList= appRouterArr.filter(item=>{
-            let childRouter = item.children; //必然存在
-
+           let childRouter = item.children; //必然存在
            if(item.meta.single){
              if(menu.indexOf(item.children[0].name)>-1){
                return true;
              }else if(item.children[0].name==='home'){
                 return true;
-              }
+             }
            }else{
              let childFilter = childRouter.filter(child=>{
                //无三级菜单
@@ -125,7 +123,6 @@ const app = {
                        return true;
                      }
                    });
-
                    if(groundFilter.length>0){
                       child.children=[...groundFilter];
                       if(hasRoleAuth){
