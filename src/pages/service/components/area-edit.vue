@@ -160,6 +160,7 @@
               duration:3
             });
               this.mouseTool = new AMap.MouseTool(this.map);
+              console.log(this.mouseTool,999000)
               this.mouseTool.polygon({
                 strokeColor: "#FF33FF",
                 strokeWeight: 6,
@@ -175,6 +176,7 @@
                 });
                 _this.candraw = false;
                 _this.overlay = event.obj;               // event.obj 为绘制出来的覆盖物对象
+                console.log(_this.overlay.getPath(),667788)
                 _this.searchDistrict(_this.overlay.getPath())
               })
           }else{
@@ -195,13 +197,13 @@
           }
         },
         startEdit(){     //开始编辑
+          this.form.rangeGd=[];
+          this.form.geoDistrict=[];
           this.polyEditor.open()
-          this.form.rangeGd=[]
-          this.form.geoDistrict=[]
         },
         finishEdit(){    //编辑完成
           this.polyEditor.close()
-          let path = this.polyEditor.Yt[0]?this.polyEditor.Yt[0]:[]
+          let path = this.polyEditor.$t[0]?this.polyEditor.$t[0]:[];
          if(path){
            this.searchDistrict(path)
          }
@@ -227,6 +229,8 @@
                 radius: 500 //范围，默认：500
               });
             }
+            _this.form.rangeGd.push(`${lng},${lat}`)
+            //根据经纬度获取行政区域编码（行政区域编码存在跨区域的情况）如果存在多个时，接口要求上送格式：510117,510011
            await geocoder.getAddress(lnglats, function (status, result) {
               if(status==='complete'){
                 let data = result.regeocode.addressComponent;
@@ -236,7 +240,6 @@
                 if(!_this.form.geoDistrict.includes(data.adcode)){
                   _this.form.geoDistrict.push(data.adcode)
                 }
-                _this.form.rangeGd.push(`${lng},${lat}`)
               }
             });
           })

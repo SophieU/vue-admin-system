@@ -10,8 +10,8 @@
         <div class="table-wrapper">
           <Table :data="areaLists" :columns="areaColumns"></Table>
           <div class="pagination">
-            <Page :page-size="10" :current="pageNo"
-              @on-change="(page)=>getAreaLists(page)"
+            <Page :page-size="pageSize" :current="pageNo" :total="totalCount" show-elevator  @on-page-size-change="(size)=>getAreaLists('size',size)"
+              @on-change="(page)=>getAreaLists('page',page)"
             ></Page>
           </div>
         </div>
@@ -32,6 +32,8 @@
       return {
         loading:true,
         pageNo:1,
+        totalCount:0,
+        pageSize:10,
         pageType:'list', // 页面类型： list-列表（默认），detail-详情编辑, add-新增
         areaLists:[],
         itemId:'', //详情id
@@ -113,17 +115,21 @@
         this.pageType = type
       },
       // 待添加分页
-      getAreaLists(page){
-        if(page){
+      getAreaLists(type,page){
+        if(type == 'page'){
           this.pageNo = page
         }
+        if(type == 'size'){
+          this.pageSize = page
+        }
         this.loading=true;
-        this.$http.get(`/yyht/v1/repair/region/pageList?pageSize=10&pageNo=${this.pageNo}`)
+        this.$http.get(`/yyht/v1/repair/region/pageList?pageSize=${this.pageSize}&pageNo=${this.pageNo}`)
           .then(res=>{
             this.loading=false;
             let data = res.data;
             if(data.code===0){
               this.areaLists=data.data.list;
+              this.totalCount = data.data.totalCount;
             }
             //首次设置默认
             if(this.editInd===''&&this.areaLists.length>0){
