@@ -582,7 +582,7 @@
   }
   .content-div{
     width: 600px;
-    height: 300px;
+    height: auto;
     padding-top: 20px;
     padding-left: 20px;
     .check-content{
