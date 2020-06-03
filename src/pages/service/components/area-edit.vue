@@ -15,6 +15,15 @@
             <Input v-model="form.remark" type="textarea" placeholder="请填写备注信息" style="width: 250px;"/>
         </FormItem>
         <FormItem  class="must" label="区域选点">
+           <Button @click="fullMapModal = true">选择区域</Button>
+        </FormItem>
+        <FormItem  class="must" label="">
+          <Button @click="saveForm" type="primary" :loading="btnLoading">保存</Button>
+          <Button @click="cancel">取消</Button>
+        </FormItem>
+      </Form>
+      <Modal v-model="fullMapModal" fullscreen>
+        <div slot="header">
           <div class="control">
             <div v-show="pageType==='add'" class="btn-group">
               <Button @click="drawPolygon" type="primary">开始绘制区域</Button>
@@ -26,17 +35,13 @@
               <Button @click="clearPolygon">清除区域</Button>
             </div>
           </div>
-            <p class="tips">Tips：绘制完成后，点击鼠标右击自动完成绘制</p>
-            <div id="map">
-              <div class="map-mask" v-show="!candraw" @contextmenu="e=>e.preventDefault()" @click="mapTip"></div>
-              <div id="container"></div>
-            </div>
-        </FormItem>
-        <FormItem>
-          <Button @click="saveForm" type="primary" :loading="btnLoading">保存</Button>
-          <Button @click="cancel">取消</Button>
-        </FormItem>
-      </Form>
+        </div>
+          <p class="tips">Tips：绘制完成后，点击鼠标右击自动完成绘制</p>
+          <div id="map">
+            <div class="map-mask" v-show="!candraw" @contextmenu="e=>e.preventDefault()" @click="mapTip"></div>
+            <div id="container"></div>
+          </div>
+      </Modal>
     </div>
 </template>
 
@@ -48,6 +53,8 @@
       props:['pageType','detailId'],
       data(){
           return {
+            flag:false,
+            fullMapModal:false,
             btnLoading:false,
             loading:false,
             map:null, // 地图实例
@@ -70,6 +77,7 @@
           }
       },
       mounted(){
+        console.log(window.AMap)
         if(window.AMap){
           this.renderMap()
         }else{
@@ -157,10 +165,11 @@
           if(this.pageType=='add'){
             this.$Message.info({
               content:'点击地图开始绘制，右键结束绘制',
-              duration:3
-            });
+              duration:3,
+              zoom: 14
+            })
+          }
               this.mouseTool = new AMap.MouseTool(this.map);
-              console.log(this.mouseTool,999000)
               this.mouseTool.polygon({
                 strokeColor: "#FF33FF",
                 strokeWeight: 6,
@@ -175,11 +184,21 @@
                   top:300
                 });
                 _this.candraw = false;
-                _this.overlay = event.obj;               // event.obj 为绘制出来的覆盖物对象
-                console.log(_this.overlay.getPath(),667788)
+                _this.overlay = event.obj;     // event.obj 为绘制出来的覆盖物对象
                 _this.searchDistrict(_this.overlay.getPath())
+              });
+              const mask = document.getElementsByClassName('map-mask')[0]
+              document.getElementById('map').addEventListener('wheel',function(e){
+                _this.map.on('zoomchange',function () {
+                     console.log('zoom')
+                })
+                // console.log(document.getElementsByClassName('map-mask')[0]);
+                // console.log(_this.map,'map');
+                // console.log(e)
+                // console.log(_this.map.getZoom())
               })
-          }else{
+          // }else{
+          if(this.pageType != 'add'){
             var polygon = new AMap.Polygon({
               map: _this.map,
               path: path,
@@ -193,28 +212,40 @@
             this.map.add(polygon);
             // 缩放地图到合适的视野级别
             this.map.setFitView();
-            this.polyEditor = new AMap.PolyEditor(this.map, polygon)
+            this.polyEditor = new AMap.PolyEditor(this.map, polygon);
+            this.overlay = this.polyEditor.Sc
           }
+          // }
         },
         startEdit(){     //开始编辑
           this.form.rangeGd=[];
           this.form.geoDistrict=[];
-          this.polyEditor.open()
+          if(this.overlay){
+            this.polyEditor.open();
+          }
+          this.candraw = true;
         },
         finishEdit(){    //编辑完成
-          this.polyEditor.close()
+          this.flag = true;
+          this.polyEditor.close();
           let path = this.polyEditor.$t[0]?this.polyEditor.$t[0]:[];
          if(path){
            this.searchDistrict(path)
          }
-          this.candraw = false
-          this.overlay = this.polyEditor
+          this.candraw = false;
+          this.overlay = this.polyEditor.Sc;
+          console.log(this.overlay,'finish')
         },
-
         clearPolygon(){
+          if(this.pageType != 'add' && this.flag == false){
+            this.$Message.warning('您还未完成编辑，不能删除！');
+            return
+          }
           this.map.remove(this.overlay);
+          this.form.rangeGd = [];
           this.overlay = null;
-          this.candraw=true
+          this.candraw=true;
+          this.polyEditor.close();
         },
        async searchDistrict(path){     //设置数据
           var geocoder;
@@ -246,38 +277,38 @@
         },
         async saveForm(){
             this.btnLoading = true;
-            let param = _.cloneDeep(this.form)
+            let param = _.cloneDeep(this.form);
             if(!this.form.name) {
-              this.$Message.info('请填写区域名称')
+              this.$Message.info('请填写区域名称');
               this.btnLoading = false;
               return
             }
             let fullDescribe = this.editor1.txt.html();
             if(fullDescribe.length<0){
-              this.$Message.info('请填写区域服务说明')
+              this.$Message.info('请填写区域服务说明');
               this.btnLoading = false;
               return
             }
             if(!this.form.remark) {
-              this.$Message.info('请填写区域名称')
+              this.$Message.info('请填写区域名称');
               this.btnLoading = false;
               return
             }
-            param.fullDescribe = fullDescribe
+            param.fullDescribe = fullDescribe;
             if(!this.overlay){
-              this.$Message.info('请绘制服务区域')
+              this.$Message.info('请绘制服务区域');
               this.btnLoading = false;
               return
             }
            //  var paths = this.overlay.getPath()
            // await this.searchDistrict(paths)
 
-            param.geoDistrict = param.geoDistrict.join(',')
-            param.rangeGd = param.rangeGd.join(';')
+            param.geoDistrict = param.geoDistrict.join(',');
+            param.rangeGd = param.rangeGd.join(';');
 
             this.$http.post(`/yyht/v1/repair/region/addOrUpdate`,param).then(res=>{
               if(res.data.code===0){
-                this.$Message.success('保存成功')
+                this.$Message.success('保存成功');
                 this.$emit('update:pageType','list')
               }else{
                 this.$Message.error('保存失败')
@@ -294,7 +325,7 @@
               if(res.data.code===0){
                 this.loading=false;
                 let data = res.data.data;
-                this.overlay = data;
+                // this.overlay = data;
                 let rangeGd = data.rangeGd.split(';');
                 this.form=data;
                 this.form.rangeGd = rangeGd;
@@ -317,23 +348,23 @@
   }
   #map{
     width: 100%;
-    max-width: 1000px;
+    max-width: 100vw;
     border: 1px solid #efefef;
     position: relative;
     #container{
       width: 100%;
-      height: 500px;
-    }
-    .control{
-      position: absolute;
-      z-index:999;
-      right: 10px;
-      top: 15px;
+      height:81vh;
     }
   }
-  .btn-group{
-    margin-bottom: 15px;
-  }
+  /*.control{*/
+  /*  position: absolute;*/
+  /*  z-index:999;*/
+  /*  left: 10px;*/
+  /*  top: 15px;*/
+  /*}*/
+  /*.btn-group{*/
+  /*  margin-bottom: 15px;*/
+  /*}*/
   #searchPoint{
     height: 32px;
     border: 1px solid #efefef;

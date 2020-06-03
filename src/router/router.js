@@ -61,6 +61,7 @@ export const otherRouter={
   component:Main,
   children:[
     {path:'advertiserDetail',title:'广告主管理',name:'advertiserDetail',component:()=>import('@/pages/platform/components/advertDetail.vue')},
+    {path:'set-sevice',title:'设置服务',name:'set-sevice',component:()=>import('@/pages/service/components/set-sevice')},
     {path:'staffDetail',title:'人员详情',meta:{hideInMenu:true},component:()=>import('@/pages/staff/staff-detail'),
       children:[
         {path:'',name:'staffDetail',title:'基本信息',meta:{},component:()=>import('@/pages/staff/staff-component/staff-base')},

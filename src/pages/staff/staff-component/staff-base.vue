@@ -170,6 +170,14 @@
               </FormItem>
             </div>
           </template>
+          <template>
+            <FormItem style="margin-left: 20px" label="是否备用师傅">
+              <i-switch size="large" v-model="accountInfo.isSlave" true-value="Y" false-value="N" @on-change="saveChange('accountInfo','switch')">
+                <span slot="open">启用</span>
+                <span slot="close">停用</span>
+              </i-switch>
+            </FormItem>
+          </template>
         </div>
       </div>
       <div class="normal-form subox">
@@ -317,7 +325,8 @@
           accountInfo:{
             "applyState":0,  // 审核状态（1、-1 审核失败；2、0 待审核 3、 1 审核成功）
             "applyRemark":"",
-            "accountsState":"" //帐号状态（1、正常NORMAL；2、停用DISABLE；）
+            "accountsState":"", //帐号状态（1、正常NORMAL；2、停用DISABLE；）
+            "isSlave":""
           },
           disBusiness:true,
           businessState:''
@@ -530,9 +539,10 @@
         },
         // 设置师傅扣点比例
         saveChange(changeKey,from){
-          let params
+          let params;
           if(changeKey==='accountInfo'){
             params = this.accountInfo;
+            console.log(this.accountInfo,55)
             params.serviceUserId = this.userId
             if(from==='switch'){
               delete this.accountInfo.applyState

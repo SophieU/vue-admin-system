@@ -82,6 +82,7 @@
                     type:'error',
                     size:'small'
                   },
+                  style:{marginRight:'8px'},
                   on:{
                     click(){
                       let id = params.row.id;
@@ -91,7 +92,19 @@
 
                     }
                   }
-                },'删除')
+                },'删除'),
+                h('Button',{
+                  props:{
+                    type:'warning',
+                    size:'small'
+                  },
+                  on:{
+                    click(){
+                        _this.$router.push({name:'set-sevice',query:{id:params.row.id}});
+                       console.log(params.row)
+                    }
+                  }
+                },'设置服务')
               ]);
 
             }
