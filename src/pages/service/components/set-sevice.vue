@@ -90,17 +90,6 @@
               sortIndex:'',
               description:'', //textarea描述信息
               serviceDescription:'',//富文本编辑器内的内容
-            },
-            typeRule:{ //父节点的校验规则
-              name:[
-                {required:true,message:'请填写服务项目类型名称',trigger:'blur'},
-              ],
-              sortIndex:[
-                {required:true,type:'number',message:'请填写服务项目类型排序',trigger:'change'},
-              ],
-              isShow:[
-                {required:true,message:'请选择服务项目类型显示状态',trigger:'change'},
-              ],
             }
           }
       },
@@ -197,11 +186,27 @@
           this.$http.post(`/yyht/v1/repair/region/setRepairCategoryRegionRef`,{...params}).then(res=>{
             if(res.data.code===0){
               this.$Message.success('保存成功');
-              this.cancelForm();
+              // this.cancelForm();
               this.getTreeLists();
               this.currentNodeType ='first'
             }else{
               this.$Message.error(res.data.msg)
+            }
+            this.proForm ={
+                id:'',
+                name:'',  //服务项目名称
+                parentId:'', //所属服务类型
+                serviceFee:'',//人工费不低于
+                hasDtdServiceFee:'',//是否收取上门费
+                dtdServiceFee:'',//上门费金额
+                isPrepayDtd:'',//是否需要支付上门费
+                iconCode:'',//图片名称
+                isUserCanUse:'',//用户下单是否可选
+                isShow:'Y',//是否在APP上显示
+                longName:'',
+                sortIndex:'',
+                description:'', //textarea描述信息
+                serviceDescription:'',//富文本编辑器内的内容
             }
             this.btnLoading = false;
             this.saveLoading = false;

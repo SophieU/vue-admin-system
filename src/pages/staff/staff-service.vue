@@ -71,7 +71,7 @@
         title="新增服务师傅"
         @on-visible-change="modalHide"
       >
-          <i-form ref="teachForm" :rules="teachRule" :model="teachForm" :label-width="100">
+          <i-form ref="teachForm" :rules="teachRule" :model="teachForm" :label-width="110">
                 <form-item label="服务网点：" prop="repairStationId">
                   <Select v-model="teachForm.repairStationId" @on-change="changeStation" style="width: 200px">
                     <Option v-for="item in modalStation" :key="item.id" :value="item.id">{{item.name}}</Option>
@@ -80,7 +80,6 @@
                 <form-item label="员工姓名：" prop="trueName">
                   <Input v-model="teachForm.trueName" style="width: 200px"/>
                 </form-item>
-
                 <form-item label="手机号码：" prop="mobile">
                   <Input v-model="teachForm.mobile" style="width: 200px"/>
                 </form-item>
@@ -91,6 +90,12 @@
                   <Select v-model="teachForm.accountsState" style="width: 200px">
                     <Option value="NORMAL">正常</Option>
                     <Option value="DISABLE">停用</Option>
+                  </Select>
+                </form-item>
+                <form-item label="是否备用师傅：" prop="isSlave">
+                  <Select v-model="teachForm.isSlave" style="width: 200px">
+                    <Option value="Y">是</Option>
+                    <Option value="N">否</Option>
                   </Select>
                 </form-item>
                 <form-item label="服务区域列表" class="must" prop="repairRegionIds">
@@ -129,6 +134,7 @@
               repairStationId:'',//网点ID
               trueName:'',//员工姓名
               mobile:'',//手机号码
+              isSlave:'',
               workNumber:'',//工号
               accountsState:'',//上班状态
               showFaceImage:'',//头像
@@ -141,6 +147,7 @@
               mobile:[{required:true,message:'请填写手机号码',trigger:'blur'}],
               workNumber:[{required:true,message:'请填写工号',trigger:'blur'}],
               accountsState:[{required:true,message:'请选择上班状态',trigger:'change'}],
+              isSlave:[{required:true,message:'是否备用师傅',trigger:'change'}],
               // repairRegionIds:[{required:true,message:'请选择服务区域列表',trigger:'change'}],
               // repairCategoryIds:[{required:true,message:'请选择服务网点分类',trigger:'blur'}],
               // showFaceImage:[{required:true,message:'请上传头像',trigger:'blur'}],
@@ -279,6 +286,7 @@
           }
         },
         saveTeach(name){ //增加师傅弹窗保存
+          this.loadingSend = true;
           this.$refs[name].validate((valid) => {
             if (valid) {
               if(this.teachForm.repairCategoryIds.length == 0){
@@ -299,10 +307,14 @@
                 if(res.data.code == 0){
                   this.teachModal = false;
                   this.getLists();
+                }else{
+                  this.$Message.error(res.data.msg)
                 }
+                this.loadingSend = false;
               })
             } else {
               this.$Message.error('表单填写不完整！');
+              this.loadingSend = false;
             }
           })
         },

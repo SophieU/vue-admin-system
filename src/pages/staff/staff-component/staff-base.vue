@@ -51,8 +51,8 @@
             <Select :disabled="disNormalUser" v-model="normalUserInfo.userType">
               <Option value="USER">普通用户</Option>
               <Option value="ADMIN">超级管理员</Option>
-              <Option value="SERVICE_USER">系统用户</Option>
-              <Option value="MERCHANT">商户类型</Option>
+              <Option value="SERVICE_USER">服务师傅</Option>
+              <Option value="MERCHANT">拓展商户</Option>
             </Select>
           </FormItem>
           <FormItem label="会员状态:">
@@ -173,8 +173,8 @@
           <template>
             <FormItem style="margin-left: 20px" label="是否备用师傅">
               <i-switch size="large" v-model="accountInfo.isSlave" true-value="Y" false-value="N" @on-change="saveChange('accountInfo','switch')">
-                <span slot="open">启用</span>
-                <span slot="close">停用</span>
+                <span slot="open">是</span>
+                <span slot="close">否</span>
               </i-switch>
             </FormItem>
           </template>
