@@ -49,7 +49,6 @@
             <div class="order-item">
               <span class="label">师傅电话：</span>
               <span class="item-info">{{dispatchInfo.masterPhone}}</span>
-
             </div>
 <!--            <Divider />-->
             <!--协助人员-->

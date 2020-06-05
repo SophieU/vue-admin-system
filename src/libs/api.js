@@ -3,24 +3,15 @@ import router from '../router/index';
 import Cookies from 'js-cookie';
 let baseUrl = '';
 let domin = window.location.hostname;
-
-// 192.168.0.133:8887
-// baseUrl = 'http://192.168.0.133:8887'
-// baseUrl = 'http://182.254.234.236:9001'//外网
-   baseUrl = 'http://192.168.0.67:8887'   //郑为本地
-// if (domin === 'hjzx.yishengyue.cn') {
-//    //正式
-//   baseUrl = 'https://hjzxjk.yishengyue.cn/repair/call/center/v1/'
-//   localStorage.setItem('baseURL','https://hjzxjk.yishengyue.cn/repair/call/center/v1/');
-// } else if (domin === 'yanshihjzx.yishengyue.cn') {
-//   //演示
-//   baseUrl='http://101.132.99.21:8116/repair/call/center/v1/';
-//   localStorage.setItem('baseURL','http://101.132.99.21:8116/repair/call/center/v1/');
-// } else {
-//   //测试
-//   baseUrl='http://101.132.99.21:8109/repair/call/center/v1/';
-//   localStorage.setItem('baseURL','http://101.132.99.21:8109/repair/call/center/v1/');
-// }
+if (domin === 'yyht.sudayoufu.com') {
+   //正式
+  baseUrl = 'https://yyhtjk.sudayoufu.com';
+  localStorage.setItem('baseURL','https://yyhtjk.sudayoufu.com');
+} else {
+  //测试
+  baseUrl='http://192.168.0.67:8887';
+  localStorage.setItem('baseURL','http://192.168.0.67:8887');
+}
 axios.defaults.headers.common['Content-Type']='application/json';
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 axios.defaults.baseURL =baseUrl;
