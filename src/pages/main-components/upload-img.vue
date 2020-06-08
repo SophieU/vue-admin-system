@@ -57,6 +57,7 @@
       :show-upload-list="false"
       :format="['jpg','jpeg','png']"
       :on-success="handleSuccess"
+      :before-upload="beforeUpload"
       :default-file-list="defaultList"
       :max-size="2048"
       :on-exceeded-size="handleMaxSize"
@@ -125,6 +126,9 @@
       }
     },
     methods:{
+      beforeUpload(event){
+        console.log(event)
+      },
       // clearFiles(){
       //   this.$refs.upload.clearFiles();
       //   this.uploadList = [];

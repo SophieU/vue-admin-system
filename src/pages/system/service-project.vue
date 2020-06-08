@@ -271,7 +271,6 @@
                     _this.loading = true;
                     _this.eidtImg = [];
                     _this.getDetail(data.id);
-                    console.log(this.currentNode.id)
                   }
                 }
               }, data.title)

@@ -16,7 +16,7 @@ util.sortTableRow=function(a,b,datas){  //列表排序方法
 }
 
 util.title=function(title){
-  let Title='天富呼叫中心';
+  let Title='速达帮客';
   if(title){
     Title+='-'+title;
   }

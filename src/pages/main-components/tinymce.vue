@@ -197,7 +197,7 @@
       'Content-type': 'application/json;charset=UTF-8'
     },
     mounted () {
-      this.getToken();
+      // this.getToken();
       this.init();
     },
     // beforeDestroy () {
@@ -206,14 +206,14 @@
     //   window.tinymce.remove(document.getElementById(`{this.Id}`))
     // },
     methods: {
-      getToken(){
-        this.$http.get(`/base/qiniu/token`).then(res=>{
-          if (res.data.code === 0){
-            this.domain = res.data.data.domain;
-            this.qiniuToken.token = res.data.data.token;
-          }
-        })
-      },
+      // getToken(){
+      //   this.$http.get(`/base/qiniu/token`).then(res=>{
+      //     if (res.data.code === 0){
+      //       this.domain = res.data.data.domain;
+      //       this.qiniuToken.token = res.data.data.token;
+      //     }
+      //   })
+      // },
       init () {
         const self = this;
         this.Editor = window.tinymce.init({
@@ -231,12 +231,13 @@
             }
             function uploadPic () {
               const formData = new FormData();
+              // debugger;
               formData.append('file', blobInfo.blob(), blobInfo.filename());
-              formData.append('token',self.qiniuToken.token);
-              self.$http.post(`https://up.qbox.me/`,formData,{withCredentials: false}).then(res=>{
+              // formData.append('hearders',{'Content-Type':'multipart/form-data'});
+              self.$http.post(`/base/qiniu/upload/image`,formData,{withCredentials: false}).then(res=>{
                 if(res.status == 200){
                   // 抛出 'on-upload-complete' 钩子
-                  let imgUrl = self.domain+ res.data.key;
+                  let imgUrl = res.data.data.imageUrl;
                   success(imgUrl);
                   self.$emit('on-upload-complete')
                 }else{

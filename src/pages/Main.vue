@@ -13,9 +13,9 @@
         <div slot="top"  class="logo-con">
           <div class="top-logo" v-show="!collapse">
             <img src="../assets/imgs/logo-ico.png"  key="max-logo">
-            <span>天富一生约</span>
-            <span>&nbsp;·&nbsp;</span>
-            <span>呼叫中心</span>
+            <span>速达帮客</span>
+<!--            <span>&nbsp;·&nbsp;</span>-->
+<!--            <span>呼叫中心</span>-->
           </div>
           <img v-show="collapse" src="../assets/imgs/logo-ico.png"  key="min-logo" >
         </div>
