@@ -51,6 +51,17 @@
         <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
       </template>
     </div>
+    <div class="upload-list" v-show="flag == 2" v-for="(item,index) in multipList" :key="index">
+      <template v-if="item.status==='finished'">
+        <img :src="item.url">
+        <div class="upload-list-cover">
+          <Icon v-show="imgDisabled == false" type="ios-trash-outline" @click.native="handleRemove(item,index)"></Icon>
+        </div>
+      </template>
+      <template v-else>
+        <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
+      </template>
+    </div>
     <Upload
       ref="upload"
       :disabled="imgDisabled == true?true:false"
@@ -84,6 +95,9 @@
       imgDisabled:{
         type:Boolean
       },
+      flag:{           //这个参数用于一个页面引用两次或者多次图片上传组件
+        type:Number   //0代表单张图片，2代表多张图片
+      },
       /*prefix:{
         type:String,
         required: true,
@@ -91,6 +105,9 @@
       eidtImg:{
         type:Array,
         required: false,
+      },
+      multipImg:{     //这个参数用于一个页面引用两次或者多次图片上传组件
+        type:Array,
       },
       // qiniuToken:{
       //   type: Object
@@ -109,6 +126,7 @@
     },
     data(){
       return {
+        multipList:[],//一个页面引用多次图片上传
         defaultList:[],
         uploadList:[],
         imgName:'',
@@ -123,21 +141,33 @@
         },
         //getList里面通过searchValue去搜索数据库
         immediate:true
+      },
+      multipImg:{
+        //使用watch值是对象的第三种情况
+        handler:function(val){
+          this.multipList = val;
+        },
+        //getList里面通过searchValue去搜索数据库
+        immediate:true
       }
     },
     methods:{
-      beforeUpload(event){
-        console.log(event)
-      },
       // clearFiles(){
       //   this.$refs.upload.clearFiles();
       //   this.uploadList = [];
       // },
       handleSuccess(res,file){
+        console.log(file)
+        console.log(this.multipList)
         // file.url = this.domain + file.response.key;
         file.url=res.data.imageUrl;
-        this.uploadList = [file];
-        this.$emit('uploadCallback', res.data);
+        if(this.flag == 0){
+          this.uploadList = [file];
+          this.$emit('uploadCallback', res.data);
+        }else{
+          this.multipList.push({name:'',url:file.response.data.imageUrl,status:'finished'});
+          this.$emit('multipCallback',this.multipList);
+        }
       },
       handleMaxSize(){
         this.$Message.warning(`超出图片大小范围，请重新选择图片`)
@@ -148,12 +178,17 @@
       //   this.qiniuToken.key = name;
       //   // this.qiniuToken.key = file.name;
       // },
-      handleRemove(file,list){
-        this.uploadList = [];
-        let res = {
-          key:''
-        };
-        this.$emit('onUpload',res)
+      handleRemove(item,index){
+        if(this.flag == 0){
+          this.uploadList = [];
+          let res = {
+            key:''
+          };
+          this.$emit('onUpload',res)
+        }else{
+          this.multipList.splice(index,1);
+          this.$emit('multipCallback',this.multipList);
+        }
       },
       // getToken(){
       //   this.$http.get(`/base/qiniu/token`).then(res=>{

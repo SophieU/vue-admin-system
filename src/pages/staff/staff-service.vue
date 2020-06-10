@@ -107,7 +107,7 @@
                   <Tree :data="repairTree" show-checkbox @on-check-change="changeCheck"></Tree>
                 </form-item>
                 <form-item label="头像：" class="must" prop="showFaceImage">
-                  <UploadImage :eidtImg="eidtImg" ref="upImg" @uploadCallback="uploadUrl"></UploadImage>
+                  <UploadImage :eidtImg="eidtImg" ref="upImg" :flag="0" @uploadCallback="uploadUrl"></UploadImage>
                 </form-item>
           </i-form>
         <div slot="footer">

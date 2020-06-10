@@ -59,7 +59,7 @@
               <span style="color:red">最多10个字</span>
             </FormItem>
             <FormItem label="广告图片" prop="imgName">
-              <UploadImg ref="upImg" :eidtImg="eidtImg"  @onUpload="onUpload" @uploadCallback="successImg"></UploadImg>
+              <UploadImg ref="upImg" :eidtImg="eidtImg" :flag="0"  @onUpload="onUpload" @uploadCallback="successImg"></UploadImg>
               <span style="color:red">{{typeDes}}</span>
             </FormItem>
             <FormItem label="是否长期有效" prop="isLongValid" v-show="menu == 'banner'">

@@ -42,7 +42,7 @@
                   <InputNumber :disabled="!editTypeForm" :min="1" :precision="0" v-model="typeForm.sortIndex"/>
                 </FormItem>
                 <FormItem class="must" label="选择图标样式">
-                <UploadImage :eidtImg="eidtImg" ref="upTypeImg" :qiniuToken="qiniuToken" :imgDisabled="!editTypeForm" @uploadCallback="uploadUrl"></UploadImage>
+                <UploadImage :eidtImg="eidtImg" ref="upTypeImg" :flag="0" :qiniuToken="qiniuToken" :imgDisabled="!editTypeForm" @uploadCallback="uploadUrl"></UploadImage>
                 </FormItem>
                 <FormItem class="must" prop="isShow" label="状态">
                   <RadioGroup v-model="typeForm.isShow">
@@ -123,7 +123,7 @@
                   </template>
                 </FormItem>
                 <FormItem label="选择图标样式">
-                  <UploadImage :eidtImg="eidtImg" ref="upImg" :qiniuToken="qiniuToken" :imgDisabled="!editProForm" @uploadCallback="uploadUrl"></UploadImage>
+                  <UploadImage :eidtImg="eidtImg" ref="upImg" :qiniuToken="qiniuToken" :flag="0" :imgDisabled="!editProForm" @uploadCallback="uploadUrl"></UploadImage>
                 </FormItem>
                 <FormItem class="form-item" label="服务备注">
                   <Input :disabled="!editProForm" type="textarea" v-model="proForm.description"/>

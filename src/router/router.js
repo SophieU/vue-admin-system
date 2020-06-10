@@ -62,6 +62,7 @@ export const otherRouter={
   children:[
     {path:'advertiserDetail',title:'广告主管理',name:'advertiserDetail',component:()=>import('@/pages/platform/components/advertDetail.vue')},
     {path:'set-sevice',title:'设置服务',name:'set-sevice',component:()=>import('@/pages/service/components/set-sevice')},
+    {path:'set-product',title:'编辑订单详情',name:'set-product',component:()=>import('@/pages/order/order-com/set-product')},
     {path:'staffDetail',title:'人员详情',meta:{hideInMenu:true},component:()=>import('@/pages/staff/staff-detail'),
       children:[
         {path:'',name:'staffDetail',title:'基本信息',meta:{},component:()=>import('@/pages/staff/staff-component/staff-base')},
@@ -169,8 +170,8 @@ export const appRouter=[
   {
     path:'/pre-manage',
     icon:'logo-codepen',
-    title:'预约商品',
-    name:'preOrder',
+    title:'预约管理',
+    name:'pre-manage',
     component:Main,
     meta:{single:false},
     children:[
