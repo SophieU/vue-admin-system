@@ -35,16 +35,16 @@
             <div class="modal-form">
                 <Form :model="adOwnerEdit.from" :rules="rules" ref="editForm" :label-width="100" class="demo-ruleForm">
                     <FormItem label="广告主" prop="ownerName">
-                        <Input v-model="adOwnerEdit.from.ownerName"></Input>
+                        <Input v-model="adOwnerEdit.from.ownerName" style="width:250px"></Input>
                     </FormItem>
                     <FormItem label="联系电话" prop="ownerPhone">
-                        <Input v-model="adOwnerEdit.from.ownerPhone"></Input>
+                        <Input v-model="adOwnerEdit.from.ownerPhone" style="width:250px"></Input>
                     </FormItem>
                   <FormItem label="业务员姓名" prop="agentName">
                     <Input v-model="adOwnerEdit.from.agentName" :maxlength="11"  style="width:250px"></Input>
                   </FormItem>
                     <FormItem label="联系地址" prop="ownerAddress">
-                        <Input v-model="adOwnerEdit.from.ownerAddress"></Input>
+                        <Input v-model="adOwnerEdit.from.ownerAddress" style="width:250px"></Input>
                     </FormItem>
                   <FormItem label="合作状态：" prop="adState">
                     <Select :transfer="true" v-model="adOwnerEdit.from.adState" placeholder="请选择" style="width:250px">

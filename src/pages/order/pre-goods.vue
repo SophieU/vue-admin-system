@@ -2,6 +2,9 @@
   <div>
     <Card>
       <div class="mb-15">
+        <Button type="primary" @click="$router.push({name:'set-product',query:{type:'add'}})">新增</Button>
+      </div>
+      <div class="mb-15">
         <Spin fix v-show="loadingTable == true">加载中...</Spin>
         <Table :columns="goodsCol" :data="goodsData"></Table>
         <div class="pagination ">
@@ -25,6 +28,9 @@
               {title:'商品名称',key:'productName',align:'center'},
               {title:'商品广告词',key:'productJingle',align:'center'},
               {title:'商品条形码',key:'productSerial',align:'center'},
+              {title:'添加时间',key:'productAddTime',align:'center'},
+              {title:'售卖数量',key:'productSaleNum',align:'center'},
+              {title:'点击数',key:'productClick',align:'center'},
               {title:'商品主图',key:'productImage',align:'center',render:(h,params)=>{
                 return h('div',{
                   style:{
@@ -46,6 +52,7 @@
                 ])
                 }},
               {title:'商品市场价格',key:'productMarketPrice',align:'center'},
+              {title:'成本价',key:'productCostPrice',align:'center'},
               {title:'商品价格',key:'productPrice',align:'center'},
               {title:'操作',key:'',align:'center',render:(h,params)=>{
                 return h('Button',{
@@ -55,7 +62,7 @@
                   },
                   on:{
                     click:()=>{
-                      this.$router.push({name:'set-product',query:{id:params.row.productId}})
+                      this.$router.push({name:'set-product',query:{id:params.row.productId,type:'editor'}})
                     }
                   }
                 },'查看')
@@ -72,7 +79,7 @@
       methods:{
           getPage(){
             this.loadingTable = true;
-            this.$http.get(`/yyht/v1/product/getCommendProductForPage?pageNo=${this.pageConfig.pageNo}&pageSize=${this.pageConfig.pageSize}`).then(res=>{
+            this.$http.get(`/yyht/v1/product/getAllProductForPage?pageNo=${this.pageConfig.pageNo}&pageSize=${this.pageConfig.pageSize}`).then(res=>{
                 if(res.data.code == 0){
                   this.goodsData = res.data.data.list;
                   this.pageConfig.total = res.data.data.totalCount;

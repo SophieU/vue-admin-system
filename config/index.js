@@ -43,8 +43,8 @@ module.exports = {
     // Paths
     assetsRoot: path.resolve(__dirname, '../sdyf-admin'),
     assetsSubDirectory: 'static',
-    // assetsPublicPath: '/sdyf-admin/',
-    assetsPublicPath: '/',
+    assetsPublicPath: '/sdyf-admin/',//测试
+    // assetsPublicPath: '/',//生产
 
     /**
      * Source Maps

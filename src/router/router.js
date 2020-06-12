@@ -175,8 +175,8 @@ export const appRouter=[
     component:Main,
     meta:{single:false},
     children:[
-      {path:'preOrder',meta:{},icon:'md-locate',title:'预约商品管理',name:'preOrder',component:()=>import('@/pages/order/pre-order.vue')},
-      {path:'preGoods',meta:{},icon:'md-locate',title:'预约订单管理',name:'preGoods',component:()=>import('@/pages/order/pre-goods.vue')},
+      {path:'preOrder',meta:{},icon:'md-locate',title:'预约订单管理',name:'preOrder',component:()=>import('@/pages/order/pre-order.vue')},
+      {path:'preGoods',meta:{},icon:'md-locate',title:'预约商品管理',name:'preGoods',component:()=>import('@/pages/order/pre-goods.vue')},
     ]
   },
   {

@@ -40,6 +40,9 @@
               <FormItem label="市场价：">
                 <Input type="text" v-model="productForm.productMarketPrice" style="width:200px"></Input>
               </FormItem>
+              <FormItem label="排序：">
+                <Input type="number" v-model="productForm.sortIndex" style="width:200px"></Input>
+              </FormItem>
               <FormItem label="是否推荐：">
                 <RadioGroup v-model="productForm.isCommend">
                   <Radio label="Y">是</Radio>
@@ -66,7 +69,7 @@
       data(){
           return{
             btnload:false,
-            loadingTable:true,
+            loadingTable:false,
             multipImg:[],//详情图（多张）
             imgDisabled:false, //设置图片的上传数量
             eidtImg:null,//图片显示（主图一张）
@@ -79,7 +82,8 @@
               productCostPrice:'', //成本价
               productMarketPrice:'', //成本价
               isCommend:'',  //是否推荐
-              productBody:''  //富文本
+              productBody:'',  //富文本
+              sortIndex:''
             }
           }
       },
@@ -121,11 +125,27 @@
         saveFn(){
         this.btnload = true;
         delete this.productForm.productId;
-         let data = Object.assign({},{id:this.$route.query.id},this.productForm);
+        delete this.productForm.productAddTime;
+          delete this.productForm.productClick;
+          delete this.productForm.productSaleNum;
+          delete this.productForm.productCollect;
+        let data;
+        this.$route.query.type == 'add'? data = this.productForm : data = Object.assign({},{id:this.$route.query.id},this.productForm);
          this.$http.post(`/yyht/v1/product/addOrUpdate`,data).then(res=>{
            if(res.data.code == 0){
               this.$Message.success('操作成功！');
-              this.getDetail();
+             this.$route.query.type == 'add'?this.$router.back() :this.getDetail();
+             this.productForm = {
+                 productName:'', //商品名称
+                 productImage:'',//商品主图
+                 productListImageList:[],//商品详情图
+                 productJingle:'', //商品广告词
+                 productPrice:'',  //销售价
+                 productCostPrice:'', //成本价
+                 productMarketPrice:'', //成本价
+                 isCommend:'',  //是否推荐
+                 productBody:''  //富文本
+             }
            }else{
              this.$Message.error(res.data.msg)
            }
@@ -134,7 +154,7 @@
         }
       },
       mounted() {
-          this.getDetail();
+          this.$route.query.type == 'editor' && this.getDetail()
       }
     }
 </script>

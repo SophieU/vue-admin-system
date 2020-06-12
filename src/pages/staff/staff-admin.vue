@@ -83,8 +83,8 @@
               {title:'登录账号',key:'userName',align:'center'},
               {title:'用户类型',key:'userTypeName',align:'center'},
               {title:'昵称',key:'nickName',align:'center'},
-              {title:'姓名',key:'trueName',align:'center'},
-              {title:'微信openId',key:'wxXcxOpenId',width:'400px',align:'center'},
+              {title:'注册时间',key:'regTime',align:'center',width:'180px'},
+              {title:'微信openId',key:'wxXcxOpenId',width:'250px',align:'center'},
               {title:'用户状态',align:'center',render:(h,params)=>{
                 let text = params.row.userState ==='OPEN'?'开启':'关闭'
                   return h('span',{},text)

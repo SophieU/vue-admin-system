@@ -157,7 +157,17 @@
                 {title:'联系地址',key:'ownerAddress',align:'center'},
                 {title:'联系电话',key:'ownerPhone',align:'center'},
                 {title:'正在投放广告数',key:'countNum',align:'center'},
-                {title:'广告状态',key:'ownerState',align:'center'},
+                {title:'广告状态',key:'ownerState',align:'center',render:(h,params)=>{
+                  let val;
+                  switch (params.row.ownerState) {
+                       case 'IN_COOPERATION' : val = '合作中';
+                       break;
+                       case 'PAUSE' : val = '暂停中';
+                       break;
+                       default:val = '停止合作'
+                  }
+                  return h('span',val)
+                  }},
                 {title:'操作',width:240,align:'center',render:(h,params)=>{
                     let _this = this;
                     let id = params.row.id;
