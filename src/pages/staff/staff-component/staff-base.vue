@@ -53,6 +53,7 @@
               <Option value="ADMIN">超级管理员</Option>
               <Option value="SERVICE_USER">服务师傅</Option>
               <Option value="MERCHANT">拓展商户</Option>
+              <Option value="PARTNER">合伙人</Option>
             </Select>
           </FormItem>
           <FormItem label="会员状态:">
@@ -303,7 +304,22 @@
           queryType:'', //页面类型： service-服务师傅，normal-普通用户
           disNormalUser:true,
           normalUserInfo:{ //普通用户信息
-
+            userTypeName:'',
+            trueName:'',
+            mobile:'',
+            nickName:'',
+            regTime:'',
+            wxXcxOpenId:'',
+            userType:'',
+            userState:'',
+            commissionType:'',
+            commissionValue:'',
+            userAccount:{
+              money:'',
+              frozenAmount:'',
+              isSetPayPwd:'',
+            },
+            inviteQrImgUrl:''
           },
           disInfo:true,
           baseInfo:{
@@ -454,6 +470,7 @@
           this.$http.get(`/yyht/v1/user/detail?userId=${id}`).then(res=>{
             if(res.data.code===0){
               this.normalUserInfo = res.data.data;
+              this.loading = false;
             }
           })
         },
@@ -542,7 +559,6 @@
           let params;
           if(changeKey==='accountInfo'){
             params = this.accountInfo;
-            console.log(this.accountInfo,55)
             params.serviceUserId = this.userId
             if(from==='switch'){
               delete this.accountInfo.applyState
@@ -576,7 +592,6 @@
             this.getDetail(this.userId)
           }else{
             this.getUserDetail(this.userId);
-            this.loading = false;
           }
       }
     }

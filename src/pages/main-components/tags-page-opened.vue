@@ -2,7 +2,7 @@
   @import '../main.scss';
 </style>
 <template>
-    <div class="tags-outer-scroll-con"  ref="scrollCon" @DOMMouseScroll="handleScroll" @mousewheel="handleScroll">
+    <div class="tags-outer-scroll-con" ref="scrollCon" @DOMMouseScroll="handleScroll" @mousewheel="handleScroll">
       <div class="close-all-tag-on">
         <Dropdown transfer  @on-click="handleTagsOption">
           <Button size="small" type="primary">
